@@ -33,7 +33,7 @@ const packageJson = JSON.parse(readFileSync(new URL('./package.json', import.met
 
 	/** @type {import('esbuild').BuildOptions} */
 	const buildOptions = {
-		entryPoints: ['./src/Responsive.ts'],
+		entryPoints: ['./src/responsive.ts'],
 		outfile: './dist/main.js',
 		format: 'iife',
 		globalName: 'Responsive',
