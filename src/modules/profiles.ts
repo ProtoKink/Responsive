@@ -1,11 +1,14 @@
-import { BaseModule } from "../base/base_module";
-import { Subscreen } from "../base/setting_definitions";
+import { BaseModule, Subscreen } from "bc-deeplib/deeplib";
 import { ProfilesSettingsModel } from "../models/profiles";
 import { GuiProfiles } from "../screens/profiles";
 
 export class ProfilesModule extends BaseModule {
   get settings(): ProfilesSettingsModel {
     return super.settings as ProfilesSettingsModel;
+  }
+
+  set settings(val: ProfilesSettingsModel) {
+    super.settings = val;
   }
 
   get settingsScreen(): Subscreen | null {
@@ -16,7 +19,7 @@ export class ProfilesModule extends BaseModule {
     return <ProfilesSettingsModel>{};
   }
 
-  Load(): void {}
+  load(): void {}
 
-  Run(): void {}
+  run(): void {}
 }

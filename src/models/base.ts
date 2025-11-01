@@ -1,6 +1,4 @@
-export type BaseSettingsModel = {
-  ResponsiveEnabled: boolean;
-};
+import { BaseSettingsModel } from "bc-deeplib/deeplib";
 
 export type GlobalSettingsModel = BaseSettingsModel & {
   responsesEnabled: boolean;

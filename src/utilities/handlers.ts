@@ -36,7 +36,7 @@ const doesBcxAllowsTalking = () => {
 };
 
 export const orgasmHandle = (c: Character) => {
-  if (!PlayerStorage().GlobalModule.ResponsiveEnabled) return;
+  if (!PlayerStorage().GlobalModule.modEnabled) return;
   if (!PlayerStorage().GlobalModule.responsesEnabled) return;
   if (CurrentScreen !== "ChatRoom" || !Player) return;
   if (Player.MemberNumber !== c.MemberNumber) return;
@@ -49,7 +49,7 @@ export const orgasmHandle = (c: Character) => {
 };
 
 export const activityHandle = (dict: ActivityInfo, entry: ResponsesEntryModel) => {
-  if (!PlayerStorage().GlobalModule.ResponsiveEnabled) return;
+  if (!PlayerStorage().GlobalModule.modEnabled) return;
   if (!PlayerStorage().GlobalModule.responsesEnabled) return;
   if (CurrentScreen !== "ChatRoom" || !Player) return;
   if (dict.targetCharacter.MemberNumber !== Player.MemberNumber) return;
@@ -61,7 +61,7 @@ export const activityHandle = (dict: ActivityInfo, entry: ResponsesEntryModel) =
 };
 
 export const leaveHandle = (data: any) => {
-  if (!PlayerStorage().GlobalModule.ResponsiveEnabled) return;
+  if (!PlayerStorage().GlobalModule.modEnabled) return;
   if (!PlayerStorage().GlobalModule.doLeaveMessage) return;
   if (CurrentScreen !== "ChatRoom" || !Player) return;
   if (!(CurrentScreen == "ChatRoom" && ChatRoomData?.Name != data.ChatRoomName)) return;

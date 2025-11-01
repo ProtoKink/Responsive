@@ -1,17 +1,22 @@
-import { BaseModule } from "../base/base_module";
+import { BaseModule, Subscreen, sdk, initMod } from 'bc-deeplib/deeplib';
 import { activityDeconstruct } from "../utilities/chat_messages";
 import { activityHandle, leaveHandle, orgasmHandle } from "../utilities/handlers";
 import { ResponsesEntryModel, ResponsesSettingsModel } from "../models/responses";
 import { GuiResponses } from "../screens/responses";
-import { Subscreen } from "../base/setting_definitions";
 import { getDefaultResponsesEntries } from "../utilities/default_responses_entries";
-import { HookPriority, ModuleCategory, hookFunction } from "../utilities/sdk";
+import { HookPriority, ModuleCategory } from "../utilities/sdk";
 
 export class ResponsesModule extends BaseModule {
+  static instance: ResponsesModule;
+
   static isOrgasm: boolean = false; // Just for Char Talk stuff
 
   get settings(): ResponsesSettingsModel {
     return super.settings as ResponsesSettingsModel;
+  }
+
+  set settings(val: ResponsesSettingsModel) {
+    super.settings = val;
   }
 
   get settingsScreen(): Subscreen | null {
@@ -22,7 +27,10 @@ export class ResponsesModule extends BaseModule {
     return getDefaultResponsesEntries();
   }
 
-  Load(): void {
+  load(): void {
+    super.load();
+    ResponsesModule.instance = this;
+    
     ChatRoomRegisterMessageHandler({
       Description: "Processes activity responses",
       Priority: 320,
@@ -41,7 +49,7 @@ export class ResponsesModule extends BaseModule {
     });
 
     //Leave Message
-    hookFunction(
+    sdk.hookFunction(
       "ServerAccountBeep",
       HookPriority.AddBehavior,
       (args, next) => {
@@ -57,7 +65,7 @@ export class ResponsesModule extends BaseModule {
     );
 
     //Orgasm Handling
-    hookFunction(
+    sdk.hookFunction(
       "ActivityOrgasmStart",
       HookPriority.Observe,
       (args, next) => {
@@ -68,7 +76,7 @@ export class ResponsesModule extends BaseModule {
     );
   }
 
-  Run(): void {}
+  run(): void {}
 
   getResponsesEntry(actName: string | undefined, grpName: string | undefined): ResponsesEntryModel | undefined {
 		if (!actName || !grpName) return undefined;

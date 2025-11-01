@@ -10,11 +10,11 @@ export function loadCommands() {
       switch (args) {
         case "toggle":
           const data = PlayerStorage().GlobalModule;
-          data.ResponsiveEnabled = !data.ResponsiveEnabled;
-          if (data.ResponsiveEnabled) {
+          data.modEnabled = !data.modEnabled;
+          if (data.modEnabled) {
             sendLocalSmart("bcr_toggle_enb", BCR_TOGGLE_ENABLED, MT.INFO);
           }
-          if (!data.ResponsiveEnabled) {
+          if (!data.modEnabled) {
             sendLocalSmart("bcr_toggle_dis", BCR_TOGGLE_DISABLED, MT.INFO);
           }
           break;

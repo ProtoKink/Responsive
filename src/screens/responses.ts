@@ -1,95 +1,111 @@
-import { Setting } from "../../.types/setting";
-import { GuiSubscreen } from "../base/base_setting";
+import { advElement, BaseSubscreen, domUtil, exportToGlobal, getText, layout, Modal, SettingElement, SubscreenOptions } from "bc-deeplib/deeplib";
 import { ResponsesEntryModel, ResponsesSettingsModel } from "../models/responses";
-import { conDebug } from "../utilities/console";
-import { getText } from "../translation";
 
-type $AssetGroupItemName = AssetGroupItemName | "ItemPenis" | "ItemGlans";
+const selector = Object.freeze({
+  entrySettingForm: 'rsp-entry-setting-form',
+  entrySelfTrigger: 'rsp-entry-self-trigger',
+  settingsDiv: 'rsp-settings-div',
+  entryDiv: 'rsp-entry-div',
+  activityDropdown: 'rsp-activity-dropdown',
+  responsesNav: 'rsp-responses-nav',
+  responseAddButton: 'rsp-response-add-button',
+  entryMasterSet: 'rsp-entry-master-set',
+  responseButton: 'rsp-response-entry-button',
+  responsesList: 'rsp-responses-list',
+  responseEntryButton: 'rsp-response-entry-button',
+  entryCheckSettings: 'rsp-entry-check-settings',
+});
 
-export class GuiResponses extends GuiSubscreen {
+export class GuiResponses extends BaseSubscreen {
+  static instance: GuiResponses;
+
   activityIndex: number = 0;
+  currentEntry: ResponsesEntryModel | undefined;
   selfAllowed: boolean = false; // to not call ActivityCanBeDoneOnSelf() every draw call;
   masterSet: boolean = false;
   copiedEntry = <ResponsesEntryModel>{};
+  focusGroup: AssetItemGroup | undefined;
 
-  get name(): string {
-    return "responses";
-  }
-
-  get icon(): string {
-    return "Icons/Chat.png";
-  }
+  protected static override subscreenOptions: SubscreenOptions = {
+    name: 'responses',
+    icon: 'Icons/Chat.png',
+    forceUpCharacter: true
+  };
 
   get settings(): ResponsesSettingsModel {
     return super.settings as ResponsesSettingsModel;
   }
 
+  set settings(val: ResponsesSettingsModel) {
+    super.settings = val;
+  }
+
   get currentResponsesEntry(): ResponsesEntryModel | undefined {
     let actName = this.currentAct()?.Name ?? "";
-    let groupName = this.currentGroup()?.Name ?? "";
+    let groupName = this.currentGroup()?.Name;
     let entry = this.getResponsesEntry(actName, groupName);
     return entry;
   }
 
   get activities(): Activity[] {
-    if (!Player.FocusGroup) return [];
+    if (!GuiResponses.instance.focusGroup) return [];
     else
-      return AssetActivitiesForGroup("Female3DCG", Player.FocusGroup.Name, "any").filter((a) =>
-        this.getActivityLabelTag(a, Player.FocusGroup!)
+      return AssetActivitiesForGroup("Female3DCG", GuiResponses.instance.focusGroup.Name, "any").filter((a) =>
+        this.activityHasDictionaryText(this.getActivityLabelTag(a, GuiResponses.instance.focusGroup!))
       );
   }
 
-  get multipageStructure(): Setting[][] {
+  get pageStructure(): SettingElement[][] {
     return [
       [],
       [
-        <Setting>{
+        {
           type: "text",
           id: "extra_low",
           label: "responses.setting.low_response.name",
           description: "responses.setting.low_response.desc",
-          setting: () => GuiResponses.stringListShow(this.settings?.extraResponses?.low),
-          setSetting: (val) => {
+          setElementValue: () => GuiResponses.stringListShow(this.settings?.extraResponses?.low),
+          setSettingValue: (val) => {
             this.settings.extraResponses.low = GuiResponses.validateInput(val) ?? this.settings.extraResponses.low;
           }
         },
-        <Setting>{
+        {
           type: "text",
           id: "extra_light",
           label: "responses.setting.light_response.name",
           description: "responses.setting.light_response.desc",
-          setting: () => GuiResponses.stringListShow(this.settings?.extraResponses?.light),
-          setSetting: (val) => {
+          setElementValue: () => GuiResponses.stringListShow(this.settings?.extraResponses?.light),
+          setSettingValue: (val) => {
             this.settings.extraResponses.light = GuiResponses.validateInput(val) ?? this.settings.extraResponses.light;
           }
         },
-        <Setting>{
+        {
           type: "text",
           id: "extra_medium",
           label: "responses.setting.medium_response.name",
           description: "responses.setting.medium_response.desc",
-          setting: () => GuiResponses.stringListShow(this.settings?.extraResponses?.medium),
-          setSetting: (val) => {
+          setElementValue: () => GuiResponses.stringListShow(this.settings?.extraResponses?.medium),
+          setSettingValue: (val) => {
             this.settings.extraResponses.medium = GuiResponses.validateInput(val) ?? this.settings.extraResponses.medium;
           }
         },
-        <Setting>{
+        {
           type: "text",
           id: "extra_hot",
           label: "responses.setting.hot_response.name",
           description: "responses.setting.hot_response.desc",
-          setting: () => GuiResponses.stringListShow(this.settings?.extraResponses?.hot),
-          setSetting: (val) => {
+          setElementValue: () => GuiResponses.stringListShow(this.settings?.extraResponses?.hot),
+          setSettingValue: (val) => {
             this.settings.extraResponses.hot = GuiResponses.validateInput(val) ?? this.settings.extraResponses.hot;
           }
         },
-        <Setting>{
+        {
           type: "text",
           id: "extra_orgasm",
           label: "responses.setting.orgasm_response.name",
           description: "responses.setting.orgasm_response.desc",
-          setting: () => GuiResponses.stringListShow(this.settings?.extraResponses?.orgasm),
-          setSetting: (val) => {
+          setElementValue: () => GuiResponses.stringListShow(this.settings?.extraResponses?.orgasm),
+          setSettingValue: (val) => {
             this.settings.extraResponses.orgasm = GuiResponses.validateInput(val) ?? this.settings.extraResponses.orgasm;
           }
         }
@@ -120,135 +136,91 @@ export class GuiResponses extends GuiSubscreen {
     return result.substring(1, result.length - 1);
   };
 
-  static activityCanBeDoneOnSelf(activity: Activity, group: AssetGroupItemName): boolean {
-    return activity?.TargetSelf
-      ? (typeof activity.TargetSelf === "boolean" ? activity.Target : activity.TargetSelf).includes(group)
+  static activityCanBeDoneOnSelf(activity: ActivityName, group: AssetGroupItemName): boolean {
+    const foundActivity = AssetAllActivities(Player.AssetFamily).find((act) => act.Name === activity);
+
+    return foundActivity?.TargetSelf
+      ? (typeof foundActivity.TargetSelf === "boolean" ? foundActivity.Target : foundActivity.TargetSelf).includes(group)
       : false;
   }
 
-  /**
-   * Whether an activity can be performed on others / only on self / both.
-   * @param {Activity} activity
-   * @returns {{ onOthers: boolean, onSelf: boolean, selfOnly: boolean, othersOnly: boolean }}
-   */
-  static activityTargetMode(activity: Activity): { onOthers: boolean, onSelf: boolean, selfOnly: boolean, othersOnly: boolean } {
-    const onOthers = Array.isArray(activity.Target) && activity.Target.length > 0;
-    const onSelf =
-      activity.TargetSelf === true
-      || (Array.isArray(activity.TargetSelf) && activity.TargetSelf.length > 0);
-    return {
-      onOthers,
-      onSelf,
-      selfOnly: onSelf && !onOthers,
-      othersOnly: onOthers && !onSelf,
-    };
+  load() {
+    super.load();
+    GuiResponses.instance = this;
+
+    advElement.createCustom({
+      id: selector.entrySettingForm,
+      htmlOptions: {
+        tag: 'div',
+        parent: layout.getSubscreen()
+      },
+      position: [520, 180],
+      size: () => GuiResponses.instance.focusGroup ? [1280, 720] : [0, 0],
+    });
   }
 
-  Load() {
-    if (!this.settings) conDebug(`Loading Responses GUI`);
-    super.Load();
-    ElementCreateTextArea("mainResponses");
+  run() {
+    super.run();
 
-    this.elementHide("mainResponses");
-
-    CharacterAppearanceForceUpCharacter = Player.MemberNumber ?? -1;
-  }
-
-  Run() {
-    let prev = MainCanvas.textAlign;
-
-    MainCanvas.textAlign = "left";
-
-    super.Run();
-
-    if (PreferencePageCurrent == 1) {
+    if (BaseSubscreen.currentPage == 1) {
+      domUtil.unhide(selector.entrySettingForm);
       // Draws all the available character zones
       for (let Group of AssetGroup) {
-        if (Group.IsItem() && !Group.MirrorActivitiesFrom && AssetActivitiesForGroup("Female3DCG", Group.Name).length)
-          DrawAssetGroupZone(Player, Group.Zone, 0.9, 50, 50, 1, "#808080FF", 3, this.getZoneColor(Group.Name));
-      }
-
-      if (Player.FocusGroup != null) {
-        let activity = this.activities[this.activityIndex ?? 0];
-        DrawAssetGroupZone(Player, Player.FocusGroup.Zone, 0.9, 50, 50, 1, "cyan");
-        MainCanvas.textAlign = "center";
-        DrawBackNextButton(
-          550,
-          this.getYPos(0),
-          600,
-          64,
-          this.getActivityLabel(activity, Player.FocusGroup),
-          "White",
-          "",
-          () => "",
-          () => ""
-        );
-        MainCanvas.textAlign = "left";
-        if (!!activity) {
-          let image = "Assets/" + Player.AssetFamily + "/Activity/" + activity.Name + ".png";
-          if (activity.Name.indexOf("Item") > -1) {
-            image = "Icons/Dress.png";
-          }
-          DrawImageResize(image, 1170, this.getYPos(0) - 28, 120, 120);
-          DrawEmptyRect(1170, this.getYPos(0) - 28, 120, 120, "Black", 2);
-          this.drawActivityOptions();
+        if (Group.IsItem() && !Group.MirrorActivitiesFrom && AssetActivitiesForGroup("Female3DCG", Group.Name).length) {
+          const isActive = GuiResponses.instance.focusGroup == Group;
+          if (isActive) continue;
+          DrawAssetGroupZone(Player, Group.Zone, 0.9, 50, 50, 1, "#606060FF", 1, GuiResponses.instance.getZoneColor(Group.Name));
         }
-      } else {
-        DrawText(getText("responses.text.select_zone"), this.getXPos(0), this.getYPos(0), "Black", "White");
       }
-    }
 
-    if (PreferencePageCurrent == 2) this.elementHide("mainResponses");
-    MainCanvas.textAlign = prev;
+      if (GuiResponses.instance.focusGroup != null) {
+        const group = GuiResponses.instance.focusGroup;
+        DrawAssetGroupZone(Player, group.Zone, 0.9, 50, 50, 1, "cyan", 1, GuiResponses.instance.getZoneColor(group.Name));
+
+        MainCanvas.textAlign = "left";
+      } else {
+        // DrawText(getText("responses.text.select_zone"), this.getXPos(0), this.getYPos(0), "Black", "White");
+      }
+    } else if (BaseSubscreen.currentPage == 2) {
+      domUtil.hide(selector.entrySettingForm);
+    }
   }
 
-  Click() {
-    let tmp = GuiSubscreen.START_X;
-    GuiSubscreen.START_X = 550;
-    super.Click();
+  click() {
+    super.click();
 
-    if (PreferencePageCurrent == 1) {
+    if (BaseSubscreen.currentPage == 1) {
       for (const Group of AssetGroup) {
-        if (Group.IsItem() && !Group.MirrorActivitiesFrom && AssetActivitiesForGroup("Female3DCG", Group.Name).length) {
-          const Zone = Group.Zone.find((z) => DialogClickedInZone(Player, z, 0.9, 50, 50, 1));
-          if (Zone) {
-            // If we have selected group, first save data for it.
-            if (Player.FocusGroup) this.saveResponseEntry(this.currentResponsesEntry);
-            // If we clicked on selected group, we deselect it.
-            if (Player.FocusGroup === Group) return this.deselectEntry();
-            Player.FocusGroup = Group;
-            let activities = this.activities;
-            if (this.activityIndex >= activities.length) this.activityIndex = 0;
-            this.loadResponseEntry(this.currentResponsesEntry);
-          }
-        }
-      }
+        if (!Group.IsItem() || Group.MirrorActivitiesFrom || !AssetActivitiesForGroup("Female3DCG", Group.Name).length) continue;
 
-      if (Player.FocusGroup != null) {
-        let activities = this.activities;
-        // Arousal activity control
-        if (MouseIn(this.getXPos(0), this.getYPos(0), 600, 64)) {
-          this.saveResponseEntry(this.currentResponsesEntry);
-          if (MouseX <= this.getXPos(0) + 300) this.activityIndex = (activities.length + this.activityIndex - 1) % activities.length;
-          else this.activityIndex = (this.activityIndex + 1) % activities.length;
-          this.loadResponseEntry(this.currentResponsesEntry);
+        const Zone = Group.Zone.find((z) => DialogClickedInZone(Player, z, 0.9, 50, 50, 1));
+        if (!Zone) continue;
+
+        this.currentEntry = this.currentResponsesEntry
+        if (GuiResponses.instance.focusGroup) this.saveResponseEntry(this.currentEntry);
+        if (GuiResponses.instance.focusGroup === Group) return this.deselectEntry();
+        GuiResponses.instance.focusGroup = Group;
+        if (GuiResponses.instance.focusGroup) {
+          this.toggleEntrySettingForm();
+          this.renderEntrySettingForm();
         }
+        let activities = this.activities;
+        if (this.activityIndex >= activities.length) this.activityIndex = 0;
+        this.currentEntry = this.currentResponsesEntry
+        // this.loadResponseEntry(this.currentEntry);
       }
 
       this.handleActivityEntryClick();
     }
-
-    GuiSubscreen.START_X = tmp;
   }
 
-  Exit() {
-    this.saveResponseEntry(this.currentResponsesEntry);
-    ElementRemove("mainResponses");
+  exit() {
+    GuiResponses.instance.settings.mainResponses = this.settings.mainResponses.filter((a) => a.responses.length > 0);
+    this.saveResponseEntry(this.currentEntry);
+    this.currentEntry = undefined;
+    GuiResponses.instance.focusGroup = null;
 
-    CharacterAppearanceForceUpCharacter = -1;
-    CharacterLoadCanvas(Player);
-    Player.FocusGroup = null;
-    super.Exit();
+    super.exit();
   }
 
   currentAct() {
@@ -256,31 +228,38 @@ export class GuiResponses extends GuiSubscreen {
   }
 
   currentGroup() {
-    return Player.FocusGroup;
+    return GuiResponses.instance.focusGroup;
   }
 
-  getZoneColor(groupName: string): string {
-    let hasConfiguration = this.settings?.mainResponses?.some((a) => a.groupName.includes(groupName));
-    return hasConfiguration ? "#00FF0044" : "#80808044";
+  getZoneColor(groupName: AssetGroupItemName): string {
+    const hasConfiguration = this.settings?.mainResponses?.some((a) => a.groupName.includes(groupName));
+    const isCurrentGroup = this.currentGroup()?.Name == groupName;
+
+    if (isCurrentGroup) return "#44ffff44";
+    else if (hasConfiguration) return "#00FF0044";
+    else return "#80808044";
   }
 
-  getResponsesEntry(actName: string, grpName: string): ResponsesEntryModel | undefined {
+  getResponsesEntry(actName: string, grpName: AssetGroupItemName): ResponsesEntryModel | undefined {
     return this.settings?.mainResponses?.find((a) => a.actName == actName && a.groupName.includes(grpName));
   }
 
-  getActivityLabelTag(activity: Activity, group: AssetGroup) {
-    let groupName = group.Name as $AssetGroupItemName;
+  activityHasDictionaryText(KeyWord: string) {
+    if (!ActivityDictionary) ActivityDictionaryLoad();
+    if (!ActivityDictionary) return;
+
+    for (let D = 0; D < ActivityDictionary.length; D++) if (ActivityDictionary[D][0] == KeyWord) return true;
+    return false;
+  }
+
+  getActivityLabelTag(activity: Activity, group: AssetGroup): `Label-ChatOther-${string}-${string}` {
+    let groupName = group.Name as AssetGroupItemName | "ItemPenis" | "ItemGlans";
     if (Player.HasPenis()) {
       if (groupName == "ItemVulva") groupName = "ItemPenis";
       if (groupName == "ItemVulvaPiercings") groupName = "ItemGlans";
     }
-    const targetMode = GuiResponses.activityTargetMode(activity);
 
-    if (targetMode.selfOnly) {
-      return `Label-ChatSelf-${groupName}-${activity.Name}`;
-    } else {
-      return `Label-ChatOther-${groupName}-${activity.Name}`;
-    }
+    return `Label-ChatOther-${groupName}-${activity.Name}`;
   }
 
   getActivityLabel(activity: Activity, group: AssetGroup) {
@@ -292,18 +271,15 @@ export class GuiResponses extends GuiSubscreen {
   }
 
   deselectEntry() {
-    Player.FocusGroup = null;
-    this.elementHide("mainResponses");
-  }
-
-  loadResponseEntry(entry: ResponsesEntryModel | undefined) {
-    this.elementSetValue("mainResponses", GuiResponses.stringListShow(entry?.responses as string[]) ?? []);
+    GuiResponses.instance.focusGroup = undefined;
+    GuiResponses.instance.currentEntry = undefined;
+    this.toggleEntrySettingForm();
   }
 
   saveResponseEntry(entry: ResponsesEntryModel | undefined) {
     let responses = ElementValue("mainResponses");
-    let merge: boolean = false;
-    let unmerge: boolean = false;
+    let merge: boolean;
+    let unmerge: boolean;
     const validResponses = GuiResponses.validateInput(responses);
 
     if (responses != "" && validResponses) {
@@ -323,18 +299,13 @@ export class GuiResponses extends GuiSubscreen {
     if (!entry) return;
     let temp = this.settings?.mainResponses?.find((ent) => ent.actName === entry.actName && ent.groupName === entry.groupName);
 
-    if (temp?.groupName?.length && temp.groupName.length <= 1) {
+    if (temp?.groupName.length <= 1) {
       this.settings.mainResponses = this.settings?.mainResponses.filter((a) => {
         return !(a.actName == entry.actName && a.groupName == entry.groupName);
       });
     } else {
-      const currentGroupName = this.currentGroup()?.Name;
-      if (currentGroupName) {
-        temp?.groupName?.splice(temp?.groupName?.indexOf(currentGroupName), 1);
-      }
+      temp?.groupName?.splice(temp?.groupName?.indexOf(this.currentGroup()?.Name), 1);
     }
-
-    this.elementSetValue("mainResponses", []);
   }
 
   /**
@@ -352,11 +323,9 @@ export class GuiResponses extends GuiSubscreen {
 
     // Looking for entry to merge, if any
     let mergingEntry = this.settings?.mainResponses?.find((ent) => {
-      const currentGroupName = this.currentGroup()?.Name;
-      if (!currentGroupName) return false;
       return (
         ent.actName == this.currentAct().Name && // Actions are same
-        !ent.groupName.includes(currentGroupName) && // Group array don't have selected group
+        !ent.groupName.includes(this.currentGroup().Name) && // Group array don't have selected group
         (JSON.stringify(ent.responses) === stringifiedValidResponses || // Responses are the same
           ent.selfTrigger === entry.selfTrigger) // Self trigger from current entry is same with one that we found
       );
@@ -364,12 +333,10 @@ export class GuiResponses extends GuiSubscreen {
 
     if (!mergingEntry) return false; // We didn't find entry that fullfils our needs. We don't need to merge
 
-    const currentGroupName = this.currentGroup()?.Name;
-    if (!currentGroupName) return false;
-    mergingEntry.groupName.push(currentGroupName);
+    mergingEntry.groupName.push(this.currentGroup()?.Name);
 
     const entr = this.settings?.mainResponses?.find((ent) => ent.actName === entry.actName && ent.groupName === entry.groupName);
-    entr?.groupName?.splice(entr?.groupName?.indexOf(currentGroupName), 1);
+    entr?.groupName?.splice(entr?.groupName?.indexOf(this.currentGroup()?.Name), 1);
 
     this.clearEntry(entry);
     return true;
@@ -390,13 +357,11 @@ export class GuiResponses extends GuiSubscreen {
 
     // Looking for entry to unmerge, if any
     let unmergingEntry = this.settings?.mainResponses?.find((ent) => {
-      const currentGroupName = this.currentGroup()?.Name;
-      if (!currentGroupName) return false;
       return (
         ent.actName == this.currentAct().Name && // Actions are same
         Array.isArray(ent.groupName) && // Group name is type of array
         ent.groupName.length > 1 && // Group array has more than one entry
-        ent.groupName.includes(currentGroupName) && // Group array has selected group
+        ent.groupName.includes(this.currentGroup().Name) && // Group array has selected group
         (JSON.stringify(ent.responses) !== stringifiedCurrentResponses || // Responses are not the same
           ent.selfTrigger !== entry.selfTrigger) // Self trigger from current entry not same with one that we found
       );
@@ -404,11 +369,9 @@ export class GuiResponses extends GuiSubscreen {
 
     if (!unmergingEntry) return false; // We didn't find entry that fullfils our needs. We don't need to unmerge
 
-    const currentGroupName = this.currentGroup()?.Name;
-    if (!currentGroupName) return false;
-    unmergingEntry.groupName.splice(unmergingEntry.groupName.indexOf(currentGroupName), 1);
+    unmergingEntry.groupName.splice(unmergingEntry.groupName.indexOf(this.currentGroup()?.Name), 1);
 
-    const newEntry = this.createNewEntry(this.currentAct().Name, currentGroupName, validResponses, entry.selfTrigger);
+    const newEntry = this.createNewEntry(this.currentAct().Name, this.currentGroup().Name, validResponses, entry.selfTrigger);
     this.settings.mainResponses.push(newEntry);
 
     return true;
@@ -427,14 +390,14 @@ export class GuiResponses extends GuiSubscreen {
     if (!existing) {
       existing = this.createNewEntry(this.currentAct()?.Name, this.currentGroup()?.Name ?? "");
       this.settings.mainResponses.push(existing);
-      this.loadResponseEntry(this.currentResponsesEntry);
+      // this.loadResponseEntry(this.currentEntry);
     }
 
     return existing;
   }
 
   copyEntry(entry: ResponsesEntryModel | undefined) {
-    this.copiedEntry = entry as ResponsesEntryModel;
+    this.copiedEntry = structuredClone(entry) as ResponsesEntryModel;
   }
 
   pasteEntry(entry: ResponsesEntryModel | undefined) {
@@ -442,99 +405,252 @@ export class GuiResponses extends GuiSubscreen {
     if (!entry) entry = this.createEntryIfNeeded(entry);
 
     entry.responses = this.copiedEntry.responses ?? [""];
-    this.loadResponseEntry(entry);
-    const currentGroupName = this.currentGroup()?.Name;
-    if (!currentGroupName) return;
-    if (GuiResponses.activityCanBeDoneOnSelf(this.currentAct(), currentGroupName))
+    // this.loadResponseEntry(entry);
+    if (GuiResponses.activityCanBeDoneOnSelf(this.currentAct()?.Name, this.currentGroup()?.Name))
       entry.selfTrigger = this.copiedEntry.selfTrigger;
   }
 
   handleActivityEntryClick() {
-    let entry = this.currentResponsesEntry;
-    const currentGroupName = this.currentGroup()?.Name;
-    if (!currentGroupName) return;
-    this.selfAllowed = GuiResponses.activityCanBeDoneOnSelf(this.currentAct(), currentGroupName);
+    let entry = this.currentEntry;
+    this.selfAllowed = GuiResponses.activityCanBeDoneOnSelf(this.currentAct()?.Name, this.currentGroup()?.Name);
 
     // Clear Entry
-    if (!!entry && MouseIn(1310, this.getYPos(0), 64, 64)) {
+    if (!!entry && MouseIn(1310, 280, 64, 64)) {
       this.clearEntry(entry);
     }
 
-    if (MouseIn(1385, this.getYPos(0), 64, 64)) {
+    if (MouseIn(1385, 280, 64, 64)) {
       this.copyEntry(entry);
     }
 
-    if (MouseIn(1455, this.getYPos(0), 64, 64)) {
+    if (MouseIn(1455, 280, 64, 64)) {
       this.pasteEntry(entry);
-    }
-
-    // Self Allowed Checkbox
-    if (MouseIn(this.getXPos(2) + 600, this.getYPos(2) - 32, 64, 64) && this.selfAllowed) {
-      entry = this.createEntryIfNeeded(entry);
-      entry.selfTrigger = !entry.selfTrigger;
-    }
-
-    // Master Set Checkbox
-    if (MouseIn(this.getXPos(8) + 600, this.getYPos(8) - 32, 64, 64)) {
-      this.masterSet = !this.masterSet;
     }
   }
 
   drawActivityOptions() {
-    let activityEntry = this.currentResponsesEntry;
+    let activityEntry = this.currentEntry;
 
     if (!!activityEntry) {
       MainCanvas.textAlign = "center";
-      DrawButton(1310, this.getYPos(0), 64, 64, "X", "White", undefined, getText("responses.text.clear_entry"));
+      DrawButton(1310, 280, 64, 64, "X", "White", undefined, getText("responses.text.clear_entry"));
       MainCanvas.textAlign = "left";
     }
 
     MainCanvas.textAlign = "center";
-    DrawButton(1385, this.getYPos(0), 64, 64, "", "White", undefined, getText("responses.text.copy_entry"));
-    DrawImageResize("Icons/Export.png", 1385, this.getYPos(0), 64, 64);
+    DrawButton(1385, 280, 64, 64, "", "White", undefined, getText("responses.text.copy_entry"));
+    DrawImageResize("Icons/Export.png", 1385, 280, 64, 64);
     MainCanvas.textAlign = "left";
 
     MainCanvas.textAlign = "center";
-    DrawButton(1455, this.getYPos(0), 64, 64, "", "White", undefined, getText("responses.text.paste_entry"));
-    DrawImageResize("Icons/Import.png", 1455, this.getYPos(0), 64, 64);
+    DrawButton(1455, 280, 64, 64, "", "White", undefined, getText("responses.text.paste_entry"));
+    DrawImageResize("Icons/Import.png", 1455, 280, 64, 64);
     MainCanvas.textAlign = "left";
-
-    // Self Allowed Checkbox
-    this.drawCheckbox(
-      "responses.setting.self_trigger.name",
-      "responses.setting.self_trigger.desc",
-      activityEntry?.selfTrigger ?? false,
-      2,
-      !this.selfAllowed
-    );
-
-    // Master Set Checkbox
-    this.drawCheckbox("responses.setting.master_set.name", "responses.setting.master_set.desc", this.masterSet ?? false, 8);
-
-    this.elementPosition("mainResponses", "responses.setting.responses.name", "responses.setting.responses.desc", 3, false);
   }
 
-  elementSetValue(elementId: string, value: any) {
-    let element = document.getElementById(elementId) as HTMLInputElement;
-    if (!!element && value != null) element.value = value;
+  buildEntrySettingForm() {
+    let entry = GuiResponses.instance.currentEntry;
+
+    if (!GuiResponses.instance.focusGroup) {
+      GuiResponses.instance.toggleEntrySettingForm();
+      return [];
+    }
+
+    if (!entry) {
+      entry = this.createEntryIfNeeded(entry);
+    }
+
+    const selfTriggerCheckbox = advElement.createCheckbox({
+      id: selector.entrySelfTrigger,
+      label: getText('responses.setting.self_trigger.name'),
+      description: getText('responses.setting.self_trigger.desc'),
+      setElementValue: () => entry.selfTrigger,
+      setSettingValue: (val) => entry.selfTrigger = val,
+      disabled: !GuiResponses.activityCanBeDoneOnSelf(this.currentAct()?.Name, this.currentGroup()?.Name)
+    })
+
+    const masterSetCheckbox = advElement.createCheckbox({
+      id: selector.entryMasterSet,
+      label: getText('responses.setting.master_set.name'),
+      description: getText('responses.setting.master_set.desc'),
+      setElementValue: () => GuiResponses.instance.masterSet,
+      setSettingValue: (val) => GuiResponses.instance.masterSet = val,
+    })
+        let activity = GuiResponses.instance.activities[GuiResponses.instance.activityIndex ?? 0];
+
+        if (!!activity) {
+          let image = "Assets/" + Player.AssetFamily + "/Activity/" + activity.Name + ".png";
+          if (activity.Name.indexOf("Item") > -1) {
+            image = "Icons/Dress.png";
+          }
+          DrawImageResize(image, 1170, 280 - 28, 120, 120);
+          DrawEmptyRect(1170, 280 - 28, 120, 120, "Black", 2);
+          GuiResponses.instance.drawActivityOptions();
+        }
+
+    const settings = ElementCreate({
+      tag: 'div',
+      attributes: {
+        id: selector.settingsDiv
+      },
+      classList: [selector.entryDiv],
+      children: [
+        this.buildActivityDropdown(),
+        selfTriggerCheckbox,
+        masterSetCheckbox
+      ]
+    });
+
+    return [
+      settings,
+      this.buildResponsesList(),
+    ];
   }
 
-  elementPosition(elementId: string, label: string, description: string, order: number, disabled: boolean = false) {
-    var isHovering = MouseIn(this.getXPos(order), this.getYPos(order) - 32, 600, 64);
-    const isValid = !!GuiResponses.validateInput(ElementValue(elementId));
+  toggleEntrySettingForm() {
+    const entrySettingForm = document.getElementById(selector.entrySettingForm) as HTMLDivElement;
+    const entrySettingFormShouldBeActive = !!GuiResponses.instance.focusGroup;
+    const entrySettingFormUnion = BaseSubscreen.currentElements.find((e) => e[0].id === selector.entrySettingForm);
 
-    DrawTextFit(
-      isValid ? `${getText(label)}` : `${getText(label)} ✖`,
-      this.getXPos(order),
-      this.getYPos(order),
-      600,
-      isHovering ? "Red" : "Black",
-      "Gray"
-    );
+    if (!entrySettingFormUnion) return;
 
-    ElementPosition(elementId, this.getXPos(order) + 750 + 225, this.getYPos(order), 800, 64);
-    if (disabled) ElementSetAttribute(elementId, "disabled", "true");
-    if (!disabled) document.getElementById(elementId)?.removeAttribute("disabled");
-    if (isHovering) this.tooltip(getText(description));
+    if (entrySettingFormShouldBeActive) {
+      entrySettingForm.toggleAttribute('active', true);
+    }
+
+
+    if (!entrySettingFormShouldBeActive) 
+      entrySettingForm.querySelectorAll('&>*').forEach((e) => e.toggleAttribute('hidden', !entrySettingFormShouldBeActive));
+
+    domUtil.autoSetSize(entrySettingForm, entrySettingFormUnion[1].size);
+
+    if (entrySettingFormShouldBeActive) 
+      entrySettingForm.querySelectorAll('&>*').forEach((e) => e.toggleAttribute('hidden', entrySettingFormShouldBeActive));
+
+    setTimeout(() => {
+      // this trick with duplicate variable is needed to prevent hiding element with too fast clicking
+      const shouldBeActive = !!GuiResponses.instance.focusGroup;
+      if (!shouldBeActive) {
+        entrySettingForm.toggleAttribute('active', false);
+      }
+    }, 500);
+  }
+
+  renderEntrySettingForm() {
+    const entrySettingForm = document.getElementById(selector.entrySettingForm) as HTMLDivElement;
+    entrySettingForm.innerHTML = '';
+    entrySettingForm.append(...GuiResponses.instance.buildEntrySettingForm());
+
+    this.resize(false);
+  }
+
+  buildActivityDropdown() {
+    const options = this.activities.map((act, index) => {
+      return ({
+        attributes: {
+          value: index,
+          label: this.getActivityLabel(act, GuiResponses.instance.focusGroup),
+          selected: index === GuiResponses.instance.activityIndex
+        }
+      }) as Omit<HTMLOptions<"option">, "tag">
+    })
+
+    const dropdown = advElement.createDropdown({
+      id: selector.activityDropdown,
+      optionsList: options,
+      setSettingValue: function (value) {
+        GuiResponses.instance.saveResponseEntry(GuiResponses.instance.currentResponsesEntry);
+        GuiResponses.instance.activityIndex = CommonParseNumber(value);
+        GuiResponses.instance.renderEntrySettingForm();
+      },
+      label: 'Activity',
+      description: 'Select an activity to respond to.',
+      htmlOptions: {
+        container: {
+          parent: layout.getSubscreen(),
+        }
+      }
+    });
+
+    if (GuiResponses.instance.focusGroup) {
+      domUtil.unhide(dropdown);
+    } else {
+      domUtil.hide(dropdown);
+    }
+
+    return dropdown;
+  }
+
+  buildResponsesList() {
+    let responseEntry = this.getResponsesEntry(this.currentAct()?.Name, this.currentGroup()?.Name);
+
+    if (!responseEntry) 
+      responseEntry = this.createEntryIfNeeded(responseEntry);
+
+    const responses = responseEntry.responses.filter((r) => !!r);
+
+    return ElementCreate({
+      tag: 'div',
+      attributes: {
+        id: selector.responsesNav
+      },
+      classList: [selector.entryDiv],
+      children: [
+        advElement.createButton({
+          id: selector.responseAddButton,
+          onClick: function () {
+            Modal.prompt(getText('responses.prompt')).then((response) => {
+              if (!response) return;
+
+              responseEntry.responses.push(response);
+              GuiResponses.instance.renderResponsesList();
+            })
+          },
+          options: {
+            image: "Icons/Plus.png",
+            label: "Add Response",
+          },
+        }),
+        {
+          tag: 'div',
+          classList: ['scroll-box'],
+          attributes: {
+            id: selector.responsesList
+          },
+          children: [
+            ...responses.map((response, index) => {
+              return advElement.createButton({
+                id: `${selector.responseButton}-${index}`,
+                options: {
+                  label: response,
+                  tooltip: 'Click to edit',
+                },
+                htmlOptions: {
+                  button: {
+                    classList: [selector.responseEntryButton],
+                  }
+                },
+                onClick: function () {
+                  Modal.prompt(getText('responses.prompt'), response).then((newResponse) => {
+                    if (!newResponse) responseEntry.responses.splice(index, 1)
+                    else responseEntry.responses[index] = newResponse;
+
+                    GuiResponses.instance.renderResponsesList();
+                  })
+                }
+              });
+            })
+          ],
+        }
+      ]
+    });
+  }
+
+  renderResponsesList() {
+    const responsesList = document.getElementById(selector.responsesNav) as HTMLDivElement;
+    responsesList.innerHTML = '';
+    responsesList.append(...this.buildResponsesList().children);
   }
 }
+
+exportToGlobal("GuiResponses", GuiResponses);

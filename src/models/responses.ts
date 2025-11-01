@@ -1,4 +1,4 @@
-import { BaseSettingsModel } from "./base";
+import { BaseSettingsModel } from "bc-deeplib/deeplib";
 
 export type ResponsesSettingsModel = BaseSettingsModel & {
   mainResponses: ResponsesEntryModel[];

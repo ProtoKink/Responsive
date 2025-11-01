@@ -1,7 +1,7 @@
-import { BaseModule } from "../base/base_module";
+import { BaseModule, sdk } from "bc-deeplib/deeplib";
 import { isSimpleChat } from "../utilities/chat_messages";
 import { PlayerStorage } from "../utilities/data";
-import { HookPriority, ModuleCategory, hookFunction } from "../utilities/sdk";
+import { HookPriority, ModuleCategory } from "../utilities/sdk";
 
 /**
  * "Frown", "Sad", "Pained", "Angry", "HalfOpen", "Open", "Ahegao", "Moan",
@@ -50,7 +50,7 @@ interface CharTalkCharacterData {
 export class CharTalkModule extends BaseModule {
   static characterData: Record<number, CharTalkCharacterData> = {};
 
-  Load(): void {
+  load(): void {
     ChatRoomRegisterMessageHandler({
       Description: "Processes mouth moving on the client",
       Priority: 500,
@@ -61,7 +61,7 @@ export class CharTalkModule extends BaseModule {
       }
     });
 
-    hookFunction(
+    sdk.hookFunction(
       "CommonDrawAppearanceBuild",
       HookPriority.Observe,
       (args, next) => {
@@ -149,7 +149,7 @@ export class CharTalkModule extends BaseModule {
 
   static charTalkHandle(c: Character, msg: string) {
     const storage = PlayerStorage().GlobalModule;
-    if (!storage.ResponsiveEnabled || !storage.CharTalkEnabled || !c?.MemberNumber || CharTalkModule.characterData[c.MemberNumber]) return;
+    if (!storage.modEnabled || !storage.CharTalkEnabled || !c?.MemberNumber || CharTalkModule.characterData[c.MemberNumber]) return;
 
     if (isSimpleChat(msg)) {
       CharTalkModule.animateSpeech(c, msg);

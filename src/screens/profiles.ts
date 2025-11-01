@@ -1,211 +1,204 @@
-import { GuiSubscreen } from "../base/base_setting";
-import { ProfileEntryModel, ProfileNames, ProfileSaveModel, ProfilesSettingsModel } from "../models/profiles";
-import { conWarn } from "../utilities/console";
-import { getText } from "../translation";
-import { PlayerStorage } from "../utilities/data";
+import { advElement, BaseSubscreen, getText, layout, Modal, modStorage, SubscreenOptions } from 'bc-deeplib/deeplib';
+import { ProfileEntryModel, ProfilesSettingsModel } from '../models/profiles';
+import { SettingsModel } from '../models/settings';
+import { logger } from '../utilities/definition';
+import { ResponsesSettingsModel } from '../models/responses';
+import { GlobalSettingsModel } from '../models/base';
 
-export class GuiProfiles extends GuiSubscreen {
-  private PreferenceText = "";
-  private ProfileNames: ProfileNames = ["", "", ""];
 
-  get name(): string {
-    return "profiles";
-  }
+export class GuiProfiles extends BaseSubscreen {
 
-  get icon(): string {
-    return "Icons/Title.png";
-  }
+  protected static override subscreenOptions: SubscreenOptions = {
+    name: 'profiles',
+    icon: `Icons/Title.png`,
+    drawCharacter: false
+  };
 
   get settings(): ProfilesSettingsModel {
     return super.settings as ProfilesSettingsModel;
   }
 
-  tmpGlbl = GuiSubscreen.START_X;
+  load() {
+    super.load();
 
-  Load() {
-    super.Load();
+    const profilesContainer = ElementCreate({
+      tag: 'div',
+      classList: ['rsp-profiles-container'],
+      attributes: {
+        id: 'rsp-profiles-container'
+      },
+      parent: layout.getSubscreen()
+    });
 
     for (let i = 0; i < 3; i++) {
-      let profileIndex = i + 1;
-      if (!PlayerStorage()?.ProfilesModule?.[profileIndex]) {
-        PlayerStorage().ProfilesModule[profileIndex] = {
-          data: <ProfileSaveModel>{},
-          name: ""
-        };
-      }
-      this.ProfileNames[i] = PlayerStorage()?.ProfilesModule?.[profileIndex]?.name ?? "";
+      const profileId = i + 1;
+      const profileName = this.settings[profileId].name || getText('profiles.text.profile') + ` ${profileId}`;
+
+      const profileElement = ElementCreate({
+        tag: 'div',
+        attributes: {
+          id: `rsp-profile-${profileId}`,
+        },
+        classList: ['rsp-profile'],
+        children: [
+          advElement.createLabel({
+            id: `rsp-profile-label-${profileId}`,
+            label: profileName
+          }),
+          {
+            tag: 'div',
+            classList: ['rsp-profile-buttons'],
+            children: [
+              advElement.createButton({
+                id: `rsp-profiles-profile-save-${profileId}`,
+                onClick: () => this.handleProfilesSaving(profileId),
+                options: {
+                  label: getText('profiles.button.save'),
+                }
+              }),
+
+              advElement.createButton({
+                id: `rsp-profiles-profile-load-${profileId}`,
+                onClick: () => this.handleProfilesLoading(profileId),
+                options: {
+                  label: getText('profiles.button.load'),
+                  disabled: !this.profileExists(profileId)
+                }
+              }),
+
+              advElement.createButton({
+                id: `rsp-profiles-profile-delete-${profileId}`,
+                onClick: () => this.handleProfilesDeleting(profileId),
+                options: {
+                  label: getText('profiles.button.delete'),
+                  disabled: !this.profileExists(profileId)
+                }
+              }),
+            ]
+          }
+        ]
+      });
+
+      profilesContainer.appendChild(profileElement);
     }
 
     CharacterAppearanceForceUpCharacter = Player.MemberNumber ?? -1;
   }
 
-  Run() {
-    let prev = MainCanvas.textAlign;
-    super.Run();
-    MainCanvas.textAlign = "left";
+  resize(onLoad?: boolean): void {
+    super.resize(onLoad);
+  }
 
-    for (let i = 0; i < 3; i++) {
-      let profileIndex = i + 1;
+  private async handleProfilesSaving(profileId: number): Promise<void> {
+    if (!this.profileCanBeSaved(profileId)) return;
 
-      if (this.ProfileNames[i] === "")
-        DrawText(getText("profiles.text.profile") + ` ${profileIndex}`, this.getXPos(profileIndex), this.getYPos(profileIndex), "Black", "Gray");
-      if (this.ProfileNames[i] !== "")
-        DrawText(this.ProfileNames[i] as string, this.getXPos(profileIndex), this.getYPos(profileIndex), "Black", "Gray");
+    const name = await Modal.prompt(getText('profiles.prompt'));
+    if (name === null) return;
 
-      this.drawButton("profiles.button.save", "white", profileIndex, 250);
-      this.drawButton("profiles.button.load", "white", profileIndex, 500);
-      this.drawButton("profiles.button.delete", "IndianRed", profileIndex, 750);
+    const storage = modStorage.playerStorage;
+    const profile = this.settings[profileId];
+
+    if (!profile || Object.keys(profile).length === 0) {
+      this.settings[profileId] = {} as ProfileEntryModel;
     }
 
-    if (this.PreferenceText)
-      DrawText(this.PreferenceText, GuiSubscreen.START_X + 250, GuiSubscreen.START_Y - GuiSubscreen.Y_MOD, "Black", "Gray");
+    this.settings[profileId] = CommonCloneDeep({
+      name: name,
+      data: {
+        GlobalModule: storage.GlobalModule as GlobalSettingsModel,
+        ResponsesModule: storage.ResponsesModule as ResponsesSettingsModel
+      },
+    });
 
-    MainCanvas.textAlign = prev;
+    const display = name ? `"${name}"` : profileId;
+    ToastManager.success(`${getText('profiles.text.profile')} ${display} ${getText('profiles.text.has_been_saved')}`);
+
+    this.updateProfileLabel(profileId);
+    this.updateProfileButtons(profileId);
   }
 
-  Click() {
-    super.Click();
-
-    for (let i = 0; i < 3; i++) {
-      let profileIndex = i + 1;
-
-      this.handleProfilesSaving(profileIndex);
-      this.handleProfilesLoading(profileIndex);
-      this.handleProfilesDeleting(profileIndex);
+  private handleProfilesLoading(profileId: number): void {
+    if (!this.profileExists(profileId)) {
+      ToastManager.error(`${getText('profiles.text.profile')} ${profileId} ${getText('profiles.text.doesnt_exist')}`);
+      return;
     }
+
+    const data = this.settings[profileId].data;
+
+    modStorage.playerStorage = CommonCloneDeep({
+      ...modStorage.playerStorage,
+      GlobalModule: data.GlobalModule,
+      ResponsesModule: data.ResponsesModule
+    });
+
+    const name = this.settings[profileId].name;
+    const display = name ? `"${name}"` : profileId;
+    ToastManager.success(`${getText('profiles.text.profile')} ${display} ${getText('profiles.text.has_been_loaded')}`);
+
   }
 
-  Exit() {
-    CharacterAppearanceForceUpCharacter = -1;
-    CharacterLoadCanvas(Player);
-    this.PreferenceText = "";
-    super.Exit();
+  private handleProfilesDeleting(profileId: number): void {
+    if (!this.profileExists(profileId)) {
+      ToastManager.info(`${getText('profiles.text.profile')} ${profileId} ${getText('profiles.text.doesnt_exist')}`);
+      return;
+    }
+
+    const name = this.settings[profileId].name;
+
+    this.settings[profileId] = {
+      name: '',
+      data: {}
+    } as ProfileEntryModel;
+
+    const display = name ? `"${name}"` : profileId;
+    ToastManager.success(`${getText('profiles.text.profile')} ${display} ${getText('profiles.text.has_been_deleted')}`);
+
+    this.updateProfileLabel(profileId);
+    this.updateProfileButtons(profileId);
   }
 
-  saveProfile(profileId: number, profileName: string) {
-    if (profileId < 1 || profileId > 3) {
-      conWarn(`Invalid profile id ${profileId}`);
+  private updateProfileButtons(profileId: number): void {
+    const profileSaveButton = ElementWrap(`rsp-profiles-profile-save-${profileId}`) as HTMLButtonElement;
+    const profileLoadButton = ElementWrap(`rsp-profiles-profile-load-${profileId}`) as HTMLButtonElement;
+    const profileDeleteButton = ElementWrap(`rsp-profiles-profile-delete-${profileId}`) as HTMLButtonElement;
+
+    if (!profileSaveButton || !profileLoadButton || !profileDeleteButton) return;
+
+    profileSaveButton.disabled = !this.profileCanBeSaved(profileId);
+    profileLoadButton.disabled = !this.profileExists(profileId);
+    profileDeleteButton.disabled = !this.profileExists(profileId);
+  }
+
+  private updateProfileLabel(profileId: number): void {
+    const name = this.settings[profileId].name;
+    const display = name ? name : `${getText('profiles.text.profile')} ${profileId}`;
+    const profileLabel = ElementWrap(`rsp-profile-label-${profileId}`);
+    if (!profileLabel) return;
+    profileLabel.textContent = display;
+  }
+
+  private isValidProfileId(id: number): boolean {
+    if (id < 1 || id > 3) {
+      logger.warn(`Invalid profile id ${id}`);
       return false;
     }
-
-    if (!Object.keys(PlayerStorage()?.ProfilesModule?.[profileId]).length) {
-      PlayerStorage().ProfilesModule[profileId] = <ProfileEntryModel>{};
-    }
-
-    let saveData: ProfileSaveModel = {
-      GlobalModule: PlayerStorage().GlobalModule,
-      ResponsesModule: PlayerStorage().ResponsesModule
-    };
-
-    PlayerStorage().ProfilesModule[profileId] = {
-      name: profileName,
-      data: saveData
-    };
 
     return true;
   }
 
-  loadProfile(profileId: number) {
-    if (profileId < 1 || profileId > 3) {
-      conWarn(`Invalid profile id ${profileId}`);
-      return false;
-    }
-
-    if (!Object.keys(PlayerStorage()?.ProfilesModule?.[profileId]).length) {
-      return false;
-    }
-
-    let data = PlayerStorage().ProfilesModule[profileId].data;
-    if (!data) {
-      return false;
-    }
-
-    if (data) {
-      PlayerStorage().GlobalModule = data.GlobalModule;
-      PlayerStorage().ResponsesModule = data.ResponsesModule;
-    }
+  private profileCanBeSaved(profileId: number): boolean {
+    if (!this.isValidProfileId(profileId)) return false;
 
     return true;
   }
 
-  deleteProfile(profileId: number) {
-    if (profileId < 1 || profileId > 3) {
-      conWarn(`Invalid profile id ${profileId}`);
-      return false;
-    }
+  private profileExists(profileId: number): boolean {
+    if (!this.isValidProfileId(profileId)) return false;
 
-    if (!Object.keys(PlayerStorage()?.ProfilesModule?.[profileId]).length) {
-      return false;
-    }
+    const data = this.settings[profileId]?.data || {};
 
-    if (Object.keys(PlayerStorage()?.ProfilesModule?.[profileId]).length) {
-      PlayerStorage().ProfilesModule[profileId] = <ProfileEntryModel>{};
-      return true;
-    }
-  }
+    if (!data || Object.keys(data).length === 0) return false;
 
-  handleProfilesSaving(profileIndex: number) {
-    let formerIndex = profileIndex - 1;
-    if (MouseIn(this.getXPos(profileIndex) + 250, this.getYPos(profileIndex) - 32, 200, 64)) {
-      let promptedName = prompt(getText("profiles.prompt"));
-
-      if (promptedName === null) return;
-      this.ProfileNames[formerIndex] = promptedName;
-      if (this.ProfileNames[formerIndex] === "") {
-        this.saveProfile(profileIndex, "");
-        this.PreferenceText = `${getText("profiles.text.profile")} ${profileIndex} ${getText("profiles.text.has_been_saved")}`;
-      }
-      if (this.ProfileNames[formerIndex] !== "") {
-        this.saveProfile(profileIndex, this.ProfileNames[formerIndex] as string);
-        this.PreferenceText = `${getText("profiles.text.profile")} "${this.ProfileNames[formerIndex]}" ${getText(
-          "profiles.text.has_been_saved"
-        )}`;
-      }
-      return;
-    }
-  }
-
-  handleProfilesLoading(profileIndex: number) {
-    let formerIndex = profileIndex - 1;
-    if (MouseIn(this.getXPos(profileIndex) + 500, this.getYPos(profileIndex) - 32, 200, 64)) {
-      if (!this.loadProfile(profileIndex)) {
-        this.PreferenceText = `${getText("profiles.text.profile")} ${profileIndex} ${getText("profiles.text.needs_to_be_saved")}`;
-        return;
-      }
-      if (this.ProfileNames[formerIndex] === "")
-        this.PreferenceText = `${getText("profiles.text.profile")} ${profileIndex} ${getText("profiles.text.has_been_loaded")}`;
-      if (this.ProfileNames[formerIndex] !== "")
-        this.PreferenceText = `${getText("profiles.text.profile")} "${this.ProfileNames[formerIndex]}" ${getText(
-          "profiles.text.has_been_loaded"
-        )}`;
-      return;
-    }
-  }
-
-  handleProfilesDeleting(profileIndex: number) {
-    let formerIndex = profileIndex - 1;
-    if (MouseIn(this.getXPos(profileIndex) + 750, this.getYPos(profileIndex) - 32, 200, 64)) {
-      if (this.ProfileNames[formerIndex] === null) return;
-
-      if (this.deleteProfile(profileIndex)) {
-        if (this.ProfileNames[formerIndex] === "") {
-          this.PreferenceText = `${getText("profiles.text.profile")} ${profileIndex} ${getText("profiles.text.has_been_deleted")}`;
-          return;
-        }
-        if (this.ProfileNames[formerIndex] !== "") {
-          this.PreferenceText = `${getText("profiles.text.profile")} "${this.ProfileNames[formerIndex]}" ${getText(
-            "profiles.text.has_been_deleted"
-          )}`;
-          this.ProfileNames[formerIndex] = "";
-          return;
-        }
-      }
-
-      if (!this.deleteProfile(profileIndex)) {
-        this.PreferenceText = `${getText("profiles.text.profile")} ${profileIndex} ${getText("profiles.text.not_saved_or_already_deleted")}`;
-        return;
-      }
-      return;
-    }
+    return true;
   }
 }

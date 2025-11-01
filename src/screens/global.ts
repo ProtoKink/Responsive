@@ -1,82 +1,87 @@
-import { Setting } from "../../.types/setting";
-import { GuiSubscreen } from "../base/base_setting";
+import { BaseSubscreen, getText, SettingElement } from "bc-deeplib/deeplib";
 import { GlobalSettingsModel } from "../models/base";
+import { SubscreenOptions } from "bc-deeplib/base/base_subscreen";
 
-export class GuiGlobal extends GuiSubscreen {
-  get name(): string {
-    return "settings";
-  }
-
-  get icon(): string {
-    return "Icons/Preference.png";
-  }
+export class GuiGlobal extends BaseSubscreen {
+  protected static override subscreenOptions: SubscreenOptions = {
+    name: 'settings',
+    icon: 'Icons/Preference.png',
+  };
 
   get settings(): GlobalSettingsModel {
     return super.settings as GlobalSettingsModel;
   }
 
-  get structure(): Setting[] {
-    return [
-      <Setting>{
+  get pageStructure(): SettingElement[][] {
+    return [[
+      {
+        id: "modEnabled",
         type: "checkbox",
-        label: "settings.setting.responsive_enabled.name",
-        description: "settings.setting.responsive_enabled.desc",
-        setting: () => this.settings?.ResponsiveEnabled ?? true,
-        setSetting: (val) => (this.settings.ResponsiveEnabled = val)
+        label: getText("settings.setting.responsive_enabled.name"),
+        description: getText("settings.setting.responsive_enabled.desc"),
+        setElementValue: () => this.settings?.modEnabled ?? true,
+        setSettingValue: (val) => (this.settings.modEnabled = val)
       },
-      <Setting>{
+      {
+        id: "responsesEnabled",
         type: "checkbox",
-        label: "settings.setting.responsesEnabled.name",
-        description: "settings.setting.responsesEnabled.desc",
-        setting: () => this.settings?.responsesEnabled ?? true,
-        setSetting: (val) => (this.settings.responsesEnabled = val)
+        label: getText("settings.setting.responsesEnabled.name"),
+        description: getText("settings.setting.responsesEnabled.desc"),
+        setElementValue: () => this.settings?.responsesEnabled ?? true,
+        setSettingValue: (val) => (this.settings.responsesEnabled = val)
       },
-      <Setting>{
+      {
+        id: "charTalkEnabled",
         type: "checkbox",
-        label: "settings.setting.chartalk_enabled.name",
-        description: "settings.setting.chartalk_enabled.desc",
-        setting: () => this.settings?.CharTalkEnabled ?? true,
-        setSetting: (val) => (this.settings.CharTalkEnabled = val)
+        label: getText("settings.setting.chartalk_enabled.name"),
+        description: getText("settings.setting.chartalk_enabled.desc"),
+        setElementValue: () => this.settings?.CharTalkEnabled ?? true,
+        setSettingValue: (val) => (this.settings.CharTalkEnabled = val)
       },
-      <Setting>{
+      {
+        id: "doMessageInterruption",
         type: "checkbox",
-        label: "settings.setting.interruption_enabled.name",
-        description: "settings.setting.interruption_enabled.desc",
-        setting: () => this.settings?.doMessageInterruption ?? true,
-        setSetting: (val) => (this.settings.doMessageInterruption = val)
+        label: getText("settings.setting.interruption_enabled.name"),
+        description: getText("settings.setting.interruption_enabled.desc"),
+        setElementValue: () => this.settings?.doMessageInterruption ?? true,
+        setSettingValue: (val) => (this.settings.doMessageInterruption = val)
       },
-      <Setting>{
+      {
+        id: "doLeaveMessage",
         type: "checkbox",
-        label: "settings.setting.leave_message_enabled.name",
-        description: "settings.setting.leave_message_enabled.desc",
-        setting: () => this.settings?.doLeaveMessage ?? true,
-        setSetting: (val) => (this.settings.doLeaveMessage = val)
+        label: getText("settings.setting.leave_message_enabled.name"),
+        description: getText("settings.setting.leave_message_enabled.desc"),
+        setElementValue: () => this.settings?.doLeaveMessage ?? true,
+        setSettingValue: (val) => (this.settings.doLeaveMessage = val)
       },
-      /* <Setting>{
+      /* {
+        id: "doAddMoansOnHighArousal",
         type: "checkbox",
-        label: "settings.setting.doAddMoansOnHighArousal.name",
-        description: "settings.setting.doAddMoansOnHighArousal.desc",
-        setting: () => this.settings?.doAddMoansOnHighArousal ?? true,
-        setSetting: (val) => (this.settings.doAddMoansOnHighArousal = val)
+        label: getText("settings.setting.doAddMoansOnHighArousal.name"),
+        description: getText("settings.setting.doAddMoansOnHighArousal.desc"),
+        setElementValue: () => this.settings?.doAddMoansOnHighArousal ?? true,
+        setSettingValue: (val) => (this.settings.doAddMoansOnHighArousal = val)
       }, */
-      <Setting>{
+      {
+        id: "doPreventMessageIfBcxBlock",
         type: "checkbox",
-        label: "settings.setting.doPreventMessageIfBcxBlock.name",
-        description: "settings.setting.doPreventMessageIfBcxBlock.desc",
-        setting: () => this.settings?.doPreventMessageIfBcxBlock ?? false,
-        setSetting: (val) => (this.settings.doPreventMessageIfBcxBlock = val)
+        label: getText("settings.setting.doPreventMessageIfBcxBlock.name"),
+        description: getText("settings.setting.doPreventMessageIfBcxBlock.desc"),
+        setElementValue: () => this.settings?.doPreventMessageIfBcxBlock ?? false,
+        setSettingValue: (val) => (this.settings.doPreventMessageIfBcxBlock = val)
       },
-      <Setting>{
+      {
+        id: "doShowNewVersionMessage",
         type: "checkbox",
-        label: "settings.setting.new_version_message_enabled.name",
-        description: "settings.setting.new_version_message_enabled.desc",
-        setting: () => this.settings?.doShowNewVersionMessage ?? true,
-        setSetting: (val) => (this.settings.doShowNewVersionMessage = val)
+        label: getText("settings.setting.new_version_message_enabled.name"),
+        description: getText("settings.setting.new_version_message_enabled.desc"),
+        setElementValue: () => this.settings?.doShowNewVersionMessage ?? true,
+        setSettingValue: (val) => (this.settings.doShowNewVersionMessage = val)
       }
-    ];
+    ]];
   }
 
-  Load(): void {
-    super.Load();
+  load(): void {
+    super.load();
   }
 }

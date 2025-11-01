@@ -1,5 +1,4 @@
-import { BaseModule } from "../base/base_module";
-import { Subscreen } from "../base/setting_definitions";
+import { BaseModule, Subscreen } from "bc-deeplib/deeplib";
 import { GlobalSettingsModel } from "../models/base";
 import { GuiGlobal } from "../screens/global";
 
@@ -12,9 +11,13 @@ export class GlobalModule extends BaseModule {
     return super.settings as GlobalSettingsModel;
   }
 
+  set settings(val: GlobalSettingsModel) { 
+    super.settings = val
+  }
+
   get defaultSettings() {
     return <GlobalSettingsModel>{
-      ResponsiveEnabled: true,
+      modEnabled: true,
       responsesEnabled: true,
       CharTalkEnabled: true,
       doShowNewVersionMessage: true,
@@ -25,7 +28,7 @@ export class GlobalModule extends BaseModule {
     };
   }
 
-  Load(): void { }
+  load(): void { }
 
-  Run(): void { }
+  run(): void { }
 }

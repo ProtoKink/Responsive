@@ -12,7 +12,7 @@ const DefaultResponses = {
   orgasm: ["Mh...Mn...HaaAAaah!", "Mmmmh... MMmh... Hhhmmmm...", "Oooooh... Mmmmh... OooOOOOh!", "Mmmhnn... Nyhmm... aah!"]
 };
 
-const setData = (key: string) => {
+const setData = (key: keyof typeof DefaultResponses) => {
   let oldSettings = null;
   //@ts-ignore
   if (Player?.OnlineSettings?.BCResponsive?.data) {

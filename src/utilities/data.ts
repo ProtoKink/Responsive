@@ -1,3 +1,4 @@
+import { modStorage } from "bc-deeplib/deeplib";
 import { GlobalSettingsModel } from "../models/base";
 import { ProfileEntryModel } from "../models/profiles";
 import { ResponsesSettingsModel } from "../models/responses";
@@ -7,39 +8,6 @@ import { _String } from "./string";
 
 export const PlayerStorage = () => Player[ModName];
 export const ExtensionStorage = () => Player.ExtensionSettings[ModName];
-
-export function dataTake() {
-  if (ExtensionStorage()) {
-    Player[ModName] = JSON.parse(LZString.decompressFromBase64(ExtensionStorage()) || "") as SettingsModel;
-  } else if ((Player.OnlineSettings as any)["BCResponsive"]) {
-    /*
-     * Unfortunatelly, if data is object, it means, that data was saved in ancient version,
-     * when dinosaurs and Jedis were living on the Earth. Or just something went wrong...
-     */
-    if (typeof (Player.OnlineSettings as any)["BCResponsive"] == "object") {
-      return (Player[ModName] = <SettingsModel>{});
-    }
-    Player[ModName] = JSON.parse(LZString.decompressFromBase64((Player.OnlineSettings as any)["BCResponsive"]) || "");
-
-    delete (Player.OnlineSettings as any)["BCResponsive"];
-    window.ServerAccountUpdate.QueueData({ OnlineSettings: Player.OnlineSettings });
-  } else {
-    Player[ModName] = <SettingsModel>{};
-  }
-}
-
-export function dataStore() {
-  if (!ExtensionStorage()) Player.ExtensionSettings[ModName] = "";
-  let Data: SettingsModel = {
-    Version: PlayerStorage().Version,
-    GlobalModule: PlayerStorage().GlobalModule,
-    ResponsesModule: PlayerStorage().ResponsesModule,
-    ProfilesModule: PlayerStorage().ProfilesModule
-  };
-
-  Player.ExtensionSettings[ModName] = _String.encode(Data);
-  ServerPlayerExtensionSettingsSync(ModName);
-}
 
 export function dataErase(doResetSettings: boolean, doResetResponses: boolean, doResetProfiles: boolean) {
   if (doResetSettings) {
@@ -53,12 +21,11 @@ export function dataErase(doResetSettings: boolean, doResetResponses: boolean, d
   if (doResetProfiles) {
     Player[ModName].ProfilesModule = <ProfileEntryModel[]>{};
   }
-  dataStore();
+  modStorage.save();
 }
 
 export function dataResetForManual() {
-  Player[ModName].ResponsesModule = {
-    ResponsiveEnabled: false,
+  Player[ModName].ResponsesModule = <ResponsesSettingsModel>{
     mainResponses: [],
     extraResponses: {
       low: [],
@@ -67,8 +34,8 @@ export function dataResetForManual() {
       hot: [],
       orgasm: []
     }
-  } satisfies ResponsesSettingsModel;
-  dataStore();
+  };
+  modStorage.save();
 }
 
 export function dataFix() {

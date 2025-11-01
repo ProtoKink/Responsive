@@ -10,28 +10,28 @@ mainmenu.button.profiles = Profiles
 # Settings
 settings.title = - Settings -
 
-settings.setting.responsive_enabled.name = Enable Responsive:
+settings.setting.responsive_enabled.name = Enable Responsive
 settings.setting.responsive_enabled.desc = Enables Responsive features.
 
-settings.setting.responsesEnabled.name = Enable responses:
+settings.setting.responsesEnabled.name = Enable responses
 settings.setting.responsesEnabled.desc = Enables responses. When someone does some actions on you, it activates responses. Configurable in Responses settings.
 
-settings.setting.chartalk_enabled.name = Enable Character Talk:
+settings.setting.chartalk_enabled.name = Enable Character Talk
 settings.setting.chartalk_enabled.desc = Enables mouth moving when talking.
 
-settings.setting.interruption_enabled.name = Enable interruption:
+settings.setting.interruption_enabled.name = Enable interruption
 settings.setting.interruption_enabled.desc = Sends written message adding response to it. Happens when response triggers.
 
-settings.setting.leave_message_enabled.name = Enable leave message:
+settings.setting.leave_message_enabled.name = Enable leave message
 settings.setting.leave_message_enabled.desc = Sends message that you've been writing when you leashed out of room.
 
-settings.setting.doAddMoansOnHighArousal.name = Do add moans on high arousal:
+settings.setting.doAddMoansOnHighArousal.name = Do add moans on high arousal
 settings.setting.doAddMoansOnHighArousal.desc = If enabled adds moans in end of responses. Moans defined on 2 page in Responses settings.
 
-settings.setting.doPreventMessageIfBcxBlock.name = Prevent messages if BCX rule blocks:
+settings.setting.doPreventMessageIfBcxBlock.name = Prevent messages if BCX rule blocks
 settings.setting.doPreventMessageIfBcxBlock.desc = If enabled will prevent message sending if certain BCX rules are active.
 
-settings.setting.new_version_message_enabled.name = Enable new version message:
+settings.setting.new_version_message_enabled.name = Enable new version message
 settings.setting.new_version_message_enabled.desc = Shows you message about new version when it's out.
 
 # Responses
@@ -42,10 +42,10 @@ responses.text.clear_entry = Clear Entry
 responses.text.copy_entry = Copy Entry Settings
 responses.text.paste_entry = Paste Entry Settings
 
-responses.setting.self_trigger.name = Self Trigger:
+responses.setting.self_trigger.name = Self Trigger
 responses.setting.self_trigger.desc = Defines if response will be triggered when you are doing action on yourself.
 
-responses.setting.master_set.name = Master Set:
+responses.setting.master_set.name = Master Set
 responses.setting.master_set.desc = If checked, responses will be changed for all action in the entry
 
 responses.setting.responses.name = Responses:
