@@ -1,6 +1,3 @@
-
-import { conErr } from './console';
-
 export enum HookPriority {
   Observe = 0,
   AddBehavior = 1,

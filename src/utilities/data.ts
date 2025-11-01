@@ -2,9 +2,7 @@ import { modStorage } from "bc-deeplib/deeplib";
 import { GlobalSettingsModel } from "../models/base";
 import { ProfileEntryModel } from "../models/profiles";
 import { ResponsesSettingsModel } from "../models/responses";
-import { SettingsModel } from "../models/settings";
 import { ModName } from "./definition";
-import { _String } from "./string";
 
 export const PlayerStorage = () => Player[ModName];
 export const ExtensionStorage = () => Player.ExtensionSettings[ModName];
