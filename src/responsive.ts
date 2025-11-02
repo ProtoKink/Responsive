@@ -3,10 +3,10 @@ import { CharTalkModule } from './modules/char_talk';
 import { GlobalModule } from './modules/global';
 import { ProfilesModule } from './modules/profiles';
 import { ResponsesModule } from './modules/responses';
-import { loadCommands } from './utilities/commands';
 import { clearOldData, dataFix } from './utilities/data';
 import { MOD_VERSION_CAPTION, ModName, ModRepository } from './utilities/definition';
 import { GuiReset } from './screens/reset';
+import { CommandsModule } from './modules/commands';
 
 initMod({
   modInfo: {
@@ -18,7 +18,6 @@ initMod({
     }
   },
   async initFunction() {
-    loadCommands();
     clearOldData();
     dataFix();
 
@@ -35,7 +34,8 @@ initMod({
     new ResponsesModule(),
     new ProfilesModule(),
     new VersionModule({}),
-    new CharTalkModule()
+    new CharTalkModule(),
+    new CommandsModule()
   ],
   mainMenuOptions: {
     repoLink: ModRepository,

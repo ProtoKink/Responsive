@@ -5,10 +5,10 @@ import { CMD_BCR, CMD_CHANGELOG, CMD_DEBUG_DATA, CMD_TOGGLE, CMD_VERSION, MOD_VE
 export const BCR_CMDS = /*html*/ `
   <div class="ResponsiveMessageContent">
     <b style='color:#440171; text-shadow: 0.05em 0.05em #690092;'>BC Responsive</b>: Available commands (Clickable)
-    <br><a class="ResponsiveText" onClick='window.CommandSet("${CMD_TOGGLE}")'>Toggle Responsive</a>
-    <br><a class="ResponsiveText" onClick='window.CommandSet("${CMD_CHANGELOG}")'>Show Changelog</a>
-    <br><a class="ResponsiveText" onClick='window.CommandSet("${CMD_VERSION}")'>Show Version</a><br>
-    <br><a class="ResponsiveText" onClick='window.CommandSet("${CMD_DEBUG_DATA}")'>Debug Data</a><br>
+    <br><a class="ResponsiveText" onClick='window.CommandSet("${CMD_BCR} ${CMD_TOGGLE}")'>Toggle Responsive</a>
+    <br><a class="ResponsiveText" onClick='window.CommandSet("${CMD_BCR} ${CMD_CHANGELOG}")'>Show Changelog</a>
+    <br><a class="ResponsiveText" onClick='window.CommandSet("${CMD_BCR} ${CMD_VERSION}")'>Show Version</a><br>
+    <br><a class="ResponsiveText" onClick='window.CommandSet("${CMD_BCR} ${CMD_DEBUG_DATA}")'>Debug Data</a><br>
     <br><a href='https://github.com/dDeepLb/BC-Responsive/wiki' target='_blank'><b>Open Wiki</b></a>
   </div>
   `;
@@ -17,7 +17,7 @@ export const BCR_NEW_VERSION = /*html*/ `
   <div class='ResponsiveMessageContent'>
     <b style='color:#690092; text-shadow: 0.05em 0.05em #440171;'>BC Responsive</b><b>: New Version!</b> [${MOD_VERSION_CAPTION}]<br>
     <br><b style='color:#CC3232; text-shadow: 0.05em 0.05em #920009;'>Please, reload your page~</b><br>
-    <br><a class="ResponsiveText" onClick='window.CommandSet("${CMD_CHANGELOG}")'><b>Changelog (Click)</b></a>
+    <br><a class="ResponsiveText" onClick='window.CommandSet("${CMD_BCR} ${CMD_CHANGELOG}")'><b>Changelog (Click)</b></a>
     <br><a class="ResponsiveText" onClick='window.CommandSet("${CMD_BCR}")'><b>Show Help (Click)</b></a>
   </div>
  `;
