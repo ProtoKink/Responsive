@@ -5,6 +5,8 @@ import { PlayerStorage } from "./data";
 import { ModName } from "./definition";
 
 const doesBcxAllowsTalking = () => {
+  if (!window.bcx) return true;
+
   const isRuleWorking = (ruleName: string) => {
     const rule = window.bcx?.getModApi(ModName).getRuleState(ruleName);
 		if (!rule) return false;
@@ -42,7 +44,7 @@ export const orgasmHandle = (c: Character) => {
   if (Player.MemberNumber !== c.MemberNumber) return;
   if (!PlayerStorage().ResponsesModule.extraResponses.orgasm) return;
   if (ActivityOrgasmRuined) return;
-  if (window.bcx && !doesBcxAllowsTalking()) return;
+  if (!doesBcxAllowsTalking()) return;
 
   ResponsesModule.isOrgasm = true;
   orgasmMessage();
@@ -55,7 +57,7 @@ export const activityHandle = (dict: ActivityInfo, entry: ResponsesEntryModel) =
   if (dict.targetCharacter.MemberNumber !== Player.MemberNumber) return;
   if (!entry || !entry?.responses) return;
   if (!entry.selfTrigger && dict.targetCharacter.MemberNumber === dict.sourceCharacter.MemberNumber) return;
-  if (window.bcx && !doesBcxAllowsTalking()) return;
+  if (!doesBcxAllowsTalking()) return;
 
   activityMessage(dict, entry);
 };
@@ -65,7 +67,7 @@ export const leaveHandle = (data: any) => {
   if (!PlayerStorage().GlobalModule.doLeaveMessage) return;
   if (CurrentScreen !== "ChatRoom" || !Player) return;
   if (!(CurrentScreen == "ChatRoom" && ChatRoomData?.Name != data.ChatRoomName)) return;
-  if (window.bcx && !doesBcxAllowsTalking()) return;
+  if (!doesBcxAllowsTalking()) return;
 
   leaveMessage();
 };
