@@ -1,5 +1,7 @@
 import { BaseSettingsModel } from "bc-deeplib/deeplib";
 
+export type ExtraType = 'low' | 'light' | 'medium' | 'hot' | 'orgasm';
+
 export type ResponsesSettingsModel = BaseSettingsModel & {
   mainResponses: ResponsesEntryModel[];
   extraResponses: ExtraResponsesModel;
@@ -12,10 +14,4 @@ export type ResponsesEntryModel = {
   selfTrigger?: boolean;
 };
 
-export type ExtraResponsesModel = {
-  low: string[];
-  light: string[];
-  medium: string[];
-  hot: string[];
-  orgasm: string[];
-};
+export type ExtraResponsesModel = Record<ExtraType, string[]>;
