@@ -1,65 +1,5 @@
-#rsp-entries-list-wrapper,
-#rsp-add-entry-button,
 #rsp-entry-setting-form {
   box-shadow: min(0.2vh, 0.1vw) min(0.2vh, 0.1vw) min(0.4vh, 0.2vw) black;
-}
-
-#rsp-entries-list-wrapper {
-  background-color: var(--tmd-element, lightgray);
-  border-radius: var(--deeplib-border-radius);
-  padding: min(1dvh, 0.5dvw);
-  display: flex;
-  flex-direction: column;
-  gap: min(1dvh, 0.5dvw);
-
-  #rsp-entries-list-nav {
-    display: flex;
-    flex-direction: row;
-    gap: min(1dvh, 0.5dvw);
-    align-items: center;
-
-
-    #rsp-add-entry-button {
-      flex: 1 0 auto;
-      display: flex;
-      align-items: center;
-
-      // &,
-      // &::before {
-      //   border-radius: 50%;
-      // }
-
-      width: min(2.6dvh, 1.3dvw);
-      height: min(2.6dvh, 1.3dvw);
-
-      img {
-        width: 80%;
-        height: 80%;
-        inset: 10%;
-        transition: transform 0.2s ease-in-out;
-      }
-
-      &:active img {
-        transform: rotate(180deg);
-      }
-    }
-  }
-
-  #rsp-entries-list {
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: min(1dvh, 0.5dvw);
-    padding-right: min(1dvh, 0.5dvw);
-    flex-grow: 2;
-    scrollbar-gutter: stable;
-
-    & .deeplib-button {
-      flex: 1;
-      min-height: 2rem;
-      max-height: 2.6rem;
-    }
-  }
 }
 
 #rsp-entry-setting-form {
@@ -83,38 +23,40 @@
     flex: 1;
   }
 
-  #rsp-responses-nav {
-    height: min(50dvh, 25dvw);
+  #rsp-responses-nav-activity {
+    height: 100%;
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: min(1dvh, 0.5dvw);
     align-items: center;
 
-    #rsp-response-add-button {
+    #rsp-response-add-button-activity {
       width: 80%;
       height: min(6dvh, 3dvw);
-      flex: 0 0 auto;
+      flex: 0 0 fit-content;
+
+      & .button-label {
+        display: contents;
+      }
     }
 
-    #rsp-responses-list {
+    #rsp-responses-list-activity {
       display: flex;
       flex-direction: column;
       gap: min(1dvh, 0.5dvw);
       width: 100%;
+      height: 100%;
 
       & .deeplib-button {
-        flex: 1;
-        min-height: min(6dvh, 3dvw);
-        max-height: min(8dvh, 4dvw);
+        max-height: min(6dvh, 3dvw);
+
+        &[data-delete-mode] {
+          background-color: red;
+        }
       }
     }
   }
-}
-
-.deeplib-button:has(.rsp-response-entry-button.hidden) {
-  visibility: hidden;
-  display: none;
 }
 
 #rsp-activity-dropdown {
