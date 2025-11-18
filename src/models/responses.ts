@@ -8,10 +8,10 @@ export type ResponsesSettingsModel = BaseSettingsModel & {
 };
 
 export type ResponsesEntryModel = {
-  actName: string;
-  groupName: string[];
+  actName: ActivityName;
+  groupName: AssetGroupItemName[];
   responses: string[];
-  selfTrigger?: boolean;
+  selfTrigger: boolean;
 };
 
 export type ExtraResponsesModel = Record<ExtraType, string[]>;

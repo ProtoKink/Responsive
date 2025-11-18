@@ -1,5 +1,6 @@
 import { ResponsesEntryModel } from "../models/responses";
 import { ResponsesModule } from "../modules/responses";
+import { GuiResponses } from "../screens/responses";
 import { activityMessage, leaveMessage, orgasmMessage } from "./chat_messages";
 import { PlayerStorage } from "./data";
 import { ModName } from "./definition";
@@ -9,7 +10,7 @@ const doesBcxAllowsTalking = () => {
 
   const isRuleWorking = (ruleName: string) => {
     const rule = window.bcx?.getModApi(ModName).getRuleState(ruleName);
-		if (!rule) return false;
+    if (!rule) return false;
 
     switch (ruleName) {
       case "speech_forbid_open_talking":
@@ -56,13 +57,14 @@ export const activityHandle = (dict: ActivityInfo, entry: ResponsesEntryModel) =
   if (CurrentScreen !== "ChatRoom" || !Player) return;
   if (dict.targetCharacter.MemberNumber !== Player.MemberNumber) return;
   if (!entry || !entry?.responses) return;
+  if (entry.selfTrigger && !GuiResponses.activityCanBeDoneOnSelf(dict.activityName as ActivityName, dict.groupName as AssetGroupItemName)) return;
   if (!entry.selfTrigger && dict.targetCharacter.MemberNumber === dict.sourceCharacter.MemberNumber) return;
   if (!doesBcxAllowsTalking()) return;
 
   activityMessage(dict, entry);
 };
 
-export const leaveHandle = (data: any) => {
+export const leaveHandle = (data: ServerAccountBeepResponse) => {
   if (!PlayerStorage().GlobalModule.modEnabled) return;
   if (!PlayerStorage().GlobalModule.doLeaveMessage) return;
   if (CurrentScreen !== "ChatRoom" || !Player) return;

@@ -10,6 +10,8 @@ type _ChatMessageDictionary = _ChatMessageDictionaryEntry[];
 type ActivityInfo = {
   sourceCharacter: Character;
   targetCharacter: Character;
-  groupName: string;
-  activityName: string;
+  groupName: AssetGroupItemName;
+  activityName: ActivityName;
 };
+
+type $AssetGroupItemName = AssetGroupItemName | "ItemPenis" | "ItemGlans";

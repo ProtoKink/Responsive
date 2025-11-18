@@ -1,4 +1,4 @@
-import { BaseModule, Subscreen, sdk, initMod } from 'bc-deeplib/deeplib';
+import { BaseModule, Subscreen, sdk } from 'bc-deeplib/deeplib';
 import { activityDeconstruct } from "../utilities/chat_messages";
 import { activityHandle, leaveHandle, orgasmHandle } from "../utilities/handlers";
 import { ResponsesEntryModel, ResponsesSettingsModel } from "../models/responses";
@@ -36,11 +36,12 @@ export class ResponsesModule extends BaseModule {
       Priority: 320,
       Callback: (data, sender, msg, metadata) => {
         if (data.Type !== "Activity") return false;
+        if (!metadata) return false;
 
         const dict = activityDeconstruct(metadata ?? {});
         if (!dict) return false;
         let entry = this.getResponsesEntry(dict?.activityName, dict?.groupName);
-				if (!entry) return false;
+        if (!entry) return false;
 
         activityHandle(dict, entry);
 
@@ -53,7 +54,7 @@ export class ResponsesModule extends BaseModule {
       "ServerAccountBeep",
       HookPriority.AddBehavior,
       (args, next) => {
-        let data = args[0];
+        const data = args[0];
 
         if (!data.ChatRoomName || !ChatRoomData || data.BeepType !== "Leash") return next(args);
         if (!Player.OnlineSharedSettings?.AllowPlayerLeashing) return next(args);
@@ -78,8 +79,8 @@ export class ResponsesModule extends BaseModule {
 
   run(): void {}
 
-  getResponsesEntry(actName: string | undefined, grpName: string | undefined): ResponsesEntryModel | undefined {
-		if (!actName || !grpName) return undefined;
+  getResponsesEntry(actName: ActivityName | undefined, grpName: AssetGroupItemName | undefined): ResponsesEntryModel | undefined {
+    if (!actName || !grpName) return undefined;
     return this.settings.mainResponses.find((ent) => ent.actName === actName && ent.groupName.includes(grpName));
   }
 }

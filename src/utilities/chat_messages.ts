@@ -5,7 +5,7 @@ import { getCharacter, getRandomInt } from "./other";
 export function activityDeconstruct(dict: IChatRoomMessageMetadata): ActivityInfo | undefined {
   const activityName = dict.ActivityName;
   const targetCharacter = dict.TargetCharacter;
-  const groupName = dict.GroupName;
+  const groupName = dict.GroupName as AssetGroupItemName;
   const sourceCharacter = dict.SourceCharacter;
 
   if (activityName === undefined || targetCharacter === undefined || groupName === undefined || sourceCharacter === undefined) {
@@ -55,6 +55,8 @@ export function leaveMessage() {
 
 export function activityMessage(dict: ActivityInfo, entry: ResponsesEntryModel | undefined) {
   const source = getCharacter(dict.sourceCharacter.MemberNumber);
+  if (!source) return;
+
   const response = typedResponse(entry?.responses ?? []);
   const templatedResponse = replaceTemplate(response, source).trim();
 
@@ -101,7 +103,7 @@ function chatRoomNormalMessage(msg: string) {
   ChatRoomSetTarget(backupChatRoomTargetMemberNumber);
 }
 
-function replaceTemplate(msg: string, source?: Character) {
+function replaceTemplate(msg: string, source: Character) {
   if (!msg) return '';
 	source ??= Player;
 

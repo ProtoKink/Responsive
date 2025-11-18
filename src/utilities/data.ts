@@ -23,7 +23,7 @@ export function dataErase(doResetSettings: boolean, doResetResponses: boolean, d
 }
 
 export function dataResetForManual() {
-  Player[ModName].ResponsesModule = <ResponsesSettingsModel>{
+  Player[ModName].ResponsesModule = <ResponsesSettingsModel><unknown>{
     mainResponses: [],
     extraResponses: {
       low: [],

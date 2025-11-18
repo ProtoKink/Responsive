@@ -66,7 +66,8 @@ export class CharTalkModule extends BaseModule {
       HookPriority.Observe,
       (args, next) => {
         const c: Character = args[0];
-				if (!c?.MemberNumber) return next(args);
+        if (!c?.MemberNumber) return next(args);
+
         const charData = CharTalkModule.characterData[c.MemberNumber]; // Skip hook execution if animation not running
         if (!charData) return next(args);
 
@@ -109,7 +110,7 @@ export class CharTalkModule extends BaseModule {
    * Runs animation by changing mouth expression every `step[1]`ms
    */
   static runExpressionAnimationStep(c: Character) {
-		if (!c?.MemberNumber) return;
+    if (!c?.MemberNumber) return;
     const charData = CharTalkModule.characterData[c.MemberNumber];
 
     if (!charData) return;
@@ -123,7 +124,7 @@ export class CharTalkModule extends BaseModule {
   }
 
   static runExpressionAnimation(c: Character, list: [ExpressionName | null, number][]) {
-		if (!c?.MemberNumber) return;
+    if (!c?.MemberNumber) return;
     if (CharTalkModule.characterData[c.MemberNumber]) return;
 
     CharTalkModule.characterData[c.MemberNumber] = {
@@ -138,7 +139,7 @@ export class CharTalkModule extends BaseModule {
 
 
   static setLocalMouthExpression(c: Character, expressionName: ExpressionName | null) {
-		if (!c?.MemberNumber) return;
+    if (!c?.MemberNumber) return;
     const mouth = InventoryGet(c, "Mouth");
     if (!mouth || (expressionName && !mouth.Asset.Group.AllowExpression?.includes(expressionName))) return;
 
@@ -148,6 +149,8 @@ export class CharTalkModule extends BaseModule {
   }
 
   static charTalkHandle(c: Character, msg: string) {
+    if (!c?.MemberNumber) return;
+    
     const storage = PlayerStorage().GlobalModule;
     if (!storage.modEnabled || !storage.CharTalkEnabled || !c?.MemberNumber || CharTalkModule.characterData[c.MemberNumber]) return;
 
@@ -157,7 +160,9 @@ export class CharTalkModule extends BaseModule {
   }
 
   static cleanup(c: Character) {
-    if (!c?.MemberNumber || !CharTalkModule.characterData[c.MemberNumber]) return;
+    if (!c?.MemberNumber) return;
+
+    if (!CharTalkModule.characterData[c.MemberNumber]) return;
     CharTalkModule.setLocalMouthExpression(c, CharTalkModule.characterData[c.MemberNumber].realExpression);
     delete CharTalkModule.characterData[c.MemberNumber];
   }
