@@ -1,10 +1,10 @@
 import { BaseModule, Subscreen, sdk } from 'bc-deeplib/deeplib';
-import { activityDeconstruct } from "../utilities/chat_messages";
-import { activityHandle, leaveHandle, orgasmHandle } from "../utilities/handlers";
-import { ResponsesEntryModel, ResponsesSettingsModel } from "../models/responses";
-import { GuiResponses } from "../screens/responses";
-import { getDefaultResponsesEntries } from "../utilities/default_responses_entries";
-import { HookPriority, ModuleCategory } from "../utilities/sdk";
+import { activityDeconstruct } from '../utilities/chat_messages';
+import { activityHandle, leaveHandle, orgasmHandle } from '../utilities/handlers';
+import { ResponsesEntryModel, ResponsesSettingsModel } from '../models/responses';
+import { GuiResponses } from '../screens/responses';
+import { getDefaultResponsesEntries } from '../utilities/default_responses_entries';
+import { HookPriority, ModuleCategory } from '../utilities/sdk';
 
 export class ResponsesModule extends BaseModule {
   static instance: ResponsesModule;
@@ -32,15 +32,15 @@ export class ResponsesModule extends BaseModule {
     ResponsesModule.instance = this;
     
     ChatRoomRegisterMessageHandler({
-      Description: "Processes activity responses",
+      Description: 'Processes activity responses',
       Priority: 320,
-      Callback: (data, sender, msg, metadata) => {
-        if (data.Type !== "Activity") return false;
+      Callback: (data, _sender, _msg, metadata) => {
+        if (data.Type !== 'Activity') return false;
         if (!metadata) return false;
 
         const dict = activityDeconstruct(metadata ?? {});
         if (!dict) return false;
-        let entry = this.getResponsesEntry(dict?.activityName, dict?.groupName);
+        const entry = this.getResponsesEntry(dict?.activityName, dict?.groupName);
         if (!entry) return false;
 
         activityHandle(dict, entry);
@@ -51,12 +51,12 @@ export class ResponsesModule extends BaseModule {
 
     //Leave Message
     sdk.hookFunction(
-      "ServerAccountBeep",
+      'ServerAccountBeep',
       HookPriority.AddBehavior,
       (args, next) => {
         const data = args[0];
 
-        if (!data.ChatRoomName || !ChatRoomData || data.BeepType !== "Leash") return next(args);
+        if (!data.ChatRoomName || !ChatRoomData || data.BeepType !== 'Leash') return next(args);
         if (!Player.OnlineSharedSettings?.AllowPlayerLeashing) return next(args);
 
         leaveHandle(data);
@@ -67,7 +67,7 @@ export class ResponsesModule extends BaseModule {
 
     //Orgasm Handling
     sdk.hookFunction(
-      "ActivityOrgasmStart",
+      'ActivityOrgasmStart',
       HookPriority.Observe,
       (args, next) => {
         orgasmHandle(args[0] as Character);

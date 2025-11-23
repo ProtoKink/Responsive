@@ -1,7 +1,7 @@
-import { BaseModule, sdk } from "bc-deeplib/deeplib";
-import { isSimpleChat } from "../utilities/chat_messages";
-import { PlayerStorage } from "../utilities/data";
-import { HookPriority, ModuleCategory } from "../utilities/sdk";
+import { BaseModule, sdk } from 'bc-deeplib/deeplib';
+import { isSimpleChat } from '../utilities/chat_messages';
+import { PlayerStorage } from '../utilities/data';
+import { HookPriority, ModuleCategory } from '../utilities/sdk';
 
 /**
  * "Frown", "Sad", "Pained", "Angry", "HalfOpen", "Open", "Ahegao", "Moan",
@@ -16,27 +16,27 @@ const letterExpressionMap: { regex: RegExp; expr: [ExpressionName | null, number
   { regex: /[.?!…~]/, expr: [null, 600] },
   { regex: /[,;]/, expr: [null, 250] },
   //Latin
-  { regex: /[a]/i, expr: ["Open", 400] },
-  { regex: /[oeu]/i, expr: ["HalfOpen", 300] },
+  { regex: /[a]/i, expr: ['Open', 400] },
+  { regex: /[oeu]/i, expr: ['HalfOpen', 300] },
   { regex: /[bp]/i, expr: [null, 200] },
   { regex: /[mn]/i, expr: [null, 500] },
-  { regex: /[ij]/i, expr: ["Smirk", 400] },
-  { regex: /[kqrw]/i, expr: ["HalfOpen", 300] },
-  { regex: /[fv]/i, expr: ["LipBite", 300] },
-  { regex: /[cdt]/i, expr: ["TonguePinch", 200] },
-  { regex: /[slz]/i, expr: ["TonguePinch", 400] },
-  { regex: /[ghx]/i, expr: ["Angry", 300] },
+  { regex: /[ij]/i, expr: ['Smirk', 400] },
+  { regex: /[kqrw]/i, expr: ['HalfOpen', 300] },
+  { regex: /[fv]/i, expr: ['LipBite', 300] },
+  { regex: /[cdt]/i, expr: ['TonguePinch', 200] },
+  { regex: /[slz]/i, expr: ['TonguePinch', 400] },
+  { regex: /[ghx]/i, expr: ['Angry', 300] },
   //Cyrillic
-  { regex: /[ая]/i, expr: ["Open", 400] },
-  { regex: /[оеуєю]/i, expr: ["HalfOpen", 300] },
+  { regex: /[ая]/i, expr: ['Open', 400] },
+  { regex: /[оеуєю]/i, expr: ['HalfOpen', 300] },
   { regex: /[бп]/i, expr: [null, 200] },
   { regex: /[мн]/i, expr: [null, 500] },
-  { regex: /[иіжїы]/i, expr: ["Smirk", 400] },
-  { regex: /[yкр]/i, expr: ["HalfOpen", 300] },
-  { regex: /[фв]/i, expr: ["LipBite", 300] },
-  { regex: /[цдт]/i, expr: ["TonguePinch", 200] },
-  { regex: /[слз]/i, expr: ["TonguePinch", 400] },
-  { regex: /[гх]/i, expr: ["Angry", 300] }
+  { regex: /[иіжїы]/i, expr: ['Smirk', 400] },
+  { regex: /[yкр]/i, expr: ['HalfOpen', 300] },
+  { regex: /[фв]/i, expr: ['LipBite', 300] },
+  { regex: /[цдт]/i, expr: ['TonguePinch', 200] },
+  { regex: /[слз]/i, expr: ['TonguePinch', 400] },
+  { regex: /[гх]/i, expr: ['Angry', 300] }
 ];
 
 interface CharTalkCharacterData {
@@ -52,17 +52,17 @@ export class CharTalkModule extends BaseModule {
 
   load(): void {
     ChatRoomRegisterMessageHandler({
-      Description: "Processes mouth moving on the client",
+      Description: 'Processes mouth moving on the client',
       Priority: 500,
       Callback: (data, sender, msg) => {
-        if (data.Type === "Chat") CharTalkModule.charTalkHandle(sender, msg);
+        if (data.Type === 'Chat') CharTalkModule.charTalkHandle(sender, msg);
 
         return false;
       }
     });
 
     sdk.hookFunction(
-      "CommonDrawAppearanceBuild",
+      'CommonDrawAppearanceBuild',
       HookPriority.Observe,
       (args, next) => {
         const c: Character = args[0];
@@ -71,7 +71,7 @@ export class CharTalkModule extends BaseModule {
         const charData = CharTalkModule.characterData[c.MemberNumber]; // Skip hook execution if animation not running
         if (!charData) return next(args);
 
-        const mouth = InventoryGet(c, "Mouth"); // Get mouth property
+        const mouth = InventoryGet(c, 'Mouth'); // Get mouth property
 
         if (!mouth) return next(args);
 
@@ -140,7 +140,7 @@ export class CharTalkModule extends BaseModule {
 
   static setLocalMouthExpression(c: Character, expressionName: ExpressionName | null) {
     if (!c?.MemberNumber) return;
-    const mouth = InventoryGet(c, "Mouth");
+    const mouth = InventoryGet(c, 'Mouth');
     if (!mouth || (expressionName && !mouth.Asset.Group.AllowExpression?.includes(expressionName))) return;
 
     CharTalkModule.characterData[c.MemberNumber].currentExpression = expressionName;

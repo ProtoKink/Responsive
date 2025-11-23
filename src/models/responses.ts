@@ -1,4 +1,4 @@
-import { BaseSettingsModel } from "bc-deeplib/deeplib";
+import { BaseSettingsModel } from 'bc-deeplib/deeplib';
 
 export type ExtraType = 'low' | 'light' | 'medium' | 'hot' | 'orgasm';
 

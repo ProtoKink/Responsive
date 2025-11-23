@@ -1,6 +1,7 @@
-import { advElement, BaseSubscreen, domUtil, exportToGlobal, getModule, getText, layout, Modal, SettingElement, SubscreenOptions } from "bc-deeplib/deeplib";
-import { ExtraType, ResponsesEntryModel, ResponsesSettingsModel } from "../models/responses";
-import { ResponsesModule } from "../modules/responses";
+import { advElement, BaseSubscreen, domUtil, exportToGlobal, getModule, getText, layout, Modal, SettingElement, SubscreenOptions } from 'bc-deeplib/deeplib';
+import { ExtraType, ResponsesEntryModel, ResponsesSettingsModel } from '../models/responses';
+import { ResponsesModule } from '../modules/responses';
+import { logger } from '../utilities/definition';
 
 const selector = Object.freeze({
   entrySettingForm: 'rsp-entry-setting-form',
@@ -42,22 +43,22 @@ export class GuiResponses extends BaseSubscreen {
   }
 
   get currentEntry(): ResponsesEntryModel | undefined {
-    let actName = this.currentActivity?.Name;
-    let groupName = this.currentGroup?.Name;
+    const actName = this.currentActivity?.Name;
+    const groupName = this.currentGroup?.Name;
 
     if (!actName || !groupName) return undefined;
 
-    let entry = this.getResponsesEntry(actName, groupName);
+    const entry = this.getResponsesEntry(actName, groupName);
     return entry;
   }
 
   get activities(): Activity[] {
     if (!GuiResponses.instance.currentGroup) return [];
 
-    const activities = AssetActivitiesForGroup("Female3DCG", GuiResponses.instance.currentGroup.Name, "any")
+    const activities = AssetActivitiesForGroup('Female3DCG', GuiResponses.instance.currentGroup.Name, 'any');
 
     return activities
-      .filter((a) => this.activityHasDictionaryText(this.getActivityLabelTag(a.Name, GuiResponses.instance.currentGroup?.Name!)));
+      .filter((a) => this.activityHasDictionaryText(this.getActivityLabelTag(a.Name, GuiResponses.instance.currentGroup?.Name)));
   }
 
   get pageStructure(): SettingElement[][] {
@@ -65,50 +66,50 @@ export class GuiResponses extends BaseSubscreen {
       [],
       [
         {
-          type: "text",
-          id: "extra_low",
-          label: getText("responses.setting.low_response.name"),
-          description: getText("responses.setting.low_response.desc"),
+          type: 'text',
+          id: 'extra_low',
+          label: getText('responses.setting.low_response.name'),
+          description: getText('responses.setting.low_response.desc'),
           setElementValue: () => GuiResponses.stringListShow(this.settings?.extraResponses?.low),
           setSettingValue: (val) => {
             this.settings.extraResponses.low = GuiResponses.validateInput(val) ?? this.settings.extraResponses.low;
           }
         },
         {
-          type: "text",
-          id: "extra_light",
-          label: getText("responses.setting.light_response.name"),
-          description: getText("responses.setting.light_response.desc"),
+          type: 'text',
+          id: 'extra_light',
+          label: getText('responses.setting.light_response.name'),
+          description: getText('responses.setting.light_response.desc'),
           setElementValue: () => GuiResponses.stringListShow(this.settings?.extraResponses?.light),
           setSettingValue: (val) => {
             this.settings.extraResponses.light = GuiResponses.validateInput(val) ?? this.settings.extraResponses.light;
           }
         },
         {
-          type: "text",
-          id: "extra_medium",
-          label: getText("responses.setting.medium_response.name"),
-          description: getText("responses.setting.medium_response.desc"),
+          type: 'text',
+          id: 'extra_medium',
+          label: getText('responses.setting.medium_response.name'),
+          description: getText('responses.setting.medium_response.desc'),
           setElementValue: () => GuiResponses.stringListShow(this.settings?.extraResponses?.medium),
           setSettingValue: (val) => {
             this.settings.extraResponses.medium = GuiResponses.validateInput(val) ?? this.settings.extraResponses.medium;
           }
         },
         {
-          type: "text",
-          id: "extra_hot",
-          label: getText("responses.setting.hot_response.name"),
-          description: getText("responses.setting.hot_response.desc"),
+          type: 'text',
+          id: 'extra_hot',
+          label: getText('responses.setting.hot_response.name'),
+          description: getText('responses.setting.hot_response.desc'),
           setElementValue: () => GuiResponses.stringListShow(this.settings?.extraResponses?.hot),
           setSettingValue: (val) => {
             this.settings.extraResponses.hot = GuiResponses.validateInput(val) ?? this.settings.extraResponses.hot;
           }
         },
         {
-          type: "text",
-          id: "extra_orgasm",
-          label: getText("responses.setting.orgasm_response.name"),
-          description: getText("responses.setting.orgasm_response.desc"),
+          type: 'text',
+          id: 'extra_orgasm',
+          label: getText('responses.setting.orgasm_response.name'),
+          description: getText('responses.setting.orgasm_response.desc'),
           setElementValue: () => GuiResponses.stringListShow(this.settings?.extraResponses?.orgasm),
           setSettingValue: (val) => {
             this.settings.extraResponses.orgasm = GuiResponses.validateInput(val) ?? this.settings.extraResponses.orgasm;
@@ -119,25 +120,25 @@ export class GuiResponses extends BaseSubscreen {
   }
 
   static validateInput = (input: unknown) => {
-    let raw = `[${input}]`;
+    const raw = `[${input}]`;
 
     const validateStringList = (input: unknown) => {
       if (!Array.isArray(input)) return undefined;
-      if (!(input as unknown[]).every((_) => typeof _ === "string")) return undefined;
+      if (!(input as unknown[]).every((_) => typeof _ === 'string')) return undefined;
       return input as string[];
     };
 
     try {
-      let data = JSON.parse(raw);
+      const data = JSON.parse(raw);
       return validateStringList(data);
     } catch (e) {
-      return undefined;
+      return logger.error(e);
     }
   };
 
   static stringListShow = (input: string[]) => {
-    if (!input || input.length === 0) return "";
-    let result = JSON.stringify(input);
+    if (!input || input.length === 0) return '';
+    const result = JSON.stringify(input);
     return result.substring(1, result.length - 1);
   };
 
@@ -148,7 +149,7 @@ export class GuiResponses extends BaseSubscreen {
 
     if (!activityData || !activityData.TargetSelf) return false;
 
-    const targets = typeof activityData.TargetSelf === "boolean"
+    const targets = typeof activityData.TargetSelf === 'boolean'
       ? activityData.Target
       : activityData.TargetSelf;
 
@@ -173,8 +174,8 @@ export class GuiResponses extends BaseSubscreen {
       id: 'clearEntryButton',
       onClick: () => this.clearEntry(),
       options: {
-        label: "X",
-        tooltip: getText("responses.text.clear_entry")
+        label: 'X',
+        tooltip: getText('responses.text.clear_entry')
       },
       size: [90, 90],
     });
@@ -184,8 +185,8 @@ export class GuiResponses extends BaseSubscreen {
       id: 'copyEntryButton',
       onClick: () => this.copyEntry(),
       options: {
-        image: "Icons/Export.png",
-        tooltip: getText("responses.text.copy_entry")
+        image: 'Icons/Export.png',
+        tooltip: getText('responses.text.copy_entry')
       },
       size: [90, 90],
     });
@@ -195,8 +196,8 @@ export class GuiResponses extends BaseSubscreen {
       id: 'pasteEntryButton',
       onClick: () => this.pasteEntry(),
       options: {
-        image: "Icons/Import.png",
-        tooltip: getText("responses.text.paste_entry")
+        image: 'Icons/Import.png',
+        tooltip: getText('responses.text.paste_entry')
       },
       size: [90, 90],
     });
@@ -206,8 +207,8 @@ export class GuiResponses extends BaseSubscreen {
       id: 'deleteModeButton',
       onClick: () => this.toggleDeleteMode(),
       options: {
-        image: "Icons/Trash.png",
-        tooltip: getText("responses.text.toggle_delete_mode")
+        image: 'Icons/Trash.png',
+        tooltip: getText('responses.text.toggle_delete_mode')
       },
       size: [90, 90],
     });
@@ -220,19 +221,19 @@ export class GuiResponses extends BaseSubscreen {
     if (BaseSubscreen.currentPage === 1) {
       domUtil.unhide(selector.entrySettingForm);
       // Draws all the available character zones
-      for (let Group of AssetGroup) {
-        if (Group.IsItem() && !Group.MirrorActivitiesFrom && AssetActivitiesForGroup("Female3DCG", Group.Name).length) {
+      for (const Group of AssetGroup) {
+        if (Group.IsItem() && !Group.MirrorActivitiesFrom && AssetActivitiesForGroup('Female3DCG', Group.Name).length) {
           const isActive = GuiResponses.instance.focusGroup === Group;
           if (isActive) continue;
-          DrawAssetGroupZone(Player, Group.Zone, 0.9, 50, 50, 1, "#606060FF", 1, GuiResponses.instance.getZoneColor(Group.Name));
+          DrawAssetGroupZone(Player, Group.Zone, 0.9, 50, 50, 1, '#606060FF', 1, GuiResponses.instance.getZoneColor(Group.Name));
         }
       }
 
-      if (!!GuiResponses.instance.focusGroup) {
+      if (GuiResponses.instance.focusGroup) {
         const group = GuiResponses.instance.focusGroup;
-        DrawAssetGroupZone(Player, group.Zone, 0.9, 50, 50, 1, "cyan", 1, GuiResponses.instance.getZoneColor(group.Name));
+        DrawAssetGroupZone(Player, group.Zone, 0.9, 50, 50, 1, 'cyan', 1, GuiResponses.instance.getZoneColor(group.Name));
 
-        MainCanvas.textAlign = "left";
+        MainCanvas.textAlign = 'left';
       } else {
         // DrawText(getText("responses.text.select_zone"), this.getXPos(0), this.getYPos(0), "Black", "White");
       }
@@ -246,12 +247,12 @@ export class GuiResponses extends BaseSubscreen {
 
     if (BaseSubscreen.currentPage === 1) {
       for (const Group of AssetGroup) {
-        if (!Group.IsItem() || Group.MirrorActivitiesFrom || !AssetActivitiesForGroup("Female3DCG", Group.Name).length) continue;
+        if (!Group.IsItem() || Group.MirrorActivitiesFrom || !AssetActivitiesForGroup('Female3DCG', Group.Name).length) continue;
 
         const Zone = Group.Zone.find((z) => DialogClickedInZone(Player, z, 0.9, 50, 50, 1));
         if (!Zone) continue;
 
-        let activities = this.activities;
+        const activities = this.activities;
         if (this.activityIndex >= activities.length) this.activityIndex = 0;
 
         if (GuiResponses.instance.focusGroup) this.saveResponseEntry(this.currentEntry);
@@ -292,38 +293,44 @@ export class GuiResponses extends BaseSubscreen {
 
   getZoneColor(groupName: AssetGroupItemName): string {
     const hasConfiguration = this.settings?.mainResponses?.some((a) => a.groupName.includes(groupName));
-    const isCurrentGroup = this.currentGroup?.Name == groupName;
+    const isCurrentGroup = this.currentGroup?.Name === groupName;
 
-    if (isCurrentGroup) return "#44ffff44";
-    else if (hasConfiguration) return "#00FF0044";
-    else return "#80808044";
+    if (isCurrentGroup) return '#44ffff44';
+    else if (hasConfiguration) return '#00FF0044';
+    else return '#80808044';
   }
 
   getResponsesEntry(actName: ActivityName, grpName: AssetGroupItemName): ResponsesEntryModel | undefined {
-    return getModule<ResponsesModule>("ResponsesModule").getResponsesEntry(actName, grpName);
+    return getModule<ResponsesModule>('ResponsesModule').getResponsesEntry(actName, grpName);
   }
 
-  activityHasDictionaryText(KeyWord: string) {
-    if (!ActivityDictionary) ActivityDictionaryLoad();
-    if (!ActivityDictionary) return;
+  activityHasDictionaryText(KeyWord: string | undefined): boolean {
+    if (!KeyWord) return false;
 
-    for (let D = 0; D < ActivityDictionary.length; D++) if (ActivityDictionary[D][0] == KeyWord) return true;
+    if (!ActivityDictionary) ActivityDictionaryLoad();
+    if (!ActivityDictionary) return false;
+
+    for (let D = 0; D < ActivityDictionary.length; D++) if (ActivityDictionary[D][0] === KeyWord) return true;
     return false;
   }
 
-  getActivityLabelTag(activityName: ActivityName, groupName: $AssetGroupItemName): `Label-ChatOther-${string}-${string}` {
+  getActivityLabelTag(activityName: ActivityName | undefined, groupName: $AssetGroupItemName | undefined): `Label-ChatOther-${string}-${string}` | undefined {
+    if (!activityName || !groupName) return undefined;
+
     if (Player.HasPenis()) {
-      if (groupName === "ItemVulva") groupName = "ItemPenis";
-      if (groupName === "ItemVulvaPiercings") groupName = "ItemGlans";
+      if (groupName === 'ItemVulva') groupName = 'ItemPenis';
+      if (groupName === 'ItemVulvaPiercings') groupName = 'ItemGlans';
     }
 
     return `Label-ChatOther-${groupName}-${activityName}`;
   }
 
   getActivityLabel(activity: ActivityName, group: AssetGroupItemName) {
-    if (!activity) return "ACTIVITY NOT FOUND";
+    if (!activity || !group) return 'ACTIVITY NOT FOUND';
 
-    let tag = this.getActivityLabelTag(activity, group);
+    const tag = this.getActivityLabelTag(activity, group);
+
+    if (!tag) return 'ACTIVITY NOT FOUND';
 
     return ActivityDictionaryText(tag);
   }
@@ -338,7 +345,7 @@ export class GuiResponses extends BaseSubscreen {
 
     if (!entry) return;
 
-    let responses = entry.responses ?? [];
+    const responses = entry.responses ?? [];
 
     if (responses.filter(r => !!r).length > 0) {
       if (!entry) entry = this.createEntryIfNeeded(entry);
@@ -352,11 +359,11 @@ export class GuiResponses extends BaseSubscreen {
   clearEntry(entry?: ResponsesEntryModel) {
     entry ??= this.currentEntry;
 
-    if (!entry) return ToastManager.error("No entry to clear");
+    if (!entry) return ToastManager.error('No entry to clear');
 
     if (entry?.groupName.length <= 1) {
       this.settings.mainResponses = this.settings?.mainResponses.filter((a) => {
-        return !(a.actName == entry.actName && a.groupName == entry.groupName);
+        return !(a.actName === entry.actName && a.groupName === entry.groupName);
       });
     } else if (entry?.groupName.length > 1 && this.currentGroup?.Name) {
       entry?.groupName?.splice(entry?.groupName?.indexOf(this.currentGroup?.Name), 1);
@@ -379,9 +386,9 @@ export class GuiResponses extends BaseSubscreen {
     const stringifiedCurrentResponses = JSON.stringify(validResponses);
 
     // Looking for entry to unmerge, if any
-    let unmergingEntry = this.settings?.mainResponses?.find((ent) => {
+    const unmergingEntry = this.settings?.mainResponses?.find((ent) => {
       return (
-        ent.actName == this.currentActivity?.Name && // Actions are same
+        ent.actName === this.currentActivity?.Name && // Actions are same
         Array.isArray(ent.groupName) && // Group name is type of array
         ent.groupName.length > 1 && // Group array has more than one entry
         ent.groupName.includes(this.currentGroup!.Name) && // Group array has selected group
@@ -406,7 +413,7 @@ export class GuiResponses extends BaseSubscreen {
     return <ResponsesEntryModel>{
       actName: actName,
       groupName: [grpName],
-      responses: responses ?? [""],
+      responses: responses ?? [''],
       selfTrigger: selfTrigger ?? false
     };
   }
@@ -424,11 +431,11 @@ export class GuiResponses extends BaseSubscreen {
   copyEntry(entry?: ResponsesEntryModel | undefined) {
     entry ??= GuiResponses.instance.currentEntry;
 
-    if (!entry) return ToastManager.error("No entry to copy");
+    if (!entry) return ToastManager.error('No entry to copy');
 
     GuiResponses.instance.copiedEntry = structuredClone(entry) as ResponsesEntryModel;
 
-    ToastManager.success("Entry copied");
+    ToastManager.success('Entry copied');
   }
 
   pasteEntry(entry?: ResponsesEntryModel | undefined) {
@@ -436,21 +443,21 @@ export class GuiResponses extends BaseSubscreen {
 
     if (!entry) return;
 
-    if (!GuiResponses.instance.copiedEntry) return ToastManager.error("No entry to paste to");
+    if (!GuiResponses.instance.copiedEntry) return ToastManager.error('No entry to paste to');
 
     if (Object.keys(GuiResponses.instance.copiedEntry).length === 0) return;
     if (!entry) entry = GuiResponses.instance.createEntryIfNeeded(entry);
 
     if (!entry) return;
 
-    entry.responses = GuiResponses.instance.copiedEntry.responses ?? [""];
+    entry.responses = GuiResponses.instance.copiedEntry.responses ?? [''];
     // GuiResponses.instance.loadResponseEntry(entry);
     if (GuiResponses.activityCanBeDoneOnSelf(GuiResponses.instance.currentActivity?.Name, GuiResponses.instance.currentGroup?.Name))
       entry.selfTrigger = GuiResponses.instance.copiedEntry.selfTrigger;
 
     GuiResponses.instance.renderEntrySettingForm();
 
-    ToastManager.success("Entry pasted");
+    ToastManager.success('Entry pasted');
   }
 
   buildEntrySettingForm() {
@@ -535,14 +542,15 @@ export class GuiResponses extends BaseSubscreen {
 
   buildActivityDropdown() {
     const options = this.activities.map((act, index) => {
+      const groupName = GuiResponses.instance.focusGroup?.Name ? this.getActivityLabel(act.Name, GuiResponses.instance.focusGroup?.Name) : act.Name;
       return ({
         attributes: {
           value: index,
-          label: this.getActivityLabel(act.Name, GuiResponses.instance.focusGroup!?.Name),
+          label: groupName,
           selected: index === GuiResponses.instance.activityIndex
         }
-      }) as Omit<HTMLOptions<"option">, "tag">
-    })
+      }) as Omit<HTMLOptions<'option'>, 'tag'>;
+    });
 
     const dropdown = advElement.createDropdown({
       id: selector.activityDropdown,
@@ -590,11 +598,11 @@ export class GuiResponses extends BaseSubscreen {
 
               responses.push(response);
               GuiResponses.instance.renderResponsesList(id, responses);
-            })
+            });
           },
           options: {
-            image: "Icons/Plus.png",
-            label: "Add Response",
+            image: 'Icons/Plus.png',
+            label: 'Add Response',
           },
         }),
         {
@@ -643,7 +651,7 @@ export class GuiResponses extends BaseSubscreen {
                       else responses[index] = newResponse;
 
                       GuiResponses.instance.renderResponsesList(id, responses);
-                    })
+                    });
                   }
                 }
               });
@@ -661,7 +669,7 @@ export class GuiResponses extends BaseSubscreen {
   }
 
   buildActivityResponsesList() {
-    if (!this.currentActivity || !this.currentGroup) return "";
+    if (!this.currentActivity || !this.currentGroup) return '';
 
     let responseEntry = this.getResponsesEntry(this.currentActivity?.Name, this.currentGroup?.Name);
 
@@ -674,7 +682,7 @@ export class GuiResponses extends BaseSubscreen {
   }
 
   renderActivityResponsesList() {
-    if (!this.currentActivity || !this.currentGroup) return "";
+    if (!this.currentActivity || !this.currentGroup) return '';
 
     let responseEntry = this.getResponsesEntry(this.currentActivity?.Name, this.currentGroup?.Name);
 
@@ -698,4 +706,4 @@ export class GuiResponses extends BaseSubscreen {
   }
 }
 
-exportToGlobal("GuiResponses", GuiResponses);
+exportToGlobal('GuiResponses', GuiResponses);

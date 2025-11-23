@@ -1,6 +1,5 @@
 import { advElement, BaseSubscreen, getText, layout, Modal, modStorage, SubscreenOptions } from 'bc-deeplib/deeplib';
 import { ProfileEntryModel, ProfilesSettingsModel } from '../models/profiles';
-import { SettingsModel } from '../models/settings';
 import { logger } from '../utilities/definition';
 import { ResponsesSettingsModel } from '../models/responses';
 import { GlobalSettingsModel } from '../models/base';
@@ -10,7 +9,7 @@ export class GuiProfiles extends BaseSubscreen {
 
   protected static override subscreenOptions: SubscreenOptions = {
     name: 'profiles',
-    icon: `Icons/Title.png`,
+    icon: 'Icons/Title.png',
     drawCharacter: false
   };
 

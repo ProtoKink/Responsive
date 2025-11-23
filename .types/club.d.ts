@@ -1,5 +1,5 @@
 type _ChatMessageDictionaryEntry = {
-  [k: string]: any;
+  [k: string]: unknown;
   Tag?: CommonChatTags | string;
   Text?: string;
   MemberNumber?: number;
@@ -14,4 +14,4 @@ type ActivityInfo = {
   activityName: ActivityName;
 };
 
-type $AssetGroupItemName = AssetGroupItemName | "ItemPenis" | "ItemGlans";
+type $AssetGroupItemName = AssetGroupItemName | 'ItemPenis' | 'ItemGlans';

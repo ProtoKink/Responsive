@@ -1,4 +1,4 @@
-import { BaseSettingsModel } from "bc-deeplib/deeplib";
+import { BaseSettingsModel } from 'bc-deeplib/deeplib';
 
 export type GlobalSettingsModel = BaseSettingsModel & {
   responsesEnabled: boolean;

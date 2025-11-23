@@ -1,8 +1,8 @@
-import { modStorage } from "bc-deeplib/deeplib";
-import { GlobalSettingsModel } from "../models/base";
-import { ProfileEntryModel } from "../models/profiles";
-import { ResponsesSettingsModel } from "../models/responses";
-import { ModName } from "./definition";
+import { modStorage } from 'bc-deeplib/deeplib';
+import { GlobalSettingsModel } from '../models/base';
+import { ProfileEntryModel } from '../models/profiles';
+import { ResponsesSettingsModel } from '../models/responses';
+import { ModName } from './definition';
 
 export const PlayerStorage = () => Player[ModName];
 export const ExtensionStorage = () => Player.ExtensionSettings[ModName];
@@ -37,30 +37,30 @@ export function dataResetForManual() {
 }
 
 export function dataFix() {
-  let data = Player[ModName];
-  let mainResponses = data.ResponsesModule.mainResponses;
+  const data = Player[ModName];
+  const mainResponses = data.ResponsesModule.mainResponses;
 
   mainResponses.forEach((entry) => {
-    if (entry.actName == undefined) {
+    if (entry.actName === undefined) {
       mainResponses.splice(mainResponses.indexOf(entry));
     }
 
-    if (typeof entry.groupName == "string") {
+    if (typeof entry.groupName === 'string') {
       entry.groupName = [entry.groupName];
     }
 
-    if (entry.responses == undefined) {
-      entry.responses = [""];
+    if (entry.responses === undefined) {
+      entry.responses = [''];
     }
   });
 }
 
 export function clearOldData() {
-  delete (Player.OnlineSettings as any)["BCResponsive"]?.Profiles;
-  delete (Player.OnlineSettings as any)["BCResponsive"]?.data;
-  delete (Player.OnlineSettings as any)["BCResponsive"]?.SavedVersion;
+  delete (Player.OnlineSettings as any)?.['BCResponsive']?.Profiles;
+  delete (Player.OnlineSettings as any)?.['BCResponsive']?.data;
+  delete (Player.OnlineSettings as any)?.['BCResponsive']?.SavedVersion;
 
-  delete (Player as any)["BCResponsive"]?.Profiles;
-  delete (Player as any)["BCResponsive"]?.data;
-  delete (Player as any)["BCResponsive"]?.SavedVersion;
+  delete (Player as any)['BCResponsive']?.Profiles;
+  delete (Player as any)['BCResponsive']?.data;
+  delete (Player as any)['BCResponsive']?.SavedVersion;
 }

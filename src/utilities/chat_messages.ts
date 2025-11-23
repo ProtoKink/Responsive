@@ -1,6 +1,6 @@
-import { ExtraResponsesModel, ResponsesEntryModel } from "../models/responses";
-import { PlayerStorage } from "./data";
-import { getCharacter, getRandomInt } from "./other";
+import { ExtraResponsesModel, ResponsesEntryModel } from '../models/responses';
+import { PlayerStorage } from './data';
+import { getCharacter, getRandomInt } from './other';
 
 export function activityDeconstruct(dict: IChatRoomMessageMetadata): ActivityInfo | undefined {
   const activityName = dict.ActivityName;
@@ -23,18 +23,18 @@ export function activityDeconstruct(dict: IChatRoomMessageMetadata): ActivityInf
 export function isSimpleChat(msg: string) {
   return (
     msg.trim().length > 0 &&
-    ChatRoomTargetMemberNumber == -1 &&
-    !msg.startsWith("/") &&
-    !msg.startsWith("(") &&
-    !msg.startsWith("*") &&
-    !msg.startsWith("!") &&
-    !msg.startsWith(".") &&
-    !msg.startsWith("@") &&
-    !msg.startsWith("http")
+    ChatRoomTargetMemberNumber === -1 &&
+    !msg.startsWith('/') &&
+    !msg.startsWith('(') &&
+    !msg.startsWith('*') &&
+    !msg.startsWith('!') &&
+    !msg.startsWith('.') &&
+    !msg.startsWith('@') &&
+    !msg.startsWith('http')
   );
 }
 
-export function chatRoomAutoInterceptMessage(cur_msg: string, msg?: string, source?: Character) {
+export function chatRoomAutoInterceptMessage(cur_msg: string, msg?: string) {
   if (!msg) return;
 
   const data = PlayerStorage().GlobalModule;
@@ -46,11 +46,11 @@ export function chatRoomAutoInterceptMessage(cur_msg: string, msg?: string, sour
 }
 
 export function orgasmMessage() {
-  chatRoomAutoInterceptMessage(ElementValue("InputChat"), typedMoan("orgasm"), Player);
+  chatRoomAutoInterceptMessage(ElementValue('InputChat'), typedMoan('orgasm'));
 }
 
 export function leaveMessage() {
-  if (isSimpleChat(ElementValue("InputChat"))) chatRoomAutoInterceptMessage(ElementValue("InputChat"), " ");
+  if (isSimpleChat(ElementValue('InputChat'))) chatRoomAutoInterceptMessage(ElementValue('InputChat'), ' ');
 }
 
 export function activityMessage(dict: ActivityInfo, entry: ResponsesEntryModel | undefined) {
@@ -60,8 +60,8 @@ export function activityMessage(dict: ActivityInfo, entry: ResponsesEntryModel |
   const response = typedResponse(entry?.responses ?? []);
   const templatedResponse = replaceTemplate(response, source).trim();
 
-  if (templatedResponse[0] == "@") {
-    if (templatedResponse[1] == "@") {
+  if (templatedResponse[0] === '@') {
+    if (templatedResponse[1] === '@') {
       const playerName = CharacterNickname(Player);
       const messageWithPlayerName = `${playerName} ${templatedResponse.slice(2)}`;
 
@@ -71,13 +71,13 @@ export function activityMessage(dict: ActivityInfo, entry: ResponsesEntryModel |
     return sendAction(templatedResponse.slice(1));
   }
 
-  chatRoomAutoInterceptMessage(ElementValue("InputChat"), templatedResponse, source);
+  chatRoomAutoInterceptMessage(ElementValue('InputChat'), templatedResponse);
 }
 
 export function sendAction(action: string) {
-  ServerSend("ChatRoomChat", {
-    Content: "RESPONSIVE_CUSTOM_ACTION",
-    Type: "Action",
+  ServerSend('ChatRoomChat', {
+    Content: 'RESPONSIVE_CUSTOM_ACTION',
+    Type: 'Action',
     Dictionary: [
       { Tag: 'MISSING TEXT IN "Interface.csv": RESPONSIVE_CUSTOM_ACTION', Text: action },
     ]
@@ -86,20 +86,20 @@ export function sendAction(action: string) {
 
 function chatRoomInterceptMessage(cur_msg: string, msg: string) {
   if (!msg) return;
-  ElementValue("InputChat", cur_msg + "... " + msg);
+  ElementValue('InputChat', cur_msg + '... ' + msg);
   ChatRoomSendChat();
 }
 
 function chatRoomNormalMessage(msg: string) {
   if (!msg) return;
 
-  let backupChatRoomTargetMemberNumber = ChatRoomTargetMemberNumber;
+  const backupChatRoomTargetMemberNumber = ChatRoomTargetMemberNumber;
   ChatRoomSetTarget(-1);
-  let oldmsg = ElementValue("InputChat");
+  const oldmsg = ElementValue('InputChat');
 
-  ElementValue("InputChat", msg);
+  ElementValue('InputChat', msg);
   ChatRoomSendChat();
-  ElementValue("InputChat", oldmsg);
+  ElementValue('InputChat', oldmsg);
   ChatRoomSetTarget(backupChatRoomTargetMemberNumber);
 }
 
@@ -110,17 +110,17 @@ function replaceTemplate(msg: string, source: Character) {
   const playerPronouns = CharacterPronounDescription(Player);
   const playerName = CharacterNickname(Player);
 
-  const playerPronoun = playerPronouns === "She/Her" ? "she" : "he";
-  const playerPossessive = playerPronouns === "She/Her" ? "her" : "his";
-  const playerIntensive = playerPronouns === "She/Her" ? "her" : "him";
+  const playerPronoun = playerPronouns === 'She/Her' ? 'she' : 'he';
+  const playerPossessive = playerPronouns === 'She/Her' ? 'her' : 'his';
+  const playerIntensive = playerPronouns === 'She/Her' ? 'her' : 'him';
 
   const sourcePronounItem = CharacterPronounDescription(source);
   const sourceName = CharacterNickname(source);
 
-  const sourcePronoun = sourcePronounItem === "She/Her" ? "she" : "he";
-  const sourcePossessive = sourcePronounItem === "She/Her" ? "her" : "his";
+  const sourcePronoun = sourcePronounItem === 'She/Her' ? 'she' : 'he';
+  const sourcePossessive = sourcePronounItem === 'She/Her' ? 'her' : 'his';
   const sourceIntensive =
-    sourceName === playerName ? (playerPronouns === "She/Her" ? "herself" : "himself") : sourcePronounItem === "She/Her" ? "her" : "him";
+    sourceName === playerName ? (playerPronouns === 'She/Her' ? 'herself' : 'himself') : sourcePronounItem === 'She/Her' ? 'her' : 'him';
 
   return msg
     .replaceAll(/%TARGET%|Player/g, playerName)
@@ -139,17 +139,17 @@ function randomResponse(key: string[]) {
   return key[rnd] as string;
 }
 
-function typedMoan(moanType: "low" | "light" | "medium" | "hot" | "orgasm") {
+function typedMoan(moanType: 'low' | 'light' | 'medium' | 'hot' | 'orgasm') {
   return randomResponse(PlayerStorage().ResponsesModule.extraResponses[moanType]);
 }
 
-function baseMoan(arousal: number | undefined) {
-  if (!arousal) return "";
-  let factor = Math.floor(arousal / 20);
-  if (factor < 1) return ""; // skip wnen arousal is >=0 && < 20. too low as for me.
-  if (factor > 4) return ""; // Skip when arousal is 100, cause that's orgasm
-  const Tkeys: (keyof ExtraResponsesModel)[] = ["low", "low", "light", "medium", "hot", "hot"];
-  let k = Tkeys[factor];
+function _baseMoan(arousal: number | undefined) {
+  if (!arousal) return '';
+  const factor = Math.floor(arousal / 20);
+  if (factor < 1) return ''; // skip wnen arousal is >=0 && < 20. too low as for me.
+  if (factor > 4) return ''; // Skip when arousal is 100, cause that's orgasm
+  const Tkeys: (keyof ExtraResponsesModel)[] = ['low', 'low', 'light', 'medium', 'hot', 'hot'];
+  const k = Tkeys[factor];
 
   return typedMoan(k);
 }
