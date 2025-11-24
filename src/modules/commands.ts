@@ -1,7 +1,7 @@
-import { BaseModule, modStorage, sendLocalMessage } from 'bc-deeplib/deeplib';
-import { PlayerStorage } from '../utilities/data';
+import { BaseModule, sendLocalMessage } from 'bc-deeplib/deeplib';
 import { CMD_BCR, CMD_CHANGELOG, CMD_DEBUG_DATA, CMD_TOGGLE, CMD_VERSION, MT } from '../utilities/definition';
 import { BCR_TOGGLE_ENABLED, BCR_TOGGLE_DISABLED, BCR_CHANGELOG, BCR_VERSION_MSG, BCR_CMDS } from '../utilities/messages';
+import { modStorage } from '../utilities/data';
 
 export class CommandsModule extends BaseModule {
   load(): void {
@@ -16,7 +16,7 @@ export class CommandsModule extends BaseModule {
           Tag: CMD_TOGGLE,
           Description: ': To toggle the Responsive mod.',
           Action: () => {
-            const data = PlayerStorage().GlobalModule;
+            const data = modStorage.playerStorage.GlobalModule;
             data.modEnabled = !data.modEnabled;
             if (data.modEnabled) {
               sendLocalMessage('bcr_toggle_enb', BCR_TOGGLE_ENABLED, MT.INFO);

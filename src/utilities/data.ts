@@ -1,29 +1,30 @@
-import { modStorage } from 'bc-deeplib/deeplib';
+import { ModStorage } from 'bc-deeplib/deeplib';
 import { GlobalSettingsModel } from '../models/base';
 import { ProfileEntryModel } from '../models/profiles';
 import { ResponsesSettingsModel } from '../models/responses';
-import { ModName } from './definition';
+import { SettingsModel } from '../models/settings';
 
-export const PlayerStorage = () => Player[ModName];
-export const ExtensionStorage = () => Player.ExtensionSettings[ModName];
+export const modStorage = new ModStorage<SettingsModel>('Responsive');
 
 export function dataErase(doResetSettings: boolean, doResetResponses: boolean, doResetProfiles: boolean) {
+  const data = modStorage.playerStorage;
   if (doResetSettings) {
-    Player[ModName].GlobalModule = <GlobalSettingsModel>{};
+    data.GlobalModule = <GlobalSettingsModel>{};
   }
 
   if (doResetResponses) {
-    Player[ModName].ResponsesModule = <ResponsesSettingsModel>{};
+    data.ResponsesModule = <ResponsesSettingsModel>{};
   }
 
   if (doResetProfiles) {
-    Player[ModName].ProfilesModule = <ProfileEntryModel[]>{};
+    data.ProfilesModule = <ProfileEntryModel[]>{};
   }
   modStorage.save();
 }
 
 export function dataResetForManual() {
-  Player[ModName].ResponsesModule = <ResponsesSettingsModel><unknown>{
+  const data = modStorage.playerStorage;
+  data.ResponsesModule = <ResponsesSettingsModel><unknown>{
     mainResponses: [],
     extraResponses: {
       low: [],
@@ -37,7 +38,7 @@ export function dataResetForManual() {
 }
 
 export function dataFix() {
-  const data = Player[ModName];
+  const data = modStorage.playerStorage;
   const mainResponses = data.ResponsesModule.mainResponses;
 
   mainResponses.forEach((entry) => {

@@ -2,7 +2,7 @@ import { ResponsesEntryModel } from '../models/responses';
 import { ResponsesModule } from '../modules/responses';
 import { GuiResponses } from '../screens/responses';
 import { activityMessage, leaveMessage, orgasmMessage } from './chat_messages';
-import { PlayerStorage } from './data';
+import { modStorage } from './data';
 import { ModName } from './definition';
 
 const doesBcxAllowsTalking = () => {
@@ -27,7 +27,7 @@ const doesBcxAllowsTalking = () => {
   };
 
   if (
-    PlayerStorage().GlobalModule.doPreventMessageIfBcxBlock &&
+    modStorage.playerStorage.GlobalModule.doPreventMessageIfBcxBlock &&
     (isRuleWorking('speech_forbid_open_talking') ||
       isRuleWorking('speech_limit_open_talking') ||
       isRuleWorking('speech_specific_sound') ||
@@ -39,11 +39,12 @@ const doesBcxAllowsTalking = () => {
 };
 
 export const orgasmHandle = (c: Character) => {
-  if (!PlayerStorage().GlobalModule.modEnabled) return;
-  if (!PlayerStorage().GlobalModule.responsesEnabled) return;
+  const modData = modStorage.playerStorage;
+  if (!modData.GlobalModule.modEnabled) return;
+  if (!modData.GlobalModule.responsesEnabled) return;
   if (CurrentScreen !== 'ChatRoom' || !Player) return;
   if (Player.MemberNumber !== c.MemberNumber) return;
-  if (!PlayerStorage().ResponsesModule.extraResponses.orgasm) return;
+  if (!modData.ResponsesModule.extraResponses.orgasm) return;
   if (ActivityOrgasmRuined) return;
   if (!doesBcxAllowsTalking()) return;
 
@@ -52,8 +53,9 @@ export const orgasmHandle = (c: Character) => {
 };
 
 export const activityHandle = (dict: ActivityInfo, entry: ResponsesEntryModel) => {
-  if (!PlayerStorage().GlobalModule.modEnabled) return;
-  if (!PlayerStorage().GlobalModule.responsesEnabled) return;
+  const modData = modStorage.playerStorage;
+  if (!modData.GlobalModule.modEnabled) return;
+  if (!modData.GlobalModule.responsesEnabled) return;
   if (CurrentScreen !== 'ChatRoom' || !Player) return;
   if (dict.targetCharacter.MemberNumber !== Player.MemberNumber) return;
   if (!entry || !entry?.responses) return;
@@ -65,8 +67,9 @@ export const activityHandle = (dict: ActivityInfo, entry: ResponsesEntryModel) =
 };
 
 export const leaveHandle = (data: ServerAccountBeepResponse) => {
-  if (!PlayerStorage().GlobalModule.modEnabled) return;
-  if (!PlayerStorage().GlobalModule.doLeaveMessage) return;
+  const modData = modStorage.playerStorage;
+  if (!modData.GlobalModule.modEnabled) return;
+  if (!modData.GlobalModule.doLeaveMessage) return;
   if (CurrentScreen !== 'ChatRoom' || !Player) return;
   if (!(CurrentScreen === 'ChatRoom' && ChatRoomData?.Name !== data.ChatRoomName)) return;
   if (!doesBcxAllowsTalking()) return;

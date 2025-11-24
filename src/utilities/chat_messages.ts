@@ -1,5 +1,5 @@
 import { ExtraResponsesModel, ResponsesEntryModel } from '../models/responses';
-import { PlayerStorage } from './data';
+import { modStorage } from './data';
 import { getCharacter, getRandomInt } from './other';
 
 export function activityDeconstruct(dict: IChatRoomMessageMetadata): ActivityInfo | undefined {
@@ -37,7 +37,7 @@ export function isSimpleChat(msg: string) {
 export function chatRoomAutoInterceptMessage(cur_msg: string, msg?: string) {
   if (!msg) return;
 
-  const data = PlayerStorage().GlobalModule;
+  const data = modStorage.playerStorage.GlobalModule;
   if (data.doMessageInterruption && isSimpleChat(cur_msg)) {
     return chatRoomInterceptMessage(cur_msg, msg);
   }
@@ -140,7 +140,7 @@ function randomResponse(key: string[]) {
 }
 
 function typedMoan(moanType: 'low' | 'light' | 'medium' | 'hot' | 'orgasm') {
-  return randomResponse(PlayerStorage().ResponsesModule.extraResponses[moanType]);
+  return randomResponse(modStorage.playerStorage.ResponsesModule.extraResponses[moanType]);
 }
 
 function _baseMoan(arousal: number | undefined) {

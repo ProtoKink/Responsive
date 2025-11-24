@@ -1,7 +1,7 @@
 import { BaseModule, sdk } from 'bc-deeplib/deeplib';
 import { isSimpleChat } from '../utilities/chat_messages';
-import { PlayerStorage } from '../utilities/data';
 import { HookPriority, ModuleCategory } from '../utilities/sdk';
+import { modStorage } from '../utilities/data';
 
 /**
  * "Frown", "Sad", "Pained", "Angry", "HalfOpen", "Open", "Ahegao", "Moan",
@@ -151,7 +151,7 @@ export class CharTalkModule extends BaseModule {
   static charTalkHandle(c: Character, msg: string) {
     if (!c?.MemberNumber) return;
     
-    const storage = PlayerStorage().GlobalModule;
+    const storage = modStorage.playerStorage.GlobalModule;
     if (!storage.modEnabled || !storage.CharTalkEnabled || !c?.MemberNumber || CharTalkModule.characterData[c.MemberNumber]) return;
 
     if (isSimpleChat(msg)) {

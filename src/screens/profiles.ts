@@ -1,8 +1,9 @@
-import { advElement, BaseSubscreen, getText, layout, Modal, modStorage, SubscreenOptions } from 'bc-deeplib/deeplib';
+import { advElement, BaseSubscreen, getText, layout, Modal, SubscreenOptions } from 'bc-deeplib/deeplib';
 import { ProfileEntryModel, ProfilesSettingsModel } from '../models/profiles';
 import { logger } from '../utilities/definition';
 import { ResponsesSettingsModel } from '../models/responses';
 import { GlobalSettingsModel } from '../models/base';
+import { modStorage } from '../utilities/data';
 
 
 export class GuiProfiles extends BaseSubscreen {
