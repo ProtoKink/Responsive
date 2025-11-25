@@ -17,6 +17,10 @@ const selector = Object.freeze({
   responseEntryButton: 'rsp-response-entry-button',
   entryCheckSettings: 'rsp-entry-check-settings',
   clearEntryButton: 'rsp-clear-entry-button',
+  deleteModeToggle: 'rsp-delete-mode-toggle',
+  copyEntryButton: 'rsp-copy-entry-button',
+  pasteEntryButton: 'rsp-paste-entry-button',
+  doNotShowThisAgain: 'rsp-do-not-show-confirmation',
 });
 
 export class GuiResponses extends BaseSubscreen {
@@ -171,7 +175,7 @@ export class GuiResponses extends BaseSubscreen {
     });
 
     const clearEntryButton = advElement.createButton({
-      id: 'clearEntryButton',
+      id: selector.clearEntryButton,
       onClick: () => this.clearEntry(),
       options: {
         label: 'X',
@@ -182,7 +186,7 @@ export class GuiResponses extends BaseSubscreen {
     BaseSubscreen.menu?.prepend(clearEntryButton);
 
     const copyEntryButton = advElement.createButton({
-      id: 'copyEntryButton',
+      id: selector.copyEntryButton,
       onClick: () => this.copyEntry(),
       options: {
         image: 'Icons/Export.png',
@@ -193,7 +197,7 @@ export class GuiResponses extends BaseSubscreen {
     BaseSubscreen.menu?.prepend(copyEntryButton);
 
     const pasteEntryButton = advElement.createButton({
-      id: 'pasteEntryButton',
+      id: selector.pasteEntryButton,
       onClick: () => this.pasteEntry(),
       options: {
         image: 'Icons/Import.png',
@@ -204,7 +208,7 @@ export class GuiResponses extends BaseSubscreen {
     BaseSubscreen.menu?.prepend(pasteEntryButton);
 
     const deleteModeButton = advElement.createButton({
-      id: 'deleteModeButton',
+      id: selector.deleteModeToggle,
       onClick: () => this.toggleDeleteMode(),
       options: {
         image: 'Icons/Trash.png',
@@ -633,7 +637,7 @@ export class GuiResponses extends BaseSubscreen {
                     const confirmation = GuiResponses.instance.doNotShowConfirmation || await Modal.confirm([
                       getText('responses.prompt.delete'),
                       advElement.createCheckbox({
-                        id: 'doNotShowThisAgain',
+                        id: selector.doNotShowThisAgain,
                         label: getText('responses.text.do_not_show_this_again_until_leaving_this_screen'),
                         setSettingValue: (val) => GuiResponses.instance.doNotShowConfirmation = val
                       })
