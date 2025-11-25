@@ -73,6 +73,11 @@
   flex-direction: row;
 }
 
+#rsp-do-not-show-confirmation-container {
+  font-size: 0.8em;
+  margin-top: 1em;
+}
+
 #rsp-delete-mode-toggle[data-delete-mode] {
   background-color: red;
 }
