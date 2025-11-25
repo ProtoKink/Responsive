@@ -706,6 +706,8 @@ export class GuiResponses extends BaseSubscreen {
 
   toggleDeleteMode() {
     this.deleteMode = !this.deleteMode;
+
+    ElementWrap(selector.deleteModeToggle)?.toggleAttribute('data-delete-mode', this.deleteMode);
     this.renderEntrySettingForm();
   }
 }
