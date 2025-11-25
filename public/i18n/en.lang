@@ -43,6 +43,7 @@ responses.text.copy_entry = Copy Entry Settings
 responses.text.paste_entry = Paste Entry Settings
 responses.text.toggle_delete_mode = Click to toggle response delete mode
 responses.text.edit_mode = Click to edit
+responses.text.empty_response = Empty
 
 responses.setting.self_trigger.name = Self Trigger
 responses.setting.self_trigger.desc = Defines if response will be triggered when you are doing action on yourself.

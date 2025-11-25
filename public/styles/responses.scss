@@ -54,6 +54,10 @@
         &[data-delete-mode] {
           background-color: red;
         }
+
+        &[data-empty-response] .button-label {
+          color: var(--tmd-text-disabled, gray);
+        }
       }
     }
   }

@@ -272,7 +272,7 @@ export class GuiResponses extends BaseSubscreen {
   }
 
   exit() {
-    GuiResponses.instance.settings.mainResponses = this.settings.mainResponses.filter((a) => a.responses.length > 0);
+    GuiResponses.instance.settings.mainResponses = this.settings.mainResponses.filter((a) => a.responses.length > 0 && a.responses.some((r) => !!r));
     this.saveResponseEntry(this.currentEntry);
     GuiResponses.instance.focusGroup = undefined;
     GuiResponses.instance.activityIndex = 0;
@@ -417,7 +417,7 @@ export class GuiResponses extends BaseSubscreen {
     return <ResponsesEntryModel>{
       actName: actName,
       groupName: [grpName],
-      responses: responses ?? [''],
+      responses: responses ?? [],
       selfTrigger: selfTrigger ?? false
     };
   }
@@ -454,7 +454,7 @@ export class GuiResponses extends BaseSubscreen {
 
     if (!entry) return;
 
-    entry.responses = GuiResponses.instance.copiedEntry.responses ?? [''];
+    entry.responses = GuiResponses.instance.copiedEntry.responses ?? [];
     // GuiResponses.instance.loadResponseEntry(entry);
     if (GuiResponses.activityCanBeDoneOnSelf(GuiResponses.instance.currentActivity?.Name, GuiResponses.instance.currentGroup?.Name))
       entry.selfTrigger = GuiResponses.instance.copiedEntry.selfTrigger;
@@ -598,7 +598,7 @@ export class GuiResponses extends BaseSubscreen {
           id: `${selector.responseAddButton}-${id}`,
           onClick: function () {
             Modal.prompt(getText('responses.prompt.add')).then((response) => {
-              if (!response) return;
+              if (response === null) return;
 
               responses.push(response);
               GuiResponses.instance.renderResponsesList(id, responses);
@@ -620,7 +620,7 @@ export class GuiResponses extends BaseSubscreen {
               return advElement.createButton({
                 id: `${selector.responseButton}-${index}-${id}`,
                 options: {
-                  label: response,
+                  label: response === '' ? getText('responses.text.empty_response') : response,
                   tooltip: tooltip,
                   tooltipPosition: 'bottom',
                 },
@@ -628,7 +628,8 @@ export class GuiResponses extends BaseSubscreen {
                   button: {
                     classList: [selector.responseEntryButton],
                     dataAttributes: {
-                      deleteMode: GuiResponses.instance.deleteMode
+                      deleteMode: GuiResponses.instance.deleteMode,
+                      emptyResponse: response === ''
                     }
                   }
                 },
@@ -649,8 +650,7 @@ export class GuiResponses extends BaseSubscreen {
                     }
                   } else {
                     Modal.prompt(getText('responses.prompt.edit'), response).then((newResponse) => {
-                      if (newResponse === '') responses.splice(index, 1);
-                      else if (newResponse === response) return;
+                      if (newResponse === response) return;
                       else if (newResponse === null) return;
                       else responses[index] = newResponse;
 
@@ -680,20 +680,20 @@ export class GuiResponses extends BaseSubscreen {
     if (!responseEntry)
       responseEntry = this.createEntryIfNeeded(responseEntry);
 
-    const responses = responseEntry?.responses.filter((r) => !!r);
+    const responses = responseEntry?.responses;
 
     return this.buildResponsesList('activity', responses);
   }
 
   renderActivityResponsesList() {
-    if (!this.currentActivity || !this.currentGroup) return '';
+    if (!this.currentActivity || !this.currentGroup) return;
 
     let responseEntry = this.getResponsesEntry(this.currentActivity?.Name, this.currentGroup?.Name);
 
     if (!responseEntry)
       responseEntry = this.createEntryIfNeeded(responseEntry);
 
-    const responses = responseEntry?.responses.filter((r) => !!r);
+    const responses = responseEntry?.responses;
 
     this.renderResponsesList('activity', responses);
   }
