@@ -5,6 +5,7 @@ import { logger } from '../utilities/definition';
 
 const selector = Object.freeze({
   entrySettingForm: 'rsp-entry-setting-form',
+  entryHelpingNav: 'rsp-entry-helping-nav',
   entrySelfTrigger: 'rsp-entry-self-trigger',
   settingsDiv: 'rsp-settings-div',
   entryDiv: 'rsp-entry-div',
@@ -21,6 +22,9 @@ const selector = Object.freeze({
   copyEntryButton: 'rsp-copy-entry-button',
   pasteEntryButton: 'rsp-paste-entry-button',
   doNotShowThisAgain: 'rsp-do-not-show-confirmation',
+  extraSettingForm: 'rsp-extra-setting-form',
+  extraDropdown: 'rsp-extra-dropdown',
+  entryFormClass: 'rsp-entry-form',
 });
 
 export class GuiResponses extends BaseSubscreen {
@@ -28,9 +32,10 @@ export class GuiResponses extends BaseSubscreen {
 
   activityIndex: number = 0;
   copiedEntry: ResponsesEntryModel | undefined = undefined;
-  focusGroup: AssetItemGroup | undefined = undefined;
+  focusGroup: AssetItemGroup = AssetGroupGet('Female3DCG', 'ItemArms') as AssetItemGroup;
   deleteMode: boolean = false;
   doNotShowConfirmation: boolean = false;
+  selectedExtra: ExtraType = 'low';
 
   protected static override subscreenOptions: SubscreenOptions = {
     name: 'responses',
@@ -67,57 +72,71 @@ export class GuiResponses extends BaseSubscreen {
 
   get pageStructure(): SettingElement[][] {
     return [
-      [],
       [
         {
-          type: 'text',
-          id: 'extra_low',
-          label: getText('responses.setting.low_response.name'),
-          description: getText('responses.setting.low_response.desc'),
-          setElementValue: () => GuiResponses.stringListShow(this.settings?.extraResponses?.low),
-          setSettingValue: (val) => {
-            this.settings.extraResponses.low = GuiResponses.validateInput(val) ?? this.settings.extraResponses.low;
-          }
+          type: 'custom',
+          id: selector.entrySettingForm,
+          htmlOptions: {
+            tag: 'div',
+            classList: [selector.entryFormClass],
+            children: this.buildEntrySettingForm(),
+            parent: layout.getSubscreen()
+          },
+          position: [520, 180],
+          size: () => GuiResponses.instance.focusGroup ? [1280, 720] : [0, 0],
         },
         {
-          type: 'text',
-          id: 'extra_light',
-          label: getText('responses.setting.light_response.name'),
-          description: getText('responses.setting.light_response.desc'),
-          setElementValue: () => GuiResponses.stringListShow(this.settings?.extraResponses?.light),
-          setSettingValue: (val) => {
-            this.settings.extraResponses.light = GuiResponses.validateInput(val) ?? this.settings.extraResponses.light;
-          }
-        },
+          type: 'custom',
+          id: selector.entryHelpingNav,
+          htmlOptions: {
+            tag: 'nav',
+            children: [
+              advElement.createButton({
+                id: selector.clearEntryButton,
+                onClick: () => this.clearEntry(),
+                options: {
+                  label: 'X',
+                  tooltip: getText('responses.text.clear_entry')
+                },
+                size: [90, 90],
+              }),
+              advElement.createButton({
+                id: selector.copyEntryButton,
+                onClick: () => this.copyEntry(),
+                options: {
+                  image: 'Icons/Export.png',
+                  tooltip: getText('responses.text.copy_entry')
+                },
+                size: [90, 90],
+              }),
+              advElement.createButton({
+                id: selector.pasteEntryButton,
+                onClick: () => this.pasteEntry(),
+                options: {
+                  image: 'Icons/Import.png',
+                  tooltip: getText('responses.text.paste_entry')
+                },
+                size: [90, 90],
+              })
+            ],
+            parent: layout.getSubscreen()
+          },
+          position: [1905, 900, 'bottom-right'],
+          size: () => [90, null],
+        }
+      ],
+      [
         {
-          type: 'text',
-          id: 'extra_medium',
-          label: getText('responses.setting.medium_response.name'),
-          description: getText('responses.setting.medium_response.desc'),
-          setElementValue: () => GuiResponses.stringListShow(this.settings?.extraResponses?.medium),
-          setSettingValue: (val) => {
-            this.settings.extraResponses.medium = GuiResponses.validateInput(val) ?? this.settings.extraResponses.medium;
-          }
-        },
-        {
-          type: 'text',
-          id: 'extra_hot',
-          label: getText('responses.setting.hot_response.name'),
-          description: getText('responses.setting.hot_response.desc'),
-          setElementValue: () => GuiResponses.stringListShow(this.settings?.extraResponses?.hot),
-          setSettingValue: (val) => {
-            this.settings.extraResponses.hot = GuiResponses.validateInput(val) ?? this.settings.extraResponses.hot;
-          }
-        },
-        {
-          type: 'text',
-          id: 'extra_orgasm',
-          label: getText('responses.setting.orgasm_response.name'),
-          description: getText('responses.setting.orgasm_response.desc'),
-          setElementValue: () => GuiResponses.stringListShow(this.settings?.extraResponses?.orgasm),
-          setSettingValue: (val) => {
-            this.settings.extraResponses.orgasm = GuiResponses.validateInput(val) ?? this.settings.extraResponses.orgasm;
-          }
+          type: 'custom',
+          id: selector.extraSettingForm,
+          htmlOptions: {
+            tag: 'div',
+            classList: [selector.entryFormClass],
+            children: this.buildExtraEntrySettingForm(),
+            parent: layout.getSubscreen()
+          },
+          position: [520, 180],
+          size: () => [1280, 720],
         }
       ]
     ];
@@ -161,51 +180,8 @@ export class GuiResponses extends BaseSubscreen {
   }
 
   load() {
-    super.load();
     GuiResponses.instance = this;
-
-    advElement.createCustom({
-      id: selector.entrySettingForm,
-      htmlOptions: {
-        tag: 'div',
-        parent: layout.getSubscreen()
-      },
-      position: [520, 180],
-      size: () => GuiResponses.instance.focusGroup ? [1280, 720] : [0, 0],
-    });
-
-    const clearEntryButton = advElement.createButton({
-      id: selector.clearEntryButton,
-      onClick: () => this.clearEntry(),
-      options: {
-        label: 'X',
-        tooltip: getText('responses.text.clear_entry')
-      },
-      size: [90, 90],
-    });
-    BaseSubscreen.menu?.prepend(clearEntryButton);
-
-    const copyEntryButton = advElement.createButton({
-      id: selector.copyEntryButton,
-      onClick: () => this.copyEntry(),
-      options: {
-        image: 'Icons/Export.png',
-        tooltip: getText('responses.text.copy_entry')
-      },
-      size: [90, 90],
-    });
-    BaseSubscreen.menu?.prepend(copyEntryButton);
-
-    const pasteEntryButton = advElement.createButton({
-      id: selector.pasteEntryButton,
-      onClick: () => this.pasteEntry(),
-      options: {
-        image: 'Icons/Import.png',
-        tooltip: getText('responses.text.paste_entry')
-      },
-      size: [90, 90],
-    });
-    BaseSubscreen.menu?.prepend(pasteEntryButton);
+    super.load();
 
     const deleteModeButton = advElement.createButton({
       id: selector.deleteModeToggle,
@@ -223,7 +199,6 @@ export class GuiResponses extends BaseSubscreen {
     super.run();
 
     if (BaseSubscreen.currentPage === 1) {
-      domUtil.unhide(selector.entrySettingForm);
       // Draws all the available character zones
       for (const Group of AssetGroup) {
         if (Group.IsItem() && !Group.MirrorActivitiesFrom && AssetActivitiesForGroup('Female3DCG', Group.Name).length) {
@@ -241,8 +216,6 @@ export class GuiResponses extends BaseSubscreen {
       } else {
         // DrawText(getText("responses.text.select_zone"), this.getXPos(0), this.getYPos(0), "Black", "White");
       }
-    } else if (BaseSubscreen.currentPage === 2) {
-      domUtil.hide(selector.entrySettingForm);
     }
   }
 
@@ -259,12 +232,10 @@ export class GuiResponses extends BaseSubscreen {
         const activities = this.activities;
         if (this.activityIndex >= activities.length) this.activityIndex = 0;
 
-        if (GuiResponses.instance.focusGroup) this.saveResponseEntry(this.currentEntry);
-        if (GuiResponses.instance.focusGroup === Group) return this.deselectEntry();
+        if (GuiResponses.instance.focusGroup !== Group) this.saveResponseEntry(this.currentEntry);
         GuiResponses.instance.focusGroup = Group;
         if (GuiResponses.instance.focusGroup) {
-          this.toggleEntrySettingForm();
-          this.renderEntrySettingForm();
+          this.buildEntrySettingForm();
         }
         // this.loadResponseEntry(this.currentEntry);
       }
@@ -274,11 +245,12 @@ export class GuiResponses extends BaseSubscreen {
   exit() {
     GuiResponses.instance.settings.mainResponses = this.settings.mainResponses.filter((a) => a.responses.length > 0 && a.responses.some((r) => !!r));
     this.saveResponseEntry(this.currentEntry);
-    GuiResponses.instance.focusGroup = undefined;
+    GuiResponses.instance.focusGroup = AssetGroupGet('Female3DCG', 'ItemArms') as AssetItemGroup;
     GuiResponses.instance.activityIndex = 0;
     GuiResponses.instance.copiedEntry = undefined;
     GuiResponses.instance.deleteMode = false;
     GuiResponses.instance.doNotShowConfirmation = false;
+    GuiResponses.instance.selectedExtra = 'low';
 
     super.exit();
   }
@@ -339,10 +311,7 @@ export class GuiResponses extends BaseSubscreen {
     return ActivityDictionaryText(tag);
   }
 
-  deselectEntry() {
-    GuiResponses.instance.focusGroup = undefined;
-    this.toggleEntrySettingForm();
-  }
+  // #region Entry Actions
 
   saveResponseEntry(entry: ResponsesEntryModel | undefined) {
     entry ??= this.currentEntry;
@@ -373,7 +342,7 @@ export class GuiResponses extends BaseSubscreen {
       entry?.groupName?.splice(entry?.groupName?.indexOf(this.currentGroup?.Name), 1);
     }
 
-    this.renderEntrySettingForm();
+    this.buildEntrySettingForm();
   }
 
   /**
@@ -459,24 +428,27 @@ export class GuiResponses extends BaseSubscreen {
     if (GuiResponses.activityCanBeDoneOnSelf(GuiResponses.instance.currentActivity?.Name, GuiResponses.instance.currentGroup?.Name))
       entry.selfTrigger = GuiResponses.instance.copiedEntry.selfTrigger;
 
-    GuiResponses.instance.renderEntrySettingForm();
+    GuiResponses.instance.buildEntrySettingForm();
 
     ToastManager.success('Entry pasted');
   }
 
+  // #endregion Entry Actions
+
+  // #region Main Responses Entry Form
+
   buildEntrySettingForm() {
     let entry = GuiResponses.instance.currentEntry;
-
-    if (!GuiResponses.instance.focusGroup) {
-      GuiResponses.instance.toggleEntrySettingForm();
-      return [];
-    }
 
     if (!entry) {
       entry = this.createEntryIfNeeded(entry);
     }
 
     if (!entry) return [];
+
+    const entrySettingForm = ElementWrap(selector.entrySettingForm) as HTMLDivElement | null;
+    if (entrySettingForm)
+      entrySettingForm.innerHTML = '';
 
     const activityCanBeDoneOnSelf = GuiResponses.activityCanBeDoneOnSelf(this.currentActivity?.Name, this.currentGroup?.Name);
 
@@ -501,48 +473,85 @@ export class GuiResponses extends BaseSubscreen {
       ]
     });
 
-    return [
+    const ret = [
       settings,
-      this.buildActivityResponsesList(),
+      this.buildActivityResponsesList()
     ];
-  }
 
-  toggleEntrySettingForm() {
-    const entrySettingForm = document.getElementById(selector.entrySettingForm) as HTMLDivElement;
-    const entrySettingFormShouldBeActive = !!GuiResponses.instance.focusGroup;
-    const entrySettingFormUnion = BaseSubscreen.currentElements.find((e) => e[0].id === selector.entrySettingForm);
+    if (entrySettingForm) {
+      entrySettingForm.append(
+        ...ret
+      );
+      this.resize(false);
 
-    if (!entrySettingFormUnion) return;
-
-    if (entrySettingFormShouldBeActive) {
-      entrySettingForm.toggleAttribute('active', true);
+      return;
+    } else {
+      return ret;
     }
-
-
-    if (!entrySettingFormShouldBeActive)
-      entrySettingForm.querySelectorAll('&>*').forEach((e) => e.toggleAttribute('hidden', !entrySettingFormShouldBeActive));
-
-    domUtil.autoSetSize(entrySettingForm, entrySettingFormUnion[1].size);
-
-    if (entrySettingFormShouldBeActive)
-      entrySettingForm.querySelectorAll('&>*').forEach((e) => e.toggleAttribute('hidden', entrySettingFormShouldBeActive));
-
-    setTimeout(() => {
-      // this trick with duplicate variable is needed to prevent hiding element with too fast clicking
-      const shouldBeActive = !!GuiResponses.instance.focusGroup;
-      if (!shouldBeActive) {
-        entrySettingForm.toggleAttribute('active', false);
-      }
-    }, 500);
   }
 
-  renderEntrySettingForm() {
-    const entrySettingForm = document.getElementById(selector.entrySettingForm) as HTMLDivElement;
-    entrySettingForm.innerHTML = '';
-    entrySettingForm.append(...GuiResponses.instance.buildEntrySettingForm());
+  // #endregion Main Responses Entry Form
 
-    this.resize(false);
+  // #region Extra Responses Entry Form
+
+  buildExtraEntrySettingForm() {
+    const entrySettingForm = ElementWrap(selector.extraSettingForm) as HTMLDivElement | null;
+    if (entrySettingForm)
+      entrySettingForm.innerHTML = '';
+
+    const extra = this.selectedExtra;
+    const extraTypes = Object.keys(this.settings.extraResponses) as ExtraType[];
+
+    const dropdownOptions = extraTypes.map((et) => {
+      return ({
+        attributes: {
+          value: et,
+          label: getText(`responses.extra.${et}`),
+          selected: et === extra
+        }
+      }) as Omit<HTMLOptions<'option'>, 'tag'>;
+    });
+
+    const dropdown = advElement.createDropdown({
+      id: selector.extraDropdown,
+      optionsList: dropdownOptions,
+      setSettingValue: function (value) {
+        GuiResponses.instance.selectedExtra = value as ExtraType;
+        GuiResponses.instance.buildExtraEntrySettingForm();
+      },
+      label: 'Extra Response',
+      description: 'Select an extra response to respond to.',
+    });
+
+    const settings = ElementCreate({
+      tag: 'div',
+      attributes: {
+        id: `${selector.settingsDiv}-extra`
+      },
+      classList: [selector.entryDiv],
+      children: [
+        dropdown
+      ]
+    });
+
+    const ret = [
+      settings,
+      this.buildExtraResponsesList(extra)
+    ];
+
+    if (entrySettingForm) {
+      entrySettingForm.append(
+        ...ret
+      );
+      this.resize(false);
+
+      return;
+    } else {
+      return ret;
+    }
   }
+
+  // #endregion Extra Responses Entry Form
 
   buildActivityDropdown() {
     const options = this.activities.map((act, index) => {
@@ -562,22 +571,11 @@ export class GuiResponses extends BaseSubscreen {
       setSettingValue: function (value) {
         GuiResponses.instance.saveResponseEntry(GuiResponses.instance.currentEntry);
         GuiResponses.instance.activityIndex = CommonParseInt(value) ?? 0;
-        GuiResponses.instance.renderEntrySettingForm();
+        GuiResponses.instance.buildEntrySettingForm();
       },
       label: 'Activity',
       description: 'Select an activity to respond to.',
-      htmlOptions: {
-        container: {
-          parent: layout.getSubscreen(),
-        }
-      }
     });
-
-    if (GuiResponses.instance.focusGroup) {
-      domUtil.unhide(dropdown);
-    } else {
-      domUtil.hide(dropdown);
-    }
 
     return dropdown;
   }
@@ -592,12 +590,12 @@ export class GuiResponses extends BaseSubscreen {
       attributes: {
         id: `${selector.responsesNav}-${id}`
       },
-      classList: [selector.entryDiv],
+      classList: [selector.entryDiv, selector.responsesNav],
       children: [
         advElement.createButton({
           id: `${selector.responseAddButton}-${id}`,
           onClick: function () {
-            Modal.prompt(getText('responses.prompt.add')).then((response) => {
+            Modal.prompt(getText('responses.prompt.add'), { modalId: 'rsp-modal' }).then((response) => {
               if (response === null) return;
 
               responses.push(response);
@@ -608,10 +606,15 @@ export class GuiResponses extends BaseSubscreen {
             image: 'Icons/Plus.png',
             label: 'Add Response',
           },
+          htmlOptions: {
+            button: {
+              classList: [selector.responseAddButton],
+            }
+          }
         }),
         {
           tag: 'div',
-          classList: ['scroll-box'],
+          classList: ['scroll-box', selector.responsesList],
           attributes: {
             id: `${selector.responsesList}-${id}`
           },
@@ -631,6 +634,9 @@ export class GuiResponses extends BaseSubscreen {
                       deleteMode: GuiResponses.instance.deleteMode,
                       emptyResponse: response === ''
                     }
+                  },
+                  label: {
+                    classList: ['truncated-text']
                   }
                 },
                 onClick: async function () {
@@ -642,14 +648,14 @@ export class GuiResponses extends BaseSubscreen {
                         label: getText('responses.text.do_not_show_this_again_until_leaving_this_screen'),
                         setSettingValue: (val) => GuiResponses.instance.doNotShowConfirmation = val
                       })
-                    ]);
+                    ], { modalId: 'rsp-modal' });
 
                     if (confirmation) {
                       responses.splice(index, 1);
                       GuiResponses.instance.renderResponsesList(id, responses);
                     }
                   } else {
-                    Modal.prompt(getText('responses.prompt.edit'), response).then((newResponse) => {
+                    Modal.prompt(getText('responses.prompt.edit'), { defaultValue: response, modalId: 'rsp-modal' }).then((newResponse) => {
                       if (newResponse === response) return;
                       else if (newResponse === null) return;
                       else responses[index] = newResponse;
@@ -698,7 +704,7 @@ export class GuiResponses extends BaseSubscreen {
     this.renderResponsesList('activity', responses);
   }
 
-  buildArousalResponsesList(type: ExtraType) {
+  buildExtraResponsesList(type: ExtraType) {
     const responses = this.settings.extraResponses[type];
 
     return this.buildResponsesList(type, responses);
@@ -708,7 +714,10 @@ export class GuiResponses extends BaseSubscreen {
     this.deleteMode = !this.deleteMode;
 
     ElementWrap(selector.deleteModeToggle)?.toggleAttribute('data-delete-mode', this.deleteMode);
-    this.renderEntrySettingForm();
+    if (BaseSubscreen.currentPage === 1)
+      this.buildEntrySettingForm();
+    if (BaseSubscreen.currentPage === 2)
+      this.buildExtraEntrySettingForm();
   }
 }
 

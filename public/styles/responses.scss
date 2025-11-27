@@ -1,20 +1,11 @@
-#rsp-entry-setting-form {
-  box-shadow: min(0.2vh, 0.1vw) min(0.2vh, 0.1vw) min(0.4vh, 0.2vw) black;
-}
-
-#rsp-entry-setting-form {
+.rsp-entry-form {
   background-color: var(--tmd-element, lightgray);
   border-radius: var(--deeplib-border-radius);
   padding: min(1.8dvh, 0.6dvw);
   display: flex;
   flex-direction: row;
   gap: min(1dvh, 0.5dvw);
-  transition: width 0.5s ease-in-out, height 0.5s ease-in-out;
-  visibility: hidden;
-
-  &[active] {
-    visibility: visible;
-  }
+  box-shadow: min(0.2vh, 0.1vw) min(0.2vh, 0.1vw) min(0.4vh, 0.2vw) black;
 
   .rsp-entry-div {
     display: flex;
@@ -23,7 +14,7 @@
     flex: 1;
   }
 
-  #rsp-responses-nav-activity {
+  .rsp-responses-nav {
     height: 100%;
     flex: 1;
     display: flex;
@@ -31,7 +22,7 @@
     gap: min(1dvh, 0.5dvw);
     align-items: center;
 
-    #rsp-response-add-button-activity {
+    .rsp-response-add-button {
       width: 80%;
       height: min(6dvh, 3dvw);
       flex: 0 0 fit-content;
@@ -41,7 +32,7 @@
       }
     }
 
-    #rsp-responses-list-activity {
+    .rsp-responses-list {
       display: flex;
       flex-direction: column;
       gap: min(1dvh, 0.5dvw);
@@ -52,15 +43,24 @@
         max-height: min(6dvh, 3dvw);
 
         &[data-delete-mode] {
-          background-color: red;
+          background-color: #B22222;
         }
 
         &[data-empty-response] .button-label {
           color: var(--tmd-text-disabled, gray);
         }
+
+        .button-label {
+          display: block;
+        }
       }
     }
   }
+}
+
+#rsp-entry-helping-nav {
+  display: grid;
+  gap: var(--half-gap);
 }
 
 #rsp-activity-dropdown {
@@ -79,5 +79,16 @@
 }
 
 #rsp-delete-mode-toggle[data-delete-mode] {
-  background-color: red;
+  background-color: #B22222;
+}
+
+#rsp-modal {
+  .deeplib-modal-prompt {
+    width: 100%;
+
+    input.deeplib-modal-input {
+      width: 100%;
+      max-width: none;
+    }
+  }
 }
