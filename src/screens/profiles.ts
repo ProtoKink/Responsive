@@ -10,7 +10,7 @@ export class GuiProfiles extends BaseSubscreen {
 
   protected static override subscreenOptions: SubscreenOptions = {
     name: 'profiles',
-    icon: 'Icons/Title.png',
+    icon: `${PUBLIC_URL}/images/users_group.svg`,
     drawCharacter: false
   };
 

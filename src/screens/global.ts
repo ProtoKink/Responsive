@@ -5,7 +5,7 @@ import { SubscreenOptions } from 'bc-deeplib/base/base_subscreen';
 export class GuiGlobal extends BaseSubscreen {
   protected static override subscreenOptions: SubscreenOptions = {
     name: 'settings',
-    icon: 'Icons/Preference.png',
+    icon: `${PUBLIC_URL}/images/cog.svg`,
   };
 
   get settings(): GlobalSettingsModel {

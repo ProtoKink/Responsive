@@ -39,7 +39,7 @@ export class GuiResponses extends BaseSubscreen {
 
   protected static override subscreenOptions: SubscreenOptions = {
     name: 'responses',
-    icon: 'Icons/Chat.png',
+    icon: `${PUBLIC_URL}/images/chat_round_line.svg`,
     forceUpCharacter: true
   };
 
@@ -95,7 +95,7 @@ export class GuiResponses extends BaseSubscreen {
                 id: selector.clearEntryButton,
                 onClick: () => this.clearEntry(),
                 options: {
-                  label: 'X',
+                  image: `${PUBLIC_URL}/images/cross.svg`,
                   tooltip: getText('responses.text.clear_entry')
                 },
                 size: [90, 90],
@@ -104,7 +104,7 @@ export class GuiResponses extends BaseSubscreen {
                 id: selector.copyEntryButton,
                 onClick: () => this.copyEntry(),
                 options: {
-                  image: 'Icons/Export.png',
+                  image: `${PUBLIC_URL}/images/copy.svg`,
                   tooltip: getText('responses.text.copy_entry')
                 },
                 size: [90, 90],
@@ -113,7 +113,7 @@ export class GuiResponses extends BaseSubscreen {
                 id: selector.pasteEntryButton,
                 onClick: () => this.pasteEntry(),
                 options: {
-                  image: 'Icons/Import.png',
+                  image: `${PUBLIC_URL}/images/paste.svg`,
                   tooltip: getText('responses.text.paste_entry')
                 },
                 size: [90, 90],
@@ -187,7 +187,7 @@ export class GuiResponses extends BaseSubscreen {
       id: selector.deleteModeToggle,
       onClick: () => this.toggleDeleteMode(),
       options: {
-        image: 'Icons/Trash.png',
+        image: `${PUBLIC_URL}/images/trash_bin.svg`,
         tooltip: getText('responses.text.toggle_delete_mode')
       },
       size: [90, 90],
@@ -603,7 +603,7 @@ export class GuiResponses extends BaseSubscreen {
             });
           },
           options: {
-            image: 'Icons/Plus.png',
+            image: `${PUBLIC_URL}/images/plus.svg`,
             label: 'Add Response',
           },
           htmlOptions: {
