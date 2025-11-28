@@ -1,7 +1,7 @@
-import { advElement, BaseSubscreen, domUtil, exportToGlobal, getModule, getText, layout, Modal, SettingElement, SubscreenOptions } from 'bc-deeplib/deeplib';
+import { advElement, BaseSubscreen, exportToGlobal, getModule, getText, layout, Modal, SettingElement, SubscreenOptions } from 'bc-deeplib/deeplib';
 import { ExtraType, ResponsesEntryModel, ResponsesSettingsModel } from '../models/responses';
 import { ResponsesModule } from '../modules/responses';
-import { logger } from '../utilities/definition';
+import { activityCanBeDoneOnSelf, getActivities, getActivityLabel } from '../utilities/activities';
 
 const selector = Object.freeze({
   entrySettingForm: 'rsp-entry-setting-form',
@@ -59,15 +59,6 @@ export class GuiResponses extends BaseSubscreen {
 
     const entry = this.getResponsesEntry(actName, groupName);
     return entry;
-  }
-
-  get activities(): Activity[] {
-    if (!GuiResponses.instance.currentGroup) return [];
-
-    const activities = AssetActivitiesForGroup('Female3DCG', GuiResponses.instance.currentGroup.Name, 'any');
-
-    return activities
-      .filter((a) => this.activityHasDictionaryText(this.getActivityLabelTag(a.Name, GuiResponses.instance.currentGroup?.Name)));
   }
 
   get pageStructure(): SettingElement[][] {
@@ -142,43 +133,6 @@ export class GuiResponses extends BaseSubscreen {
     ];
   }
 
-  static validateInput = (input: unknown) => {
-    const raw = `[${input}]`;
-
-    const validateStringList = (input: unknown) => {
-      if (!Array.isArray(input)) return undefined;
-      if (!(input as unknown[]).every((_) => typeof _ === 'string')) return undefined;
-      return input as string[];
-    };
-
-    try {
-      const data = JSON.parse(raw);
-      return validateStringList(data);
-    } catch (e) {
-      return logger.error(e);
-    }
-  };
-
-  static stringListShow = (input: string[]) => {
-    if (!input || input.length === 0) return '';
-    const result = JSON.stringify(input);
-    return result.substring(1, result.length - 1);
-  };
-
-  static activityCanBeDoneOnSelf(activity: ActivityName | undefined, group: AssetGroupItemName | undefined): boolean {
-    if (!activity || !group) return false;
-
-    const activityData = AssetGetActivity(Player.AssetFamily, activity);
-
-    if (!activityData || !activityData.TargetSelf) return false;
-
-    const targets = typeof activityData.TargetSelf === 'boolean'
-      ? activityData.Target
-      : activityData.TargetSelf;
-
-    return targets.includes(group);
-  }
-
   load() {
     GuiResponses.instance = this;
     super.load();
@@ -229,7 +183,7 @@ export class GuiResponses extends BaseSubscreen {
         const Zone = Group.Zone.find((z) => DialogClickedInZone(Player, z, 0.9, 50, 50, 1));
         if (!Zone) continue;
 
-        const activities = this.activities;
+        const activities = getActivities(this.focusGroup);
         if (this.activityIndex >= activities.length) this.activityIndex = 0;
 
         if (GuiResponses.instance.focusGroup !== Group) this.saveResponseEntry(this.currentEntry);
@@ -256,7 +210,7 @@ export class GuiResponses extends BaseSubscreen {
   }
 
   get currentActivity(): Activity | undefined {
-    return this.activities[this.activityIndex];
+    return getActivities(this.focusGroup)[this.activityIndex];
   }
 
   get currentGroup(): AssetItemGroup | undefined {
@@ -278,37 +232,6 @@ export class GuiResponses extends BaseSubscreen {
 
   getResponsesEntry(actName: ActivityName, grpName: AssetGroupItemName): ResponsesEntryModel | undefined {
     return getModule<ResponsesModule>('ResponsesModule').getResponsesEntry(actName, grpName);
-  }
-
-  activityHasDictionaryText(KeyWord: string | undefined): boolean {
-    if (!KeyWord) return false;
-
-    if (!ActivityDictionary) ActivityDictionaryLoad();
-    if (!ActivityDictionary) return false;
-
-    for (let D = 0; D < ActivityDictionary.length; D++) if (ActivityDictionary[D][0] === KeyWord) return true;
-    return false;
-  }
-
-  getActivityLabelTag(activityName: ActivityName | undefined, groupName: $AssetGroupItemName | undefined): `Label-ChatOther-${string}-${string}` | undefined {
-    if (!activityName || !groupName) return undefined;
-
-    if (Player.HasPenis()) {
-      if (groupName === 'ItemVulva') groupName = 'ItemPenis';
-      if (groupName === 'ItemVulvaPiercings') groupName = 'ItemGlans';
-    }
-
-    return `Label-ChatOther-${groupName}-${activityName}`;
-  }
-
-  getActivityLabel(activity: ActivityName, group: AssetGroupItemName) {
-    if (!activity || !group) return 'ACTIVITY NOT FOUND';
-
-    const tag = this.getActivityLabelTag(activity, group);
-
-    if (!tag) return 'ACTIVITY NOT FOUND';
-
-    return ActivityDictionaryText(tag);
   }
 
   // #region Entry Actions
@@ -425,7 +348,7 @@ export class GuiResponses extends BaseSubscreen {
 
     entry.responses = GuiResponses.instance.copiedEntry.responses ?? [];
     // GuiResponses.instance.loadResponseEntry(entry);
-    if (GuiResponses.activityCanBeDoneOnSelf(GuiResponses.instance.currentActivity?.Name, GuiResponses.instance.currentGroup?.Name))
+    if (activityCanBeDoneOnSelf(GuiResponses.instance.currentActivity?.Name, GuiResponses.instance.currentGroup?.Name))
       entry.selfTrigger = GuiResponses.instance.copiedEntry.selfTrigger;
 
     GuiResponses.instance.buildEntrySettingForm();
@@ -450,15 +373,15 @@ export class GuiResponses extends BaseSubscreen {
     if (entrySettingForm)
       entrySettingForm.innerHTML = '';
 
-    const activityCanBeDoneOnSelf = GuiResponses.activityCanBeDoneOnSelf(this.currentActivity?.Name, this.currentGroup?.Name);
+    const isActivityCanBeDoneOnSelf = activityCanBeDoneOnSelf(this.currentActivity?.Name, this.currentGroup?.Name);
 
     const selfTriggerCheckbox = advElement.createCheckbox({
       id: selector.entrySelfTrigger,
       label: getText('responses.setting.self_trigger.name'),
       description: getText('responses.setting.self_trigger.desc'),
-      setElementValue: () => activityCanBeDoneOnSelf && entry?.selfTrigger,
+      setElementValue: () => isActivityCanBeDoneOnSelf && entry?.selfTrigger,
       setSettingValue: (val) => entry.selfTrigger = val,
-      disabled: !activityCanBeDoneOnSelf
+      disabled: !isActivityCanBeDoneOnSelf
     });
 
     const settings = ElementCreate({
@@ -554,8 +477,8 @@ export class GuiResponses extends BaseSubscreen {
   // #endregion Extra Responses Entry Form
 
   buildActivityDropdown() {
-    const options = this.activities.map((act, index) => {
-      const groupName = GuiResponses.instance.focusGroup?.Name ? this.getActivityLabel(act.Name, GuiResponses.instance.focusGroup?.Name) : act.Name;
+    const options = getActivities(this.focusGroup).map((act, index) => {
+      const groupName = GuiResponses.instance.focusGroup?.Name ? getActivityLabel(act.Name, GuiResponses.instance.focusGroup?.Name) : act.Name;
       return ({
         attributes: {
           value: index,

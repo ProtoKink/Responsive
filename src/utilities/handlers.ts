@@ -1,6 +1,6 @@
 import { ResponsesEntryModel } from '../models/responses';
 import { ResponsesModule } from '../modules/responses';
-import { GuiResponses } from '../screens/responses';
+import { activityCanBeDoneOnSelf } from './activities';
 import { activityMessage, leaveMessage, orgasmMessage } from './chat_messages';
 import { modStorage } from './data';
 import { ModName } from './definition';
@@ -59,7 +59,7 @@ export const activityHandle = (dict: ActivityInfo, entry: ResponsesEntryModel) =
   if (CurrentScreen !== 'ChatRoom' || !Player) return;
   if (dict.targetCharacter.MemberNumber !== Player.MemberNumber) return;
   if (!entry || !entry?.responses) return;
-  if (entry.selfTrigger && !GuiResponses.activityCanBeDoneOnSelf(dict.activityName as ActivityName, dict.groupName as AssetGroupItemName)) return;
+  if (entry.selfTrigger && !activityCanBeDoneOnSelf(dict.activityName as ActivityName, dict.groupName as AssetGroupItemName)) return;
   if (!entry.selfTrigger && dict.targetCharacter.MemberNumber === dict.sourceCharacter.MemberNumber) return;
   if (!doesBcxAllowsTalking()) return;
 
