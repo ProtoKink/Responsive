@@ -96,10 +96,10 @@ profiles.text.has_been_deleted = has been deleted!
 profiles.text.not_saved_or_already_deleted = is not saved or already deleted!
 
 # Reset
-reset.label.perma_reset_of_bcr_data = - Permanent reset of ALL Responsive data -
+reset.label.perma_reset_of_mod_data = - Permanent reset of ALL Responsive data -
 reset.label.warning = - Warning -
 reset.label.if_u_confirm_perma_reset = If you confirm, all Responsive data (including settings, responses and profiles) will be permanently reset!
-reset.label.youll_able_to_use_bcr = You will be able to continue using Responsive, but all of your configuration will be reset to default!
+reset.label.youll_able_to_use_mod = You will be able to continue using Responsive, but all of your configuration will be reset to default!
 reset.label.action_cannot_be_undone = This action cannot be undone!
 
 reset.button.confirm = Confirm
