@@ -7,7 +7,10 @@
   "scripts": {
     "build": "deeplib",
     "dev": "deeplib --watch --serve",
-    "dev:lib": "deeplib --watch --serve --lib-local"
+    "dev:lib": "deeplib --watch --serve --lib-local",
+    "type:check": "tsc --noEmit",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix"
   },
   "repository": {
     "type": "git",
