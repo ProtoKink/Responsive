@@ -49,6 +49,13 @@ responses.prompt.edit = Edit response
 responses.text.empty_response = Empty
 responses.text.do_not_show_this_again_until_leaving_this_screen = Do not show this again until leaving this screen
 responses.prompt.delete = Are you sure you want to delete this response?
+responses.button.add_response = Add Response
+
+responses.activity.dropdown.label = Activity
+responses.activity.dropdown.desc = Select an activity to respond to.
+
+responses.setting.self_trigger.name = Self Trigger
+responses.setting.self_trigger.desc = Defines if response will be triggered when you are doing action on yourself.
 
 responses.extra.low = Low
 responses.extra.light = Light
@@ -56,29 +63,8 @@ responses.extra.medium = Medium
 responses.extra.hot = Hot
 responses.extra.orgasm = Orgasm
 
-responses.setting.self_trigger.name = Self Trigger
-responses.setting.self_trigger.desc = Defines if response will be triggered when you are doing action on yourself.
-
-responses.setting.master_set.name = Master Set
-responses.setting.master_set.desc = If checked, responses will be changed for all action in the entry
-
-responses.setting.responses.name = Responses:
-responses.setting.responses.desc = Responses that will be send when action is done on you. Leave empty for no response for this action
-
-responses.setting.low_response.name = Low Arousal Response:
-responses.setting.low_response.desc = Responses that will be added to action response when arousal is more or equals 20 and less than 40
-
-responses.setting.light_response.name = Light Arousal Response:
-responses.setting.light_response.desc = Responses that will be added to action response when arousal is more or equals 40 and below 60
-
-responses.setting.medium_response.name = Medium Arousal Response:
-responses.setting.medium_response.desc = Responses that will be added to action response when arousal is more or equals 60 and below 80
-
-responses.setting.hot_response.name = Hot Arousal Response:
-responses.setting.hot_response.desc = Responses that will be added to action response when arousal is more or equals 80 and less than 100
-
-responses.setting.orgasm_response.name = Orgasm Response:
-responses.setting.orgasm_response.desc = Responses that will be send when you're orgasming. Leave empty for no response for this 
+responses.extra.dropdown.label = Extra Response
+responses.extra.dropdown.desc = Select an extra response to respond to.
 
 # Profiles
 profiles.title = - Profiles -

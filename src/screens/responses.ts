@@ -442,8 +442,8 @@ export class GuiResponses extends BaseSubscreen {
         GuiResponses.instance.selectedExtra = value as ExtraType;
         GuiResponses.instance.buildExtraEntrySettingForm();
       },
-      label: 'Extra Response',
-      description: 'Select an extra response to respond to.',
+      label: getText('responses.extra.dropdown.label'),
+      description: getText('responses.extra.dropdown.desc'),
     });
 
     const settings = ElementCreate({
@@ -496,8 +496,8 @@ export class GuiResponses extends BaseSubscreen {
         GuiResponses.instance.activityIndex = CommonParseInt(value) ?? 0;
         GuiResponses.instance.buildEntrySettingForm();
       },
-      label: 'Activity',
-      description: 'Select an activity to respond to.',
+      label: getText('responses.activity.dropdown.label'),
+      description: getText('responses.activity.dropdown.desc'),
     });
 
     return dropdown;
@@ -527,7 +527,7 @@ export class GuiResponses extends BaseSubscreen {
           },
           options: {
             image: `${PUBLIC_URL}/images/plus.svg`,
-            label: 'Add Response',
+            label: getText('responses.button.add_response'),
           },
           htmlOptions: {
             button: {
