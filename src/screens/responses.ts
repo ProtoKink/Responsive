@@ -231,7 +231,7 @@ export class GuiResponses extends BaseSubscreen {
   }
 
   getResponsesEntry(actName: ActivityName, grpName: AssetGroupItemName): ResponsesEntryModel | undefined {
-    return getModule<ResponsesModule>('ResponsesModule').getResponsesEntry(actName, grpName);
+    return getModule<ResponsesModule>('ResponsesModule')?.getResponsesEntry(actName, grpName);
   }
 
   // #region Entry Actions

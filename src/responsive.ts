@@ -1,22 +1,16 @@
-import { GUI, GuiImportExport, initMod, Style, VersionModule } from 'bc-deeplib/deeplib';
+import { GUI, GuiImportExport, initMod, Style } from 'bc-deeplib/deeplib';
 import { CharTalkModule } from './modules/char_talk';
 import { GlobalModule } from './modules/global';
 import { ProfilesModule } from './modules/profiles';
 import { ResponsesModule } from './modules/responses';
 import { clearOldData, dataFix } from './utilities/data';
-import { MOD_VERSION_CAPTION, ModName, ModRepository } from './utilities/definition';
+import { ModName, ModRepository } from './utilities/definition';
 import { GuiReset } from './screens/reset';
 import { CommandsModule } from './modules/commands';
 
 initMod({
-  modInfo: {
-    info: {
-      name: ModName,
-      fullName: ModName,
-      version: MOD_VERSION_CAPTION,
-      repository: ModRepository
-    }
-  },
+  modName: ModName,
+  modRepository: ModRepository,
   async initFunction() {
     clearOldData();
     dataFix();
@@ -33,12 +27,10 @@ initMod({
     new GlobalModule(),
     new ResponsesModule(),
     new ProfilesModule(),
-    new VersionModule({}),
     new CharTalkModule(),
     new CommandsModule()
   ],
   mainMenuOptions: {
-    repoLink: ModRepository,
     wikiLink: 'https://github.com/dDeepLb/BC-Responsive/wiki',
     importExportSubscreen: new GuiImportExport({
       customFileExtension: 'bcrsp'

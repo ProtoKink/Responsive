@@ -1,4 +1,4 @@
-import { CMD_BCR, CMD_CHANGELOG, CMD_DEBUG_DATA, CMD_TOGGLE, CMD_VERSION, MOD_VERSION_CAPTION } from './definition';
+import { CMD_BCR, CMD_CHANGELOG, CMD_DEBUG_DATA, CMD_TOGGLE, CMD_VERSION } from './definition';
 
 //TODO - Translation
 

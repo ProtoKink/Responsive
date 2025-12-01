@@ -44,7 +44,7 @@ export class CommandsModule extends BaseModule {
           Tag: CMD_DEBUG_DATA,
           Description: ': To copy the Responsive debug data.',
           Action: () => {
-            navigator.clipboard.writeText(LZString.compressToBase64(JSON.stringify(modStorage.extensionStorage)));
+            navigator.clipboard.writeText(modStorage.extensionStorage);
           }
         }
       ]
