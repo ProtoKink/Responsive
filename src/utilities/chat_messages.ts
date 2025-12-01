@@ -1,6 +1,6 @@
 import { ExtraResponsesModel, ResponsesEntryModel } from '../models/responses';
 import { modStorage } from './data';
-import { getCharacter, getRandomInt } from './other';
+import { getRandomInt } from './other';
 
 export function activityDeconstruct(dict: IChatRoomMessageMetadata): ActivityInfo | undefined {
   const activityName = dict.ActivityName;
@@ -54,7 +54,9 @@ export function leaveMessage() {
 }
 
 export function activityMessage(dict: ActivityInfo, entry: ResponsesEntryModel | undefined) {
-  const source = getCharacter(dict.sourceCharacter.MemberNumber);
+  const source = dict.sourceCharacter;
+  const target = dict.targetCharacter;
+  const self = source === target;
   if (!source) return;
 
   const response = typedResponse(entry?.responses ?? []);
@@ -71,7 +73,9 @@ export function activityMessage(dict: ActivityInfo, entry: ResponsesEntryModel |
     return sendAction(templatedResponse.slice(1));
   }
 
-  chatRoomAutoInterceptMessage(ElementValue('InputChat'), templatedResponse);
+  const finalMessage = `${templatedResponse} ${moanDependingOnActivity(Player, dict.activityName, self)}`;
+
+  chatRoomAutoInterceptMessage(ElementValue('InputChat'), finalMessage);
 }
 
 export function sendAction(action: string) {
@@ -143,7 +147,7 @@ function typedMoan(moanType: 'low' | 'light' | 'medium' | 'hot' | 'orgasm') {
   return randomResponse(modStorage.playerStorage.ResponsesModule.extraResponses[moanType]);
 }
 
-function _baseMoan(arousal: number | undefined) {
+function baseMoan(arousal: number | undefined) {
   if (!arousal) return '';
   const factor = Math.floor(arousal / 20);
   if (factor < 1) return ''; // skip wnen arousal is >=0 && < 20. too low as for me.
@@ -158,26 +162,25 @@ function typedResponse(responses: string[]) {
   return randomResponse(responses);
 }
 
-/* function moanDependingOnActivity(C: Character, responses: string[] | undefined, act: string | undefined) {
+function moanDependingOnActivity(C: Character, act: ActivityName, self: boolean = false) {
   if (!C?.ArousalSettings) return;
-  if (!responses) return;
 
-  const doAddMoans = PlayerStorage().GlobalModule.doAddMoansOnHighArousal;
-  if (!doAddMoans) return "";
+  const doAddMoans = modStorage.playerStorage.GlobalModule.doAddMoansOnHighArousal;
+  if (!doAddMoans) return '';
+  
 
-  let actFactor = C.ArousalSettings.Activity.find((_) => _.Name === act)?.Self;
-  if (!actFactor) return "";
+  const actFactor = PreferenceGetActivityFactor(C, act, self);
+  if (!actFactor) return '';
 
-  let threthold1 = Math.max(10, (4 - actFactor) * 25);
-  let threthold2 = threthold1 + 40;
-  let arousal = C.ArousalSettings.Progress;
+  const threthold1 = Math.max(10, (4 - actFactor) * 25);
+  const arousal = C.ArousalSettings.Progress;
 
   if (arousal <= threthold1) {
-    return "";
+    return '';
   } else {
-    if (!baseMoan(arousal)) return "";
+    if (!baseMoan(arousal)) return '';
     else {
-      return "♥" + baseMoan(arousal) + "♥";
+      return baseMoan(arousal);
     }
   }
-} */
+}

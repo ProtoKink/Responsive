@@ -54,14 +54,14 @@ export class GuiGlobal extends BaseSubscreen {
         setElementValue: () => this.settings?.doLeaveMessage ?? true,
         setSettingValue: (val) => (this.settings.doLeaveMessage = val)
       },
-      /* {
-        id: "doAddMoansOnHighArousal",
-        type: "checkbox",
-        label: getText("settings.setting.doAddMoansOnHighArousal.name"),
-        description: getText("settings.setting.doAddMoansOnHighArousal.desc"),
+      {
+        id: 'doAddMoansOnHighArousal',
+        type: 'checkbox',
+        label: getText('settings.setting.doAddMoansOnHighArousal.name'),
+        description: getText('settings.setting.doAddMoansOnHighArousal.desc'),
         setElementValue: () => this.settings?.doAddMoansOnHighArousal ?? true,
         setSettingValue: (val) => (this.settings.doAddMoansOnHighArousal = val)
-      }, */
+      },
       {
         id: 'doPreventMessageIfBcxBlock',
         type: 'checkbox',
