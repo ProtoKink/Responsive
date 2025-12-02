@@ -1,4 +1,4 @@
-import { GUI, GuiImportExport, initMod, Style } from 'bc-deeplib/deeplib';
+import { GUI, GuiImportExport, initMod, Style, VersionModule } from 'bc-deeplib/deeplib';
 import { CharTalkModule } from './modules/char_talk';
 import { GlobalModule } from './modules/global';
 import { ProfilesModule } from './modules/profiles';
@@ -7,6 +7,7 @@ import { clearOldData, dataFix } from './utilities/data';
 import { ModName, ModRepository } from './utilities/definition';
 import { GuiReset } from './screens/reset';
 import { CommandsModule } from './modules/commands';
+import { BCR_CHANGELOG } from './utilities/messages';
 
 initMod({
   modName: ModName,
@@ -28,7 +29,10 @@ initMod({
     new ResponsesModule(),
     new ProfilesModule(),
     new CharTalkModule(),
-    new CommandsModule()
+    new CommandsModule(),
+    new VersionModule({
+      newVersionMessage: BCR_CHANGELOG
+    })
   ],
   mainMenuOptions: {
     wikiLink: 'https://github.com/dDeepLb/BC-Responsive/wiki',
