@@ -83,4 +83,22 @@ export class ResponsesModule extends BaseModule {
     if (!actName || !grpName) return undefined;
     return this.settings.mainResponses.find((ent) => ent.actName === actName && ent.groupName.includes(grpName));
   }
+
+  createNewEntry(actName: ActivityName, grpName: AssetGroupItemName, responses?: string[], selfTrigger?: boolean): ResponsesEntryModel {
+    return <ResponsesEntryModel>{
+      actName: actName,
+      groupName: [grpName],
+      responses: responses ?? [],
+      selfTrigger: selfTrigger ?? false
+    };
+  }
+
+  createEntryIfNeeded(existing: ResponsesEntryModel | undefined, activity: Activity | undefined, group: AssetItemGroup | undefined): ResponsesEntryModel | undefined {
+    if (!existing && activity?.Name && group?.Name) {
+      existing = this.createNewEntry(activity.Name, group.Name);
+      this.settings.mainResponses.push(existing);
+    }
+
+    return existing;
+  }
 }

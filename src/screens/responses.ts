@@ -1,4 +1,4 @@
-import { advElement, BaseSubscreen, exportToGlobal, getModule, getText, layout, Modal, SettingElement, SubscreenOptions } from 'bc-deeplib/deeplib';
+import { advElement, BaseSubscreen, exportToGlobal, getText, layout, Modal, SettingElement, SubscreenOptions } from 'bc-deeplib/deeplib';
 import { ExtraType, ResponsesEntryModel, ResponsesSettingsModel } from '../models/responses';
 import { ResponsesModule } from '../modules/responses';
 import { activityCanBeDoneOnSelf, getActivities, getActivityLabel } from '../utilities/activities';
@@ -36,6 +36,7 @@ export class GuiResponses extends BaseSubscreen {
   deleteMode: boolean = false;
   doNotShowConfirmation: boolean = false;
   selectedExtra: ExtraType = 'low';
+  declare module: ResponsesModule;
 
   protected static override subscreenOptions: SubscreenOptions = {
     name: 'responses',
@@ -57,7 +58,7 @@ export class GuiResponses extends BaseSubscreen {
 
     if (!actName || !groupName) return undefined;
 
-    const entry = this.getResponsesEntry(actName, groupName);
+    const entry = this.module.getResponsesEntry(actName, groupName);
     return entry;
   }
 
@@ -230,10 +231,6 @@ export class GuiResponses extends BaseSubscreen {
     else return '#80808044';
   }
 
-  getResponsesEntry(actName: ActivityName, grpName: AssetGroupItemName): ResponsesEntryModel | undefined {
-    return getModule<ResponsesModule>('ResponsesModule')?.getResponsesEntry(actName, grpName);
-  }
-
   // #region Entry Actions
 
   saveResponseEntry(entry: ResponsesEntryModel | undefined) {
@@ -244,7 +241,7 @@ export class GuiResponses extends BaseSubscreen {
     const responses = entry.responses ?? [];
 
     if (responses.filter(r => !!r).length > 0) {
-      if (!entry) entry = this.createEntryIfNeeded(entry);
+      if (!entry) entry = this.module.createEntryIfNeeded(entry, this.currentActivity, this.currentGroup);
 
       this.settings.mainResponses.sort((a, b) => a.actName.localeCompare(b.actName));
     } else {
@@ -299,29 +296,10 @@ export class GuiResponses extends BaseSubscreen {
 
     unmergingEntry.groupName.splice(unmergingEntry.groupName.indexOf(this.currentGroup.Name), 1);
 
-    const newEntry = this.createNewEntry(this.currentActivity.Name, this.currentGroup.Name, validResponses, entry.selfTrigger);
+    const newEntry = this.module.createNewEntry(this.currentActivity.Name, this.currentGroup.Name, validResponses, entry.selfTrigger);
     this.settings.mainResponses.push(newEntry);
 
     return true;
-  }
-
-  createNewEntry(actName: ActivityName, grpName: AssetGroupItemName, responses?: string[], selfTrigger?: boolean): ResponsesEntryModel {
-    return <ResponsesEntryModel>{
-      actName: actName,
-      groupName: [grpName],
-      responses: responses ?? [],
-      selfTrigger: selfTrigger ?? false
-    };
-  }
-
-  createEntryIfNeeded(existing: ResponsesEntryModel | undefined): ResponsesEntryModel | undefined {
-    if (!existing && this.currentActivity?.Name && this.currentGroup?.Name) {
-      existing = this.createNewEntry(this.currentActivity?.Name, this.currentGroup?.Name);
-      this.settings.mainResponses.push(existing);
-      // this.loadResponseEntry(this.currentEntry);
-    }
-
-    return existing;
   }
 
   copyEntry(entry?: ResponsesEntryModel | undefined) {
@@ -342,7 +320,7 @@ export class GuiResponses extends BaseSubscreen {
     if (!GuiResponses.instance.copiedEntry) return ToastManager.error('No entry to paste to');
 
     if (Object.keys(GuiResponses.instance.copiedEntry).length === 0) return;
-    if (!entry) entry = GuiResponses.instance.createEntryIfNeeded(entry);
+    if (!entry) entry = this.module.createEntryIfNeeded(entry, this.currentActivity, this.currentGroup);
 
     if (!entry) return;
 
@@ -364,7 +342,7 @@ export class GuiResponses extends BaseSubscreen {
     let entry = GuiResponses.instance.currentEntry;
 
     if (!entry) {
-      entry = this.createEntryIfNeeded(entry);
+      entry = this.module.createEntryIfNeeded(entry, this.currentActivity, this.currentGroup);
     }
 
     if (!entry) return [];
@@ -604,10 +582,10 @@ export class GuiResponses extends BaseSubscreen {
   buildActivityResponsesList() {
     if (!this.currentActivity || !this.currentGroup) return '';
 
-    let responseEntry = this.getResponsesEntry(this.currentActivity?.Name, this.currentGroup?.Name);
+    let responseEntry = this.module.getResponsesEntry(this.currentActivity?.Name, this.currentGroup?.Name);
 
     if (!responseEntry)
-      responseEntry = this.createEntryIfNeeded(responseEntry);
+      responseEntry = this.module.createEntryIfNeeded(responseEntry, this.currentActivity, this.currentGroup);
 
     const responses = responseEntry?.responses;
 
@@ -617,10 +595,10 @@ export class GuiResponses extends BaseSubscreen {
   renderActivityResponsesList() {
     if (!this.currentActivity || !this.currentGroup) return;
 
-    let responseEntry = this.getResponsesEntry(this.currentActivity?.Name, this.currentGroup?.Name);
+    let responseEntry = this.module.getResponsesEntry(this.currentActivity?.Name, this.currentGroup?.Name);
 
     if (!responseEntry)
-      responseEntry = this.createEntryIfNeeded(responseEntry);
+      responseEntry = this.module.createEntryIfNeeded(responseEntry, this.currentActivity, this.currentGroup);
 
     const responses = responseEntry?.responses;
 
