@@ -1,4 +1,4 @@
-import { ResponsesSettingsModel } from '../models/responses';
+import { BehaviorsSettingsModel } from '../models/behaviors';
 import { logger } from './definition';
 
 const DefaultResponses = {
@@ -32,7 +32,7 @@ const setData = (key: keyof typeof DefaultResponses) => {
 };
 
 export function getDefaultResponsesEntries() {
-  return <ResponsesSettingsModel>{
+  return <BehaviorsSettingsModel>{
     mainResponses: [
       {
         actName: 'Pet',

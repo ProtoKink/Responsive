@@ -1,6 +1,6 @@
 import { advElement, BaseSubscreen, exportToGlobal, getText, layout, Modal, SettingElement, SubscreenOptions } from 'bc-deeplib/deeplib';
-import { ExtraType, ResponsesEntryModel, ResponsesSettingsModel } from '../models/responses';
-import { ResponsesModule } from '../modules/responses';
+import { ExtraType, BehaviorsEntryModel, BehaviorsSettingsModel } from '../models/behaviors';
+import { BehaviorsModule } from '../modules/behaviors';
 import { activityCanBeDoneOnSelf, getActivities, getActivityLabel } from '../utilities/activities';
 
 const selector = Object.freeze({
@@ -27,16 +27,16 @@ const selector = Object.freeze({
   entryFormClass: 'rsp-entry-form',
 });
 
-export class GuiResponses extends BaseSubscreen {
-  static instance: GuiResponses;
+export class GuiBehaviors extends BaseSubscreen {
+  static instance: GuiBehaviors;
 
   activityIndex: number = 0;
-  copiedEntry: ResponsesEntryModel | undefined = undefined;
+  copiedEntry: BehaviorsEntryModel | undefined = undefined;
   focusGroup: AssetItemGroup = AssetGroupGet('Female3DCG', 'ItemArms') as AssetItemGroup;
   deleteMode: boolean = false;
   doNotShowConfirmation: boolean = false;
   selectedExtra: ExtraType = 'low';
-  declare module: ResponsesModule;
+  declare module: BehaviorsModule;
 
   protected static override subscreenOptions: SubscreenOptions = {
     name: 'responses',
@@ -44,15 +44,15 @@ export class GuiResponses extends BaseSubscreen {
     forceUpCharacter: true
   };
 
-  get settings(): ResponsesSettingsModel {
-    return super.settings as ResponsesSettingsModel;
+  get settings(): BehaviorsSettingsModel {
+    return super.settings as BehaviorsSettingsModel;
   }
 
-  set settings(val: ResponsesSettingsModel) {
+  set settings(val: BehaviorsSettingsModel) {
     super.settings = val;
   }
 
-  get currentEntry(): ResponsesEntryModel | undefined {
+  get currentEntry(): BehaviorsEntryModel | undefined {
     const actName = this.currentActivity?.Name;
     const groupName = this.currentGroup?.Name;
 
@@ -75,7 +75,7 @@ export class GuiResponses extends BaseSubscreen {
             parent: layout.getSubscreen()
           },
           position: [520, 180],
-          size: () => GuiResponses.instance.focusGroup ? [1280, 720] : [0, 0],
+          size: () => GuiBehaviors.instance.focusGroup ? [1280, 720] : [0, 0],
         },
         {
           type: 'custom',
@@ -135,7 +135,7 @@ export class GuiResponses extends BaseSubscreen {
   }
 
   load() {
-    GuiResponses.instance = this;
+    GuiBehaviors.instance = this;
     super.load();
 
     const deleteModeButton = advElement.createButton({
@@ -157,15 +157,15 @@ export class GuiResponses extends BaseSubscreen {
       // Draws all the available character zones
       for (const Group of AssetGroup) {
         if (Group.IsItem() && !Group.MirrorActivitiesFrom && AssetActivitiesForGroup('Female3DCG', Group.Name).length) {
-          const isActive = GuiResponses.instance.focusGroup === Group;
+          const isActive = GuiBehaviors.instance.focusGroup === Group;
           if (isActive) continue;
-          DrawAssetGroupZone(Player, Group.Zone, 0.9, 50, 50, 1, '#606060FF', 1, GuiResponses.instance.getZoneColor(Group.Name));
+          DrawAssetGroupZone(Player, Group.Zone, 0.9, 50, 50, 1, '#606060FF', 1, GuiBehaviors.instance.getZoneColor(Group.Name));
         }
       }
 
-      if (GuiResponses.instance.focusGroup) {
-        const group = GuiResponses.instance.focusGroup;
-        DrawAssetGroupZone(Player, group.Zone, 0.9, 50, 50, 1, 'cyan', 1, GuiResponses.instance.getZoneColor(group.Name));
+      if (GuiBehaviors.instance.focusGroup) {
+        const group = GuiBehaviors.instance.focusGroup;
+        DrawAssetGroupZone(Player, group.Zone, 0.9, 50, 50, 1, 'cyan', 1, GuiBehaviors.instance.getZoneColor(group.Name));
 
         MainCanvas.textAlign = 'left';
       } else {
@@ -187,9 +187,9 @@ export class GuiResponses extends BaseSubscreen {
         const activities = getActivities(this.focusGroup);
         if (this.activityIndex >= activities.length) this.activityIndex = 0;
 
-        if (GuiResponses.instance.focusGroup !== Group) this.saveResponseEntry(this.currentEntry);
-        GuiResponses.instance.focusGroup = Group;
-        if (GuiResponses.instance.focusGroup) {
+        if (GuiBehaviors.instance.focusGroup !== Group) this.saveResponseEntry(this.currentEntry);
+        GuiBehaviors.instance.focusGroup = Group;
+        if (GuiBehaviors.instance.focusGroup) {
           this.buildEntrySettingForm();
         }
         // this.loadResponseEntry(this.currentEntry);
@@ -198,14 +198,14 @@ export class GuiResponses extends BaseSubscreen {
   }
 
   exit() {
-    GuiResponses.instance.settings.mainResponses = this.settings.mainResponses.filter((a) => a.responses.length > 0 && a.responses.some((r) => !!r));
+    GuiBehaviors.instance.settings.mainResponses = this.settings.mainResponses.filter((a) => a.responses.length > 0 && a.responses.some((r) => !!r));
     this.saveResponseEntry(this.currentEntry);
-    GuiResponses.instance.focusGroup = AssetGroupGet('Female3DCG', 'ItemArms') as AssetItemGroup;
-    GuiResponses.instance.activityIndex = 0;
-    GuiResponses.instance.copiedEntry = undefined;
-    GuiResponses.instance.deleteMode = false;
-    GuiResponses.instance.doNotShowConfirmation = false;
-    GuiResponses.instance.selectedExtra = 'low';
+    GuiBehaviors.instance.focusGroup = AssetGroupGet('Female3DCG', 'ItemArms') as AssetItemGroup;
+    GuiBehaviors.instance.activityIndex = 0;
+    GuiBehaviors.instance.copiedEntry = undefined;
+    GuiBehaviors.instance.deleteMode = false;
+    GuiBehaviors.instance.doNotShowConfirmation = false;
+    GuiBehaviors.instance.selectedExtra = 'low';
 
     super.exit();
   }
@@ -215,7 +215,7 @@ export class GuiResponses extends BaseSubscreen {
   }
 
   get currentGroup(): AssetItemGroup | undefined {
-    const group = GuiResponses.instance.focusGroup;
+    const group = GuiBehaviors.instance.focusGroup;
 
     if (!group?.IsItem()) return;
 
@@ -233,7 +233,7 @@ export class GuiResponses extends BaseSubscreen {
 
   // #region Entry Actions
 
-  saveResponseEntry(entry: ResponsesEntryModel | undefined) {
+  saveResponseEntry(entry: BehaviorsEntryModel | undefined) {
     entry ??= this.currentEntry;
 
     if (!entry) return;
@@ -249,7 +249,7 @@ export class GuiResponses extends BaseSubscreen {
     }
   }
 
-  clearEntry(entry?: ResponsesEntryModel) {
+  clearEntry(entry?: BehaviorsEntryModel) {
     entry ??= this.currentEntry;
 
     if (!entry) return ToastManager.error('No entry to clear');
@@ -274,7 +274,7 @@ export class GuiResponses extends BaseSubscreen {
    *
    * create new entry with this data
    */
-  unmergeEntry(entry: ResponsesEntryModel, validResponses: string[]) {
+  unmergeEntry(entry: BehaviorsEntryModel, validResponses: string[]) {
     // Responses we entered into Responses field
     const stringifiedCurrentResponses = JSON.stringify(validResponses);
 
@@ -302,34 +302,34 @@ export class GuiResponses extends BaseSubscreen {
     return true;
   }
 
-  copyEntry(entry?: ResponsesEntryModel | undefined) {
-    entry ??= GuiResponses.instance.currentEntry;
+  copyEntry(entry?: BehaviorsEntryModel | undefined) {
+    entry ??= GuiBehaviors.instance.currentEntry;
 
     if (!entry) return ToastManager.error('No entry to copy');
 
-    GuiResponses.instance.copiedEntry = structuredClone(entry) as ResponsesEntryModel;
+    GuiBehaviors.instance.copiedEntry = structuredClone(entry) as BehaviorsEntryModel;
 
     ToastManager.success('Entry copied');
   }
 
-  pasteEntry(entry?: ResponsesEntryModel | undefined) {
-    entry ??= GuiResponses.instance.currentEntry;
+  pasteEntry(entry?: BehaviorsEntryModel | undefined) {
+    entry ??= GuiBehaviors.instance.currentEntry;
 
     if (!entry) return;
 
-    if (!GuiResponses.instance.copiedEntry) return ToastManager.error('No entry to paste to');
+    if (!GuiBehaviors.instance.copiedEntry) return ToastManager.error('No entry to paste to');
 
-    if (Object.keys(GuiResponses.instance.copiedEntry).length === 0) return;
+    if (Object.keys(GuiBehaviors.instance.copiedEntry).length === 0) return;
     if (!entry) entry = this.module.createEntryIfNeeded(entry, this.currentActivity, this.currentGroup);
 
     if (!entry) return;
 
-    entry.responses = GuiResponses.instance.copiedEntry.responses ?? [];
+    entry.responses = GuiBehaviors.instance.copiedEntry.responses ?? [];
     // GuiResponses.instance.loadResponseEntry(entry);
-    if (activityCanBeDoneOnSelf(GuiResponses.instance.currentActivity?.Name, GuiResponses.instance.currentGroup?.Name))
-      entry.selfTrigger = GuiResponses.instance.copiedEntry.selfTrigger;
+    if (activityCanBeDoneOnSelf(GuiBehaviors.instance.currentActivity?.Name, GuiBehaviors.instance.currentGroup?.Name))
+      entry.selfTrigger = GuiBehaviors.instance.copiedEntry.selfTrigger;
 
-    GuiResponses.instance.buildEntrySettingForm();
+    GuiBehaviors.instance.buildEntrySettingForm();
 
     ToastManager.success('Entry pasted');
   }
@@ -339,7 +339,7 @@ export class GuiResponses extends BaseSubscreen {
   // #region Main Responses Entry Form
 
   buildEntrySettingForm() {
-    let entry = GuiResponses.instance.currentEntry;
+    let entry = GuiBehaviors.instance.currentEntry;
 
     if (!entry) {
       entry = this.module.createEntryIfNeeded(entry, this.currentActivity, this.currentGroup);
@@ -417,8 +417,8 @@ export class GuiResponses extends BaseSubscreen {
       id: selector.extraDropdown,
       optionsList: dropdownOptions,
       setSettingValue: function (value) {
-        GuiResponses.instance.selectedExtra = value as ExtraType;
-        GuiResponses.instance.buildExtraEntrySettingForm();
+        GuiBehaviors.instance.selectedExtra = value as ExtraType;
+        GuiBehaviors.instance.buildExtraEntrySettingForm();
       },
       label: getText('responses.extra.dropdown.label'),
       description: getText('responses.extra.dropdown.desc'),
@@ -456,12 +456,12 @@ export class GuiResponses extends BaseSubscreen {
 
   buildActivityDropdown() {
     const options = getActivities(this.focusGroup).map((act, index) => {
-      const groupName = GuiResponses.instance.focusGroup?.Name ? getActivityLabel(act.Name, GuiResponses.instance.focusGroup?.Name) : act.Name;
+      const groupName = GuiBehaviors.instance.focusGroup?.Name ? getActivityLabel(act.Name, GuiBehaviors.instance.focusGroup?.Name) : act.Name;
       return ({
         attributes: {
           value: index,
           label: groupName,
-          selected: index === GuiResponses.instance.activityIndex
+          selected: index === GuiBehaviors.instance.activityIndex
         }
       }) as Omit<HTMLOptions<'option'>, 'tag'>;
     });
@@ -470,9 +470,9 @@ export class GuiResponses extends BaseSubscreen {
       id: selector.activityDropdown,
       optionsList: options,
       setSettingValue: function (value) {
-        GuiResponses.instance.saveResponseEntry(GuiResponses.instance.currentEntry);
-        GuiResponses.instance.activityIndex = CommonParseInt(value) ?? 0;
-        GuiResponses.instance.buildEntrySettingForm();
+        GuiBehaviors.instance.saveResponseEntry(GuiBehaviors.instance.currentEntry);
+        GuiBehaviors.instance.activityIndex = CommonParseInt(value) ?? 0;
+        GuiBehaviors.instance.buildEntrySettingForm();
       },
       label: getText('responses.activity.dropdown.label'),
       description: getText('responses.activity.dropdown.desc'),
@@ -500,7 +500,7 @@ export class GuiResponses extends BaseSubscreen {
               if (response === null) return;
 
               responses.push(response);
-              GuiResponses.instance.renderResponsesList(id, responses);
+              GuiBehaviors.instance.renderResponsesList(id, responses);
             });
           },
           options: {
@@ -532,7 +532,7 @@ export class GuiResponses extends BaseSubscreen {
                   button: {
                     classList: [selector.responseEntryButton],
                     dataAttributes: {
-                      deleteMode: GuiResponses.instance.deleteMode,
+                      deleteMode: GuiBehaviors.instance.deleteMode,
                       emptyResponse: response === ''
                     }
                   },
@@ -541,19 +541,19 @@ export class GuiResponses extends BaseSubscreen {
                   }
                 },
                 onClick: async function () {
-                  if (GuiResponses.instance.deleteMode) {
-                    const confirmation = GuiResponses.instance.doNotShowConfirmation || await Modal.confirm([
+                  if (GuiBehaviors.instance.deleteMode) {
+                    const confirmation = GuiBehaviors.instance.doNotShowConfirmation || await Modal.confirm([
                       getText('responses.prompt.delete'),
                       advElement.createCheckbox({
                         id: selector.doNotShowThisAgain,
                         label: getText('responses.text.do_not_show_this_again_until_leaving_this_screen'),
-                        setSettingValue: (val) => GuiResponses.instance.doNotShowConfirmation = val
+                        setSettingValue: (val) => GuiBehaviors.instance.doNotShowConfirmation = val
                       })
                     ], { modalId: 'rsp-modal' });
 
                     if (confirmation) {
                       responses.splice(index, 1);
-                      GuiResponses.instance.renderResponsesList(id, responses);
+                      GuiBehaviors.instance.renderResponsesList(id, responses);
                     }
                   } else {
                     Modal.prompt(getText('responses.prompt.edit'), { defaultValue: response, modalId: 'rsp-modal' }).then((newResponse) => {
@@ -561,7 +561,7 @@ export class GuiResponses extends BaseSubscreen {
                       else if (newResponse === null) return;
                       else responses[index] = newResponse;
 
-                      GuiResponses.instance.renderResponsesList(id, responses);
+                      GuiBehaviors.instance.renderResponsesList(id, responses);
                     });
                   }
                 }
@@ -622,4 +622,4 @@ export class GuiResponses extends BaseSubscreen {
   }
 }
 
-exportToGlobal('GuiResponses', GuiResponses);
+exportToGlobal('GuiResponses', GuiBehaviors);

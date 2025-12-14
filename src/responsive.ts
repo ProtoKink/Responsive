@@ -2,7 +2,7 @@ import { GUI, GuiImportExport, initMod, Style, VersionModule } from 'bc-deeplib/
 import { CharTalkModule } from './modules/char_talk';
 import { GlobalModule } from './modules/global';
 import { ProfilesModule } from './modules/profiles';
-import { ResponsesModule } from './modules/responses';
+import { BehaviorsModule } from './modules/behaviors';
 import { clearOldData, dataFix } from './utilities/data';
 import { ModName, ModRepository } from './utilities/definition';
 import { GuiReset } from './screens/reset';
@@ -17,7 +17,7 @@ initMod({
     dataFix();
 
     Style.injectEmbed('bcr_style', `${PUBLIC_URL}/styles/main.css`);
-    Style.injectEmbed('bcr_responses_style', `${PUBLIC_URL}/styles/responses.css`);
+    Style.injectEmbed('bcr_behaviors_style', `${PUBLIC_URL}/styles/behaviors.css`);
   },
   modules: [
     new GUI({
@@ -26,7 +26,7 @@ initMod({
       image: 'Icons/Arousal.png',
     }),
     new GlobalModule(),
-    new ResponsesModule(),
+    new BehaviorsModule(),
     new ProfilesModule(),
     new CharTalkModule(),
     new CommandsModule(),

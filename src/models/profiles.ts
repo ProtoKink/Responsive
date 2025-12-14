@@ -1,6 +1,6 @@
 import { BaseSettingsModel } from 'bc-deeplib/deeplib';
 import { GlobalSettingsModel } from './base';
-import { ResponsesSettingsModel } from './responses';
+import { BehaviorsSettingsModel } from './behaviors';
 
 export type ProfilesSettingsModel = BaseSettingsModel & {
   [index: number]: ProfileEntryModel;
@@ -13,6 +13,6 @@ export type ProfileEntryModel = {
 
 export type ProfileSaveModel = {
   GlobalModule: GlobalSettingsModel;
-  ResponsesModule: ResponsesSettingsModel;
+  BehaviorsModule: BehaviorsSettingsModel;
 };
 

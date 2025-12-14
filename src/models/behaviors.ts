@@ -2,12 +2,12 @@ import { BaseSettingsModel } from 'bc-deeplib/deeplib';
 
 export type ExtraType = 'low' | 'light' | 'medium' | 'hot' | 'orgasm';
 
-export type ResponsesSettingsModel = BaseSettingsModel & {
-  mainResponses: ResponsesEntryModel[];
+export type BehaviorsSettingsModel = BaseSettingsModel & {
+  mainResponses: BehaviorsEntryModel[];
   extraResponses: ExtraResponsesModel;
 };
 
-export type ResponsesEntryModel = {
+export type BehaviorsEntryModel = {
   actName: ActivityName;
   groupName: AssetGroupItemName[];
   responses: string[];

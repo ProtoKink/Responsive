@@ -1,4 +1,4 @@
-import { ExtraResponsesModel, ResponsesEntryModel } from '../models/responses';
+import { ExtraResponsesModel, BehaviorsEntryModel } from '../models/behaviors';
 import { modStorage } from './data';
 import { getRandomInt } from './other';
 
@@ -53,7 +53,7 @@ export function leaveMessage() {
   if (isSimpleChat(ElementValue('InputChat'))) chatRoomAutoInterceptMessage(ElementValue('InputChat'), ' ');
 }
 
-export function activityMessage(dict: ActivityInfo, entry: ResponsesEntryModel | undefined) {
+export function activityMessage(dict: ActivityInfo, entry: BehaviorsEntryModel | undefined) {
   const source = dict.sourceCharacter;
   const target = dict.targetCharacter;
   const self = source === target;
@@ -144,7 +144,7 @@ function randomResponse(key: string[]) {
 }
 
 function typedMoan(moanType: 'low' | 'light' | 'medium' | 'hot' | 'orgasm') {
-  return randomResponse(modStorage.playerStorage.ResponsesModule.extraResponses[moanType]);
+  return randomResponse(modStorage.playerStorage.BehaviorsModule.extraResponses[moanType]);
 }
 
 function baseMoan(arousal: number | undefined) {

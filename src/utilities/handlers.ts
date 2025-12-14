@@ -1,5 +1,5 @@
-import { ResponsesEntryModel } from '../models/responses';
-import { ResponsesModule } from '../modules/responses';
+import { BehaviorsEntryModel } from '../models/behaviors';
+import { BehaviorsModule } from '../modules/behaviors';
 import { activityCanBeDoneOnSelf } from './activities';
 import { activityMessage, leaveMessage, orgasmMessage } from './chat_messages';
 import { modStorage } from './data';
@@ -44,15 +44,15 @@ export const orgasmHandle = (c: Character) => {
   if (!modData.GlobalModule.responsesEnabled) return;
   if (CurrentScreen !== 'ChatRoom' || !Player) return;
   if (Player.MemberNumber !== c.MemberNumber) return;
-  if (!modData.ResponsesModule.extraResponses.orgasm) return;
+  if (!modData.BehaviorsModule.extraResponses.orgasm) return;
   if (ActivityOrgasmRuined) return;
   if (!doesBcxAllowsTalking()) return;
 
-  ResponsesModule.isOrgasm = true;
+  BehaviorsModule.isOrgasm = true;
   orgasmMessage();
 };
 
-export const activityHandle = (dict: ActivityInfo, entry: ResponsesEntryModel) => {
+export const activityHandle = (dict: ActivityInfo, entry: BehaviorsEntryModel) => {
   const modData = modStorage.playerStorage;
   if (!modData.GlobalModule.modEnabled) return;
   if (!modData.GlobalModule.responsesEnabled) return;

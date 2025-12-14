@@ -1,7 +1,7 @@
 import { advElement, BaseSubscreen, getText, layout, Modal, SubscreenOptions } from 'bc-deeplib/deeplib';
 import { ProfileEntryModel, ProfilesSettingsModel } from '../models/profiles';
 import { logger } from '../utilities/definition';
-import { ResponsesSettingsModel } from '../models/responses';
+import { BehaviorsSettingsModel } from '../models/behaviors';
 import { GlobalSettingsModel } from '../models/base';
 import { modStorage } from '../utilities/data';
 
@@ -106,7 +106,7 @@ export class GuiProfiles extends BaseSubscreen {
       name: name,
       data: {
         GlobalModule: storage.GlobalModule as GlobalSettingsModel,
-        ResponsesModule: storage.ResponsesModule as ResponsesSettingsModel
+        BehaviorsModule: storage.BehaviorsModule as BehaviorsSettingsModel
       },
     });
 
@@ -128,7 +128,7 @@ export class GuiProfiles extends BaseSubscreen {
     modStorage.playerStorage = CommonCloneDeep({
       ...modStorage.playerStorage,
       GlobalModule: data.GlobalModule,
-      ResponsesModule: data.ResponsesModule
+      BehaviorsModule: data.BehaviorsModule
     });
 
     const name = this.settings[profileId].name;

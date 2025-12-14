@@ -1,26 +1,26 @@
 import { BaseModule, Subscreen, sdk } from 'bc-deeplib/deeplib';
 import { activityDeconstruct } from '../utilities/chat_messages';
 import { activityHandle, leaveHandle, orgasmHandle } from '../utilities/handlers';
-import { ResponsesEntryModel, ResponsesSettingsModel } from '../models/responses';
-import { GuiResponses } from '../screens/responses';
+import { BehaviorsEntryModel, BehaviorsSettingsModel } from '../models/behaviors';
+import { GuiBehaviors } from '../screens/behaviors';
 import { getDefaultResponsesEntries } from '../utilities/default_responses_entries';
 import { HookPriority, ModuleCategory } from '../utilities/sdk';
 
-export class ResponsesModule extends BaseModule {
-  static instance: ResponsesModule;
+export class BehaviorsModule extends BaseModule {
+  static instance: BehaviorsModule;
 
   static isOrgasm: boolean = false; // Just for Char Talk stuff
 
-  get settings(): ResponsesSettingsModel {
-    return super.settings as ResponsesSettingsModel;
+  get settings(): BehaviorsSettingsModel {
+    return super.settings as BehaviorsSettingsModel;
   }
 
-  set settings(val: ResponsesSettingsModel) {
+  set settings(val: BehaviorsSettingsModel) {
     super.settings = val;
   }
 
   get settingsScreen(): Subscreen | null {
-    return GuiResponses;
+    return GuiBehaviors;
   }
 
   get defaultSettings() {
@@ -29,7 +29,7 @@ export class ResponsesModule extends BaseModule {
 
   load(): void {
     super.load();
-    ResponsesModule.instance = this;
+    BehaviorsModule.instance = this;
     
     ChatRoomRegisterMessageHandler({
       Description: 'Processes activity responses',
@@ -79,13 +79,13 @@ export class ResponsesModule extends BaseModule {
 
   run(): void {}
 
-  getResponsesEntry(actName: ActivityName | undefined, grpName: AssetGroupItemName | undefined): ResponsesEntryModel | undefined {
+  getResponsesEntry(actName: ActivityName | undefined, grpName: AssetGroupItemName | undefined): BehaviorsEntryModel | undefined {
     if (!actName || !grpName) return undefined;
     return this.settings.mainResponses.find((ent) => ent.actName === actName && ent.groupName.includes(grpName));
   }
 
-  createNewEntry(actName: ActivityName, grpName: AssetGroupItemName, responses?: string[], selfTrigger?: boolean): ResponsesEntryModel {
-    return <ResponsesEntryModel>{
+  createNewEntry(actName: ActivityName, grpName: AssetGroupItemName, responses?: string[], selfTrigger?: boolean): BehaviorsEntryModel {
+    return <BehaviorsEntryModel>{
       actName: actName,
       groupName: [grpName],
       responses: responses ?? [],
@@ -93,7 +93,7 @@ export class ResponsesModule extends BaseModule {
     };
   }
 
-  createEntryIfNeeded(existing: ResponsesEntryModel | undefined, activity: Activity | undefined, group: AssetItemGroup | undefined): ResponsesEntryModel | undefined {
+  createEntryIfNeeded(existing: BehaviorsEntryModel | undefined, activity: Activity | undefined, group: AssetItemGroup | undefined): BehaviorsEntryModel | undefined {
     if (!existing && activity?.Name && group?.Name) {
       existing = this.createNewEntry(activity.Name, group.Name);
       this.settings.mainResponses.push(existing);

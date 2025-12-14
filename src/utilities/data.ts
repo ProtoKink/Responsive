@@ -1,7 +1,7 @@
 import { ModStorage } from 'bc-deeplib/deeplib';
 import { GlobalSettingsModel } from '../models/base';
 import { ProfileEntryModel } from '../models/profiles';
-import { ResponsesSettingsModel } from '../models/responses';
+import { BehaviorsSettingsModel } from '../models/behaviors';
 import { SettingsModel } from '../models/settings';
 
 export const modStorage = new ModStorage<SettingsModel>('Responsive');
@@ -13,7 +13,7 @@ export function dataErase(doResetSettings: boolean, doResetResponses: boolean, d
   }
 
   if (doResetResponses) {
-    data.ResponsesModule = <ResponsesSettingsModel>{};
+    data.BehaviorsModule = <BehaviorsSettingsModel>{};
   }
 
   if (doResetProfiles) {
@@ -24,7 +24,7 @@ export function dataErase(doResetSettings: boolean, doResetResponses: boolean, d
 
 export function dataResetForManual() {
   const data = modStorage.playerStorage;
-  data.ResponsesModule = <ResponsesSettingsModel><unknown>{
+  data.BehaviorsModule = <BehaviorsSettingsModel><unknown>{
     mainResponses: [],
     extraResponses: {
       low: [],
@@ -39,7 +39,7 @@ export function dataResetForManual() {
 
 export function dataFix() {
   const data = modStorage.playerStorage;
-  const mainResponses = data.ResponsesModule.mainResponses;
+  const mainResponses = data.BehaviorsModule.mainResponses;
 
   mainResponses.forEach((entry) => {
     if (entry.actName === undefined) {
