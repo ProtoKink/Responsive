@@ -1,24 +1,5 @@
-import { ExtraResponsesModel, BehaviorsEntryModel } from '../models/behaviors';
 import { modStorage } from './data';
 import { getRandomInt } from './other';
-
-export function activityDeconstruct(dict: IChatRoomMessageMetadata): ActivityInfo | undefined {
-  const activityName = dict.ActivityName;
-  const targetCharacter = dict.TargetCharacter;
-  const groupName = dict.GroupName as AssetGroupItemName;
-  const sourceCharacter = dict.SourceCharacter;
-
-  if (activityName === undefined || targetCharacter === undefined || groupName === undefined || sourceCharacter === undefined) {
-    return undefined;
-  }
-
-  return {
-    groupName,
-    activityName,
-    sourceCharacter,
-    targetCharacter
-  };
-}
 
 export function isSimpleChat(msg: string) {
   return (
@@ -45,49 +26,6 @@ export function chatRoomAutoInterceptMessage(cur_msg: string, msg?: string) {
   return chatRoomNormalMessage(msg);
 }
 
-export function orgasmMessage() {
-  chatRoomAutoInterceptMessage(ElementValue('InputChat'), typedMoan('orgasm'));
-}
-
-export function leaveMessage() {
-  if (isSimpleChat(ElementValue('InputChat'))) chatRoomAutoInterceptMessage(ElementValue('InputChat'), ' ');
-}
-
-export function activityMessage(dict: ActivityInfo, entry: BehaviorsEntryModel | undefined) {
-  const source = dict.sourceCharacter;
-  const target = dict.targetCharacter;
-  const self = source === target;
-  if (!source) return;
-
-  const response = typedResponse(entry?.responses ?? []);
-  const templatedResponse = replaceTemplate(response, source).trim();
-
-  if (templatedResponse[0] === '@') {
-    if (templatedResponse[1] === '@') {
-      const playerName = CharacterNickname(Player);
-      const messageWithPlayerName = `${playerName} ${templatedResponse.slice(2)}`;
-
-      return sendAction(messageWithPlayerName);
-    }
-
-    return sendAction(templatedResponse.slice(1));
-  }
-
-  const finalMessage = `${templatedResponse} ${moanDependingOnActivity(Player, dict.activityName, self)}`;
-
-  chatRoomAutoInterceptMessage(ElementValue('InputChat'), finalMessage);
-}
-
-export function sendAction(action: string) {
-  ServerSend('ChatRoomChat', {
-    Content: 'RESPONSIVE_CUSTOM_ACTION',
-    Type: 'Action',
-    Dictionary: [
-      { Tag: 'MISSING TEXT IN "Interface.csv": RESPONSIVE_CUSTOM_ACTION', Text: action },
-    ]
-  });
-}
-
 function chatRoomInterceptMessage(cur_msg: string, msg: string) {
   if (!msg) return;
   ElementValue('InputChat', cur_msg + '... ' + msg);
@@ -107,9 +45,8 @@ function chatRoomNormalMessage(msg: string) {
   ChatRoomSetTarget(backupChatRoomTargetMemberNumber);
 }
 
-function replaceTemplate(msg: string, source: Character) {
+export function replaceTemplate(msg: string, source: Character) {
   if (!msg) return '';
-	source ??= Player;
 
   const playerPronouns = CharacterPronounDescription(Player);
   const playerName = CharacterNickname(Player);
@@ -137,50 +74,8 @@ function replaceTemplate(msg: string, source: Character) {
     .replaceAll(/%SOURCE_INTENSIVE%|SourceIntensive/g, sourceIntensive);
 }
 
-function randomResponse(key: string[]) {
+export function randomResponse(key: string[]) {
   const rnd = getRandomInt(key.length);
 
   return key[rnd] as string;
-}
-
-function typedMoan(moanType: 'low' | 'light' | 'medium' | 'hot' | 'orgasm') {
-  return randomResponse(modStorage.playerStorage.BehaviorsModule.extraResponses[moanType]);
-}
-
-function baseMoan(arousal: number | undefined) {
-  if (!arousal) return '';
-  const factor = Math.floor(arousal / 20);
-  if (factor < 1) return ''; // skip wnen arousal is >=0 && < 20. too low as for me.
-  if (factor > 4) return ''; // Skip when arousal is 100, cause that's orgasm
-  const Tkeys: (keyof ExtraResponsesModel)[] = ['low', 'low', 'light', 'medium', 'hot', 'hot'];
-  const k = Tkeys[factor];
-
-  return typedMoan(k);
-}
-
-function typedResponse(responses: string[]) {
-  return randomResponse(responses);
-}
-
-function moanDependingOnActivity(C: Character, act: ActivityName, self: boolean = false) {
-  if (!C?.ArousalSettings) return;
-
-  const doAddMoans = modStorage.playerStorage.GlobalModule.doAddMoansOnHighArousal;
-  if (!doAddMoans) return '';
-  
-
-  const actFactor = PreferenceGetActivityFactor(C, act, self);
-  if (!actFactor) return '';
-
-  const threthold1 = Math.max(10, (4 - actFactor) * 25);
-  const arousal = C.ArousalSettings.Progress;
-
-  if (arousal <= threthold1) {
-    return '';
-  } else {
-    if (!baseMoan(arousal)) return '';
-    else {
-      return baseMoan(arousal);
-    }
-  }
 }

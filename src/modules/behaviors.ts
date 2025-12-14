@@ -1,9 +1,6 @@
 import { BaseModule, Subscreen, sdk } from 'bc-deeplib/deeplib';
-import { activityDeconstruct } from '../utilities/chat_messages';
-import { activityHandle, leaveHandle, orgasmHandle } from '../utilities/handlers';
-import { BehaviorsEntryModel, BehaviorsSettingsModel } from '../models/behaviors';
+import { BehaviorsSettingsModel } from '../models/behaviors';
 import { GuiBehaviors } from '../screens/behaviors';
-import { getDefaultResponsesEntries } from '../utilities/default_responses_entries';
 import { HookPriority, ModuleCategory } from '../utilities/sdk';
 
 export class BehaviorsModule extends BaseModule {
@@ -24,7 +21,18 @@ export class BehaviorsModule extends BaseModule {
   }
 
   get defaultSettings() {
-    return getDefaultResponsesEntries();
+    return <BehaviorsSettingsModel>{
+      mainResponses: [],
+      extraResponses: {
+        low: [],
+        light: [],
+        medium: [],
+        hot: [],
+        orgasm: []
+      },
+      doShowNewVersionMessage: true,
+      modEnabled: true
+    };
   }
 
   load(): void {
@@ -37,13 +45,6 @@ export class BehaviorsModule extends BaseModule {
       Callback: (data, _sender, _msg, metadata) => {
         if (data.Type !== 'Activity') return false;
         if (!metadata) return false;
-
-        const dict = activityDeconstruct(metadata ?? {});
-        if (!dict) return false;
-        const entry = this.getResponsesEntry(dict?.activityName, dict?.groupName);
-        if (!entry) return false;
-
-        activityHandle(dict, entry);
 
         return false;
       }
@@ -59,7 +60,6 @@ export class BehaviorsModule extends BaseModule {
         if (!data.ChatRoomName || !ChatRoomData || data.BeepType !== 'Leash') return next(args);
         if (!Player.OnlineSharedSettings?.AllowPlayerLeashing) return next(args);
 
-        leaveHandle(data);
         next(args);
       },
       ModuleCategory.Global
@@ -70,7 +70,6 @@ export class BehaviorsModule extends BaseModule {
       'ActivityOrgasmStart',
       HookPriority.Observe,
       (args, next) => {
-        orgasmHandle(args[0] as Character);
         next(args);
       },
       ModuleCategory.Global
@@ -78,27 +77,4 @@ export class BehaviorsModule extends BaseModule {
   }
 
   run(): void {}
-
-  getResponsesEntry(actName: ActivityName | undefined, grpName: AssetGroupItemName | undefined): BehaviorsEntryModel | undefined {
-    if (!actName || !grpName) return undefined;
-    return this.settings.mainResponses.find((ent) => ent.actName === actName && ent.groupName.includes(grpName));
-  }
-
-  createNewEntry(actName: ActivityName, grpName: AssetGroupItemName, responses?: string[], selfTrigger?: boolean): BehaviorsEntryModel {
-    return <BehaviorsEntryModel>{
-      actName: actName,
-      groupName: [grpName],
-      responses: responses ?? [],
-      selfTrigger: selfTrigger ?? false
-    };
-  }
-
-  createEntryIfNeeded(existing: BehaviorsEntryModel | undefined, activity: Activity | undefined, group: AssetItemGroup | undefined): BehaviorsEntryModel | undefined {
-    if (!existing && activity?.Name && group?.Name) {
-      existing = this.createNewEntry(activity.Name, group.Name);
-      this.settings.mainResponses.push(existing);
-    }
-
-    return existing;
-  }
 }
