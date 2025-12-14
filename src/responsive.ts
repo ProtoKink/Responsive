@@ -3,7 +3,6 @@ import { CharTalkModule } from './modules/char_talk';
 import { GlobalModule } from './modules/global';
 import { ProfilesModule } from './modules/profiles';
 import { BehaviorsModule } from './modules/behaviors';
-import { clearOldData, dataFix } from './utilities/data';
 import { ModName, ModRepository } from './utilities/definition';
 import { GuiReset } from './screens/reset';
 import { CommandsModule } from './modules/commands';
@@ -13,9 +12,6 @@ initMod({
   modName: ModName,
   modRepository: ModRepository,
   async initFunction() {
-    clearOldData();
-    dataFix();
-
     Style.injectEmbed('bcr_style', `${PUBLIC_URL}/styles/main.css`);
     Style.injectEmbed('bcr_behaviors_style', `${PUBLIC_URL}/styles/behaviors.css`);
   },

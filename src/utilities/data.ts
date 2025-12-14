@@ -36,32 +36,3 @@ export function dataResetForManual() {
   };
   modStorage.save();
 }
-
-export function dataFix() {
-  const data = modStorage.playerStorage;
-  const mainResponses = data.BehaviorsModule.mainResponses;
-
-  mainResponses.forEach((entry) => {
-    if (entry.actName === undefined) {
-      mainResponses.splice(mainResponses.indexOf(entry));
-    }
-
-    if (typeof entry.groupName === 'string') {
-      entry.groupName = [entry.groupName];
-    }
-
-    if (entry.responses === undefined) {
-      entry.responses = [''];
-    }
-  });
-}
-
-export function clearOldData() {
-  delete (Player.OnlineSettings as any)?.['BCResponsive']?.Profiles;
-  delete (Player.OnlineSettings as any)?.['BCResponsive']?.data;
-  delete (Player.OnlineSettings as any)?.['BCResponsive']?.SavedVersion;
-
-  delete (Player as any)['BCResponsive']?.Profiles;
-  delete (Player as any)['BCResponsive']?.data;
-  delete (Player as any)['BCResponsive']?.SavedVersion;
-}
