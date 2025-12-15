@@ -15,8 +15,10 @@ export function isSimpleChat(msg: string) {
   );
 }
 
-export function chatRoomAutoInterceptMessage(cur_msg: string, msg?: string) {
-  if (!msg) return;
+export function chatRoomAutoInterceptMessage(msg: string) {
+  if (msg === undefined) return;
+
+  const cur_msg = ElementValue('InputChat');
 
   const data = modStorage.playerStorage.GlobalModule;
   if (data.doMessageInterruption && isSimpleChat(cur_msg)) {
@@ -27,7 +29,7 @@ export function chatRoomAutoInterceptMessage(cur_msg: string, msg?: string) {
 }
 
 function chatRoomInterceptMessage(cur_msg: string, msg: string) {
-  if (!msg) return;
+  if (msg === undefined) return;
   ElementValue('InputChat', cur_msg + '... ' + msg);
   ChatRoomSendChat();
 }
@@ -35,14 +37,7 @@ function chatRoomInterceptMessage(cur_msg: string, msg: string) {
 function chatRoomNormalMessage(msg: string) {
   if (!msg) return;
 
-  const backupChatRoomTargetMemberNumber = ChatRoomTargetMemberNumber;
-  ChatRoomSetTarget(-1);
-  const oldmsg = ElementValue('InputChat');
-
-  ElementValue('InputChat', msg);
-  ChatRoomSendChat();
-  ElementValue('InputChat', oldmsg);
-  ChatRoomSetTarget(backupChatRoomTargetMemberNumber);
+  ChatRoomSendChatMessage(msg);
 }
 
 const pronouns = {
