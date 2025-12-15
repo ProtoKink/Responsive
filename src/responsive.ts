@@ -7,6 +7,7 @@ import { ModName, ModRepository } from './utilities/definition';
 import { GuiReset } from './screens/reset';
 import { CommandsModule } from './modules/commands';
 import { BCR_CHANGELOG } from './utilities/messages';
+import { DeepLibMigrator } from './migrators/deeplib';
 
 initMod({
   modName: ModName,
@@ -27,7 +28,10 @@ initMod({
     new CharTalkModule(),
     new CommandsModule(),
     new VersionModule({
-      newVersionMessage: BCR_CHANGELOG
+      newVersionMessage: BCR_CHANGELOG,
+      migrators: [
+        new DeepLibMigrator()
+      ]
     })
   ],
   mainMenuOptions: {

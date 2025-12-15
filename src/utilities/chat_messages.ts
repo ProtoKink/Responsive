@@ -45,33 +45,72 @@ function chatRoomNormalMessage(msg: string) {
   ChatRoomSetTarget(backupChatRoomTargetMemberNumber);
 }
 
-export function replaceTemplate(msg: string, source: Character) {
-  if (!msg) return '';
+const pronouns = {
+  'She/Her': {
+    pronoun: 'she',
+    possessive: 'her',
+    intensive: 'her',
+    intensiveSelf: 'herself'
+  },
+  'He/Him': {
+    pronoun: 'he',
+    possessive: 'his',
+    intensive: 'him',
+    intensiveSelf: 'himself'
+  },
+  'They/Them': {
+    pronoun: 'they',
+    possessive: 'their',
+    intensive: 'them',
+    intensiveSelf: 'themselves'
+  },
+};
 
-  const playerPronouns = CharacterPronounDescription(Player);
+export function replaceTemplate(msg: string, target?: Character, source?: Character) {
+  if (msg === undefined) return '';
+
+  const playerPronounKey = CharacterPronounDescription(Player) as keyof typeof pronouns;
+  const playerEntry = pronouns[playerPronounKey];
   const playerName = CharacterNickname(Player);
 
-  const playerPronoun = playerPronouns === 'She/Her' ? 'she' : 'he';
-  const playerPossessive = playerPronouns === 'She/Her' ? 'her' : 'his';
-  const playerIntensive = playerPronouns === 'She/Her' ? 'her' : 'him';
+  const targetPronounKey = target
+    ? (CharacterPronounDescription(target) as keyof typeof pronouns)
+    : undefined;
 
-  const sourcePronounItem = CharacterPronounDescription(source);
-  const sourceName = CharacterNickname(source);
+  const targetEntry = targetPronounKey ? pronouns[targetPronounKey] : undefined;
+  const targetName = target ? CharacterNickname(target) : undefined;
 
-  const sourcePronoun = sourcePronounItem === 'She/Her' ? 'she' : 'he';
-  const sourcePossessive = sourcePronounItem === 'She/Her' ? 'her' : 'his';
-  const sourceIntensive =
-    sourceName === playerName ? (playerPronouns === 'She/Her' ? 'herself' : 'himself') : sourcePronounItem === 'She/Her' ? 'her' : 'him';
+  const sourcePronounKey = source
+    ? (CharacterPronounDescription(source) as keyof typeof pronouns)
+    : undefined;
 
-  return msg
-    .replaceAll(/%TARGET%|Player/g, playerName)
-    .replaceAll(/%TARGET_PRONOUN%|Pronoun/g, playerPronoun)
-    .replaceAll(/%TARGET_POSSESIVE%|Possessive/g, playerPossessive)
-    .replaceAll(/%TARGET_INTENSIVE%|Intensive/g, playerIntensive)
-    .replaceAll(/%SOURCE%|Source/g, sourceName)
-    .replaceAll(/%SOURCE_PRONOUN%|SourcePronoun/g, sourcePronoun)
-    .replaceAll(/%SOURCE_POSSESIVE%|SourcePossessive/g, sourcePossessive)
-    .replaceAll(/%SOURCE_INTENSIVE%|SourceIntensive/g, sourceIntensive);
+  const sourceEntry = sourcePronounKey ? pronouns[sourcePronounKey] : undefined;
+  const sourceName = source ? CharacterNickname(source) : undefined;
+
+  const replacements: Record<string, string | undefined> = {
+    'player name': playerName,
+    'player pronoun': playerEntry.pronoun,
+    'player possessive': playerEntry.possessive,
+    'player intensive': playerEntry.intensive,
+    'player self': playerEntry.intensiveSelf,
+
+    'target name': targetName,
+    'target pronoun': targetEntry?.pronoun,
+    'target possessive': targetEntry?.possessive,
+    'target intensive': targetEntry?.intensive,
+    'target self': targetEntry?.intensiveSelf,
+
+    'source name': sourceName,
+    'source pronoun': sourceEntry?.pronoun,
+    'source possessive': sourceEntry?.possessive,
+    'source intensive': sourceEntry?.intensive,
+    'source self': sourceEntry?.intensiveSelf
+  };
+
+  return msg.replace(/{{\s*([^}]+?)\s*}}/g, (_, key) => {
+    const normalized = key.trim().toLowerCase();
+    return replacements[normalized] ?? `{{ ${key} }}`;
+  });
 }
 
 export function randomResponse(key: string[]) {
