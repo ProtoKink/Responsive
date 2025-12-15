@@ -33,3 +33,11 @@ export const doesBcxAllowsTalking = () => {
   }
   return true;
 };
+
+export const areBehaviorsEnabled = () => {
+  const modData = modStorage.playerStorage;
+  if (!modData.GlobalModule.modEnabled) return false;
+  if (!modData.GlobalModule.responsesEnabled) return false;
+
+  return true;
+};
