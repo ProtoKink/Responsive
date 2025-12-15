@@ -1,6 +1,6 @@
 {
   "name": "bc-responsive",
-  "version": "0.6.6",
+  "version": "1.0.0",
   "description": "An auto response script for bondage-club",
   "private": true,
   "type": "module",
@@ -26,7 +26,8 @@
   "dependencies": {
     "bc-deeplib": "^3.0.0",
     "bondage-club-mod-sdk": "^1.2.0",
-    "sass": "^1.94.2"
+    "sass": "^1.94.2",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

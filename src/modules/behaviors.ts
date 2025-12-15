@@ -1,12 +1,28 @@
-import { BaseModule, Subscreen, sdk } from 'bc-deeplib/deeplib';
-import { BehaviorsSettingsModel } from '../models/behaviors';
+import { BaseModule, Subscreen, exportToGlobal, getModule, sdk } from 'bc-deeplib/deeplib';
+import { areBehaviorsEnabled } from '../utilities/handlers';
+import { Behavior, BehaviorsSettingsModel, Reaction, Trigger, MessageData, TriggerType, TriggerOrgasmType } from '../models/behaviors';
 import { GuiBehaviors } from '../screens/behaviors';
 import { HookPriority, ModuleCategory } from '../utilities/sdk';
+import { v4 as uuidv4 } from 'uuid';
+import { processTrigger } from '../utilities/triggers';
+import { processReactions } from '../utilities/reactions';
+
+const orgasmTypesFromMessage = (msg: string): TriggerOrgasmType | undefined => {
+  switch (true) {
+    case msg.includes('OrgasmFailResist'): return 'ruinedResisted';
+    case msg.includes('OrgasmFailTimeout'): return 'ruinedTimeout';
+    case msg.includes('OrgasmFailSurrender'): return 'ruinedSurrendered';
+    case msg.includes('OrgasmResist'): return 'resisted';
+    case msg.includes('Orgasm'): return 'normal';
+  }
+
+  return undefined;
+};
 
 export class BehaviorsModule extends BaseModule {
   static instance: BehaviorsModule;
 
-  static isOrgasm: boolean = false; // Just for Char Talk stuff
+  leashedLeave: boolean = false;
 
   get settings(): BehaviorsSettingsModel {
     return super.settings as BehaviorsSettingsModel;
@@ -22,29 +38,47 @@ export class BehaviorsModule extends BaseModule {
 
   get defaultSettings() {
     return <BehaviorsSettingsModel>{
-      mainResponses: [],
-      extraResponses: {
-        low: [],
-        light: [],
-        medium: [],
-        hot: [],
-        orgasm: []
-      },
-      doShowNewVersionMessage: true,
-      modEnabled: true
+      behaviors: {},
+      reactions: {},
+      triggers: {}
     };
   }
 
   load(): void {
     super.load();
     BehaviorsModule.instance = this;
-    
+
     ChatRoomRegisterMessageHandler({
       Description: 'Processes activity responses',
       Priority: 320,
-      Callback: (data, _sender, _msg, metadata) => {
-        if (data.Type !== 'Activity') return false;
+      Callback: (data, sender, msg, metadata) => {
+        if (!areBehaviorsEnabled()) return false;
+        if (!['Activity', 'Emote', 'Action', 'Chat', 'Whisper'].includes(data.Type)) return false;
         if (!metadata) return false;
+
+        let type: TriggerType = data.Type.toLowerCase() as TriggerType;
+        let orgasmType: TriggerOrgasmType | undefined = undefined;
+
+        if (data.Type === 'Chat' || data.Type === 'Whisper') {
+          type = 'speech';
+        }
+
+        if (data.Type === 'Activity' && data.Content.startsWith('Orgasm')) {
+          type = 'orgasm';
+          orgasmType = orgasmTypesFromMessage(data.Content);
+        }
+
+        const messageData: MessageData = {
+          source: sender,
+          target: metadata.TargetCharacter,
+          messageContent: data.Content,
+          message: msg,
+          activityName: metadata.ActivityName,
+          groupName: metadata.GroupName as AssetGroupItemName,
+          orgasmType
+        };
+
+        BehaviorsModule.processBehavior(type, messageData);
 
         return false;
       }
@@ -55,26 +89,171 @@ export class BehaviorsModule extends BaseModule {
       'ServerAccountBeep',
       HookPriority.AddBehavior,
       (args, next) => {
+        if (!areBehaviorsEnabled()) return next(args);
         const data = args[0];
 
-        if (!data.ChatRoomName || !ChatRoomData || data.BeepType !== 'Leash') return next(args);
+        if (!data) return next(args);
+        if (data.BeepType !== 'Leash') return next(args);
+        if (!data.ChatRoomName) return next(args);
+        if (!ChatRoomData) return next(args);
         if (!Player.OnlineSharedSettings?.AllowPlayerLeashing) return next(args);
+
+        this.leashedLeave = true;
+
+        const messageData: MessageData = {
+          messageContent: data.Message,
+          message: data.Message,
+          roomPrecenseEvent: 'leashed'
+        };
+        BehaviorsModule.processBehavior('roomPresence', messageData);
 
         next(args);
       },
       ModuleCategory.Global
     );
 
-    //Orgasm Handling
     sdk.hookFunction(
-      'ActivityOrgasmStart',
-      HookPriority.Observe,
+      'ChatRoomSync',
+      HookPriority.AddBehavior,
       (args, next) => {
-        next(args);
+        this.leashedLeave = false;
+        if (!areBehaviorsEnabled()) return next(args);
+
+        const shouldProcess = !ServerPlayerIsInChatRoom() && RelogData?.ChatRoomName !== args[0].Name;
+        const ret = next(args);
+
+        if (shouldProcess)
+          BehaviorsModule.processBehavior('roomPresence', {
+            source: Player,
+            roomPrecenseEvent: 'join',
+          });
+
+        return ret;
+      },
+      ModuleCategory.Global
+    );
+
+    sdk.hookFunction(
+      'ServerSend',
+      HookPriority.AddBehavior,
+      (args, next) => {
+        if (!areBehaviorsEnabled()) return next(args);
+        if (!ServerPlayerIsInChatRoom()) return next(args);
+        if (args[0] !== 'ChatRoomLeave') return next(args);
+        if (this.leashedLeave) return next(args);
+
+        BehaviorsModule.processBehavior('roomPresence', {
+          roomPrecenseEvent: 'leave',
+          source: Player,
+        });
+
+        return next(args);
+      },
+      ModuleCategory.Global
+    );
+
+    sdk.hookFunction(
+      'ChatRoomSyncMemberJoin',
+      HookPriority.AddBehavior,
+      (args, next) => {
+        if (!areBehaviorsEnabled()) return next(args);
+        if (!ServerPlayerIsInChatRoom()) return next(args);
+
+        const ret = next(args);
+
+        const character = ChatRoomGetCharacter(args[0].SourceMemberNumber);
+
+        if (!character) return ret;
+
+        BehaviorsModule.processBehavior('roomPresence', {
+          roomPrecenseEvent: 'join',
+          source: character,
+        });
+
+        return ret;
+      },
+      ModuleCategory.Global
+    );
+
+    sdk.hookFunction(
+      'ChatRoomSyncMemberLeave',
+      HookPriority.AddBehavior,
+      (args, next) => {
+        if (!areBehaviorsEnabled()) return next(args);
+        if (!ServerPlayerIsInChatRoom()) return next(args);
+
+        const character = ChatRoomGetCharacter(args[0].SourceMemberNumber);
+
+        if (!character) return next(args);
+
+        BehaviorsModule.processBehavior('roomPresence', {
+          roomPrecenseEvent: 'leave',
+          source: character,
+        });
+
+        return next(args);
       },
       ModuleCategory.Global
     );
   }
 
-  run(): void {}
+  getBehavior(id: string): Behavior | undefined {
+    return this.settings.behaviors[id];
+  }
+
+  getTrigger(id: string): Trigger | undefined {
+    return this.settings.triggers[id];
+  }
+
+  getReaction(id: string): Reaction | undefined {
+    return this.settings.reactions[id];
+  }
+
+  static createBehavior(name?: string): Behavior {
+    return {
+      id: uuidv4(),
+      name: name ?? 'New Behavior',
+      enabled: true,
+      reactionMode: 'random',
+      triggers: [],
+      reactions: [],
+    };
+  }
+
+  static createTrigger(name?: string): Trigger {
+    return {
+      id: uuidv4(),
+      name: name ?? 'New Trigger',
+      type: 'speech',
+      speechType: 'normal',
+      constraintMode: 'any',
+      constraints: {},
+      content: [],
+      matchMode: 'contains'
+    };
+  }
+
+  static createReaction(name?: string): Reaction {
+    return {
+      id: uuidv4(),
+      name: name ?? 'New Reaction',
+      type: 'speech',
+      content: [],
+    };
+  }
+
+  static processBehavior(type: TriggerType, messageData: MessageData) {
+    const behavior = processTrigger(type, messageData);
+
+    if (!behavior) return false;
+
+    const reactions = behavior.reactions
+      .map(r => BehaviorsModule.instance.getReaction(r))
+      .filter(r => r !== undefined);
+
+    processReactions(reactions, behavior.reactionMode, messageData);
+  }
 }
+
+exportToGlobal('BehaviorsModule', BehaviorsModule);
+exportToGlobal('getModule', getModule);

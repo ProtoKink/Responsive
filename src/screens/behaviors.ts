@@ -114,7 +114,6 @@ export class GuiBehaviors extends BaseSubscreen {
   }
 
   exit() {
-    GuiBehaviors.instance.settings.mainResponses = this.settings.mainResponses.filter((a) => a.responses.length > 0 && a.responses.some((r) => !!r));
     GuiBehaviors.instance.deleteMode = false;
     GuiBehaviors.instance.doNotShowConfirmation = false;
 
