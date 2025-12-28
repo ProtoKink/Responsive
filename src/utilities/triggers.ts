@@ -1,4 +1,5 @@
-import { TriggerConstraint, MessageData, ConstraintMode, TriggerType, Behavior } from '../models/behaviors';
+import { modLogger } from 'bc-deeplib/deeplib';
+import { TriggerConstraint, MessageData, ConstraintMode, TriggerType, Behavior, TriggerTypeSchema, MessageDataSchema, TriggerConstraintSchema, ConstraintModeSchema } from '../models/behaviors';
 import { BehaviorsModule } from '../modules/behaviors';
 import { assertNever } from './other';
 
@@ -19,14 +20,22 @@ const triggerConstraints: TriggerConstraintHandlers = {
     const members = ChatRoomData?.Character?.map(c => c.MemberNumber) ?? [];
 
     return rule.mode === 'include'
-      ? rule.content.some(id => members.includes(id))
-      : rule.content.every(id => !members.includes(id));
+      ? rule.content.some(id => members.includes(parseInt(id, 10)))
+      : rule.content.every(id => !members.includes(parseInt(id, 10)));
   },
-  source: (rule, data) => rule.mode === 'include' ? rule.content.includes(data.source?.MemberNumber ?? -1) : !rule.content.includes(data.source?.MemberNumber ?? -1),
-  target: (rule, data) => rule.mode === 'include' ? rule.content.includes(data.target?.MemberNumber ?? -1) : !rule.content.includes(data.target?.MemberNumber ?? -1)
+  source: (rule, data) => rule.mode === 'include' ? rule.content.includes((data.source?.MemberNumber ?? -1).toString()) : !rule.content.includes((data.source?.MemberNumber ?? -1).toString()),
+  target: (rule, data) => rule.mode === 'include' ? rule.content.includes((data.target?.MemberNumber ?? -1).toString()) : !rule.content.includes((data.target?.MemberNumber ?? -1).toString())
 };
 
 export function processTrigger(type: TriggerType, messageData: MessageData): Behavior | undefined {
+  try {
+    type = TriggerTypeSchema.parse(type);
+    messageData = MessageDataSchema.parse(messageData) as MessageData;
+  } catch (e) {
+    modLogger.error(e);
+    return undefined;
+  }
+
   return Object.values(BehaviorsModule.instance.settings.behaviors)
     .filter(b => b.enabled)
     .find(b => {
@@ -34,7 +43,7 @@ export function processTrigger(type: TriggerType, messageData: MessageData): Beh
         .filter(t => t?.type === type)
         .filter(t => {
           const last = triggerExecutionMap.get(`${b.id}-${t?.id}`);
-          
+
           if (!last) return true;
 
           return CommonTime() - last >= (t?.cooldownSec ?? 0) * 1000;
@@ -42,9 +51,11 @@ export function processTrigger(type: TriggerType, messageData: MessageData): Beh
         .filter(t => t !== undefined);
 
       return triggers.find(t => {
-        let isConstraintMet = false;
+        let isConstraintMet = true;
 
-        isConstraintMet = processTriggerConstraint(t.constraints, t.constraintMode, messageData);
+        if (t.constraints && t.constraintMode) {
+          isConstraintMet = processTriggerConstraint(t.constraints, t.constraintMode, messageData);
+        };
 
         if (!isConstraintMet) return false;
 
@@ -93,6 +104,15 @@ export function processTrigger(type: TriggerType, messageData: MessageData): Beh
 }
 
 export function processTriggerConstraint(triggerConstraint: TriggerConstraint, mode: ConstraintMode, messageData: MessageData): boolean {
+  try {
+    triggerConstraint = TriggerConstraintSchema.parse(triggerConstraint ?? {});
+    mode = ConstraintModeSchema.parse(mode);
+    messageData = MessageDataSchema.parse(messageData) as MessageData;
+  } catch (e) {
+    modLogger.error(e);
+    return false;
+  }
+
   const triggerConstraintEntries = CommonKeys(triggerConstraint);
 
   if (triggerConstraintEntries.length === 0) return true;

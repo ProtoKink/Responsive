@@ -20,6 +20,9 @@ importers:
       uuid:
         specifier: ^13.0.0
         version: 13.0.0
+      zod:
+        specifier: ^4.1.13
+        version: 4.2.1
     devDependencies:
       '@eslint/js':
         specifier: ^9.39.1
@@ -1224,6 +1227,9 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
+  zod@4.2.1:
+    resolution: {integrity: sha512-0wZ1IRqGGhMP76gLqz8EyfBXKk0J2qo2+H3fi4mcUP/KtTocoX08nmIAHl1Z2kJIZbZee8KOpBCSNPRgauucjw==}
+
 snapshots:
 
   '@bufbuild/protobuf@2.10.1': {}
@@ -2327,3 +2333,5 @@ snapshots:
   xmlhttprequest-ssl@2.0.0: {}
 
   yocto-queue@0.1.0: {}
+
+  zod@4.2.1: {}

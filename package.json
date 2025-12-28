@@ -27,7 +27,8 @@
     "bc-deeplib": "^3.0.0",
     "bondage-club-mod-sdk": "^1.2.0",
     "sass": "^1.94.2",
-    "uuid": "^13.0.0"
+    "uuid": "^13.0.0",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

@@ -1,9 +1,8 @@
-import { BaseModule, Subscreen, exportToGlobal, getModule, sdk } from 'bc-deeplib/deeplib';
+import { BaseModule, Subscreen, exportToGlobal, getModule, modLogger, sdk } from 'bc-deeplib/deeplib';
 import { areBehaviorsEnabled } from '../utilities/handlers';
-import { Behavior, BehaviorsSettingsModel, Reaction, Trigger, MessageData, TriggerType, TriggerOrgasmType } from '../models/behaviors';
+import { Behavior, BehaviorsSettingsModel, Reaction, Trigger, MessageData, TriggerType, TriggerOrgasmType, BehaviorSchema, TriggerSchema, ReactionSchema, TriggerTypeSchema, MessageDataSchema, BehaviorInput, TriggerInput, ReactionInput } from '../models/behaviors';
 import { GuiBehaviors } from '../screens/behaviors';
 import { HookPriority, ModuleCategory } from '../utilities/sdk';
-import { v4 as uuidv4 } from 'uuid';
 import { processTrigger } from '../utilities/triggers';
 import { processReactions } from '../utilities/reactions';
 
@@ -209,40 +208,31 @@ export class BehaviorsModule extends BaseModule {
     return this.settings.reactions[id];
   }
 
-  static createBehavior(name?: string): Behavior {
-    return {
-      id: uuidv4(),
-      name: name ?? 'New Behavior',
-      enabled: true,
-      reactionMode: 'random',
-      triggers: [],
-      reactions: [],
-    };
+  static createBehavior(behavior: BehaviorInput): Behavior | undefined {
+    const ret = BehaviorSchema.safeParse(behavior);
+    if (!ret.success) return modLogger.error(ret.error), undefined;
+
+    return ret.data;
   }
 
-  static createTrigger(name?: string): Trigger {
-    return {
-      id: uuidv4(),
-      name: name ?? 'New Trigger',
-      type: 'speech',
-      speechType: 'normal',
-      constraintMode: 'any',
-      constraints: {},
-      content: [],
-      matchMode: 'contains'
-    };
+  static createTrigger(trigger: TriggerInput): Trigger | undefined {
+    const ret = TriggerSchema.safeParse(trigger);
+    if (!ret.success) return modLogger.error(ret.error), undefined;
+
+    return ret.data;
   }
 
-  static createReaction(name?: string): Reaction {
-    return {
-      id: uuidv4(),
-      name: name ?? 'New Reaction',
-      type: 'speech',
-      content: [],
-    };
+  static createReaction(reaction: ReactionInput): Reaction | undefined {
+    const ret = ReactionSchema.safeParse(reaction);
+    if (!ret.success) return modLogger.error(ret.error), undefined;
+    
+    return ret.data;
   }
 
   static processBehavior(type: TriggerType, messageData: MessageData) {
+    type = TriggerTypeSchema.parse(type);
+    messageData = MessageDataSchema.parse(messageData) as MessageData;
+
     const behavior = processTrigger(type, messageData);
 
     if (!behavior) return false;

@@ -1,10 +1,20 @@
-import { sendActionMessage } from 'bc-deeplib/deeplib';
-import { MessageData, Reaction, ReactionMode } from '../models/behaviors';
+import { modLogger, sendActionMessage } from 'bc-deeplib/deeplib';
+import { MessageData, MessageDataSchema, Reaction, ReactionMode, ReactionModeSchema, ReactionSchema } from '../models/behaviors';
 import { chatRoomAutoInterceptMessage, randomResponse, replaceTemplate } from './chat_messages';
 import { assertNever, getRandomInt } from './other';
 import { doesBcxAllowsTalking } from './handlers';
+import z from 'zod';
 
 export function processReactions(reactions: Reaction[], reactionMode: ReactionMode, messageData: MessageData) {
+  try {
+    reactions = z.array(ReactionSchema).parse(reactions);
+    reactionMode = ReactionModeSchema.parse(reactionMode);
+    messageData = MessageDataSchema.parse(messageData) as MessageData;
+  } catch (e) {
+    modLogger.error(e);
+    return;
+  }
+
   switch (reactionMode) {
     case 'random': {
       const reaction = reactions[getRandomInt(reactions.length)];
@@ -22,6 +32,14 @@ export function processReactions(reactions: Reaction[], reactionMode: ReactionMo
 }
 
 function processReaction(reaction: Reaction, messageData: MessageData) {
+  try {
+    reaction = ReactionSchema.parse(reaction);
+    messageData = MessageDataSchema.parse(messageData) as MessageData;
+  } catch (e) {
+    modLogger.error(e);
+    return;
+  }
+
   switch (reaction.type) {
     case 'speech': {
       if (!doesBcxAllowsTalking()) return;
