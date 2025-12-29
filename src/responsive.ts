@@ -16,24 +16,24 @@ initMod({
     Style.injectEmbed('bcr_style', `${PUBLIC_URL}/styles/main.css`);
     Style.injectEmbed('bcr_behaviors_style', `${PUBLIC_URL}/styles/behaviors.css`);
   },
-  modules: [
-    new GUI({
+  modules: {
+    GUI:new GUI({
       buttonText: ModName,
       identifier: ModName,
       image: 'Icons/Arousal.png',
     }),
-    new GlobalModule(),
-    new BehaviorsModule(),
-    new ProfilesModule(),
-    new CharTalkModule(),
-    new CommandsModule(),
-    new VersionModule({
+    GlobalModule: new GlobalModule(),
+    BehaviorsModule: new BehaviorsModule(),
+    ProfilesModule: new ProfilesModule(),
+    CharTalkModule: new CharTalkModule(),
+    CommandsModule: new CommandsModule(),
+    VersionModule: new VersionModule({
       newVersionMessage: BCR_CHANGELOG,
       migrators: [
         new DeepLibMigrator()
       ]
     })
-  ],
+  },
   mainMenuOptions: {
     wikiLink: 'https://github.com/dDeepLb/BC-Responsive/wiki',
     importExportSubscreen: new GuiImportExport({
