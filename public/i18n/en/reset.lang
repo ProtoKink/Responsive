@@ -1,0 +1,19 @@
+# Reset
+reset.label.perma_reset_of_mod_data = - Permanent reset of ALL Responsive data -
+reset.label.warning = - Warning -
+reset.label.if_u_confirm_perma_reset = If you confirm, all Responsive data (including settings, responses and profiles) will be permanently reset!
+reset.label.youll_able_to_use_mod = You will be able to continue using Responsive, but all of your configuration will be reset to default!
+reset.label.action_cannot_be_undone = This action cannot be undone!
+
+reset.button.confirm = Confirm
+reset.button.cancel = Cancel
+
+reset.setting.reset_for_manual_setting.text = Do manual reset:
+reset.setting.reset_settings.text = Do reset settings:
+reset.setting.reset_responses.text = Do reset responses:
+reset.setting.reset_profiles.text = Do reset profiles:
+
+reset.setting.reset_for_manual_setting.desc = Resets everything to state that you could configure everything from the start.
+reset.setting.reset_settings.desc = Erases settings and then resets them to default ones.
+reset.setting.reset_responses.desc = Erases responses and then resets them to default ones.
+reset.setting.reset_profiles.desc = Erases profiles.

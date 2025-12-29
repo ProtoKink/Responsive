@@ -1,0 +1,5 @@
+misc.lang
+behaviors.lang
+settings.lang
+profiles.lang
+reset.lang

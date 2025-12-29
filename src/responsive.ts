@@ -44,5 +44,6 @@ initMod({
   },
   translationOptions: {
     pathToTranslationsFolder: `${PUBLIC_URL}/i18n`,
+    fetchFolder: true
   }
 });

@@ -1,0 +1,8 @@
+infosheet.button.mod_button = Responsive Settings
+
+# MainMenu
+mainmenu.title = - BC Responsive v$ModVersion -
+
+mainmenu.button.settings = Settings
+mainmenu.button.responses = Responses
+mainmenu.button.profiles = Profiles

@@ -1,0 +1,14 @@
+# Profiles
+profiles.title = - Profiles -
+
+profiles.button.save = Save
+profiles.button.load = Load
+profiles.button.delete = Delete
+
+profiles.prompt = Please, enter profile name.
+profiles.text.profile = Profile
+profiles.text.has_been_saved = has been saved!
+profiles.text.needs_to_be_saved = needs to be saved first!
+profiles.text.has_been_loaded = has been loaded!
+profiles.text.has_been_deleted = has been deleted!
+profiles.text.not_saved_or_already_deleted = is not saved or already deleted!
