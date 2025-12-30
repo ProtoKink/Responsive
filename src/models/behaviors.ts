@@ -25,15 +25,20 @@ export type MatchMode = z.infer<typeof MatchModeSchema>;
 export const RoomPresenceEventSchema = z.enum(['leave', 'join', 'leashed']);
 export type RoomPresenceEvent = z.infer<typeof RoomPresenceEventSchema>;
 
-export const ReactionTypeSchema = z.enum(['speech', 'emote', 'action']);
+export const ReactionTypeSchema = z.enum(['speech', 'emote', 'action', 'activity']);
 export type ReactionType = z.infer<typeof ReactionTypeSchema>;
 
 export const TriggerTypeSchema = z.enum(['speech', 'emote', 'action', 'activity', 'orgasm', 'roomPresence']);
 export type TriggerType = z.infer<typeof TriggerTypeSchema>;
 
-export const IncludeExcludeRuleSchema = z.object({
-  content: z.array(z.coerce.string<string>()),
+export const IncludeExcludeEntrySchema = z.object({
+  value: z.coerce.string<string>(),
   mode: z.enum(['include', 'exclude'])
+});
+export type IncludeExcludeEntry = z.infer<typeof IncludeExcludeEntrySchema>;
+
+export const IncludeExcludeRuleSchema = z.object({
+  entries: z.array(IncludeExcludeEntrySchema)
 });
 export type IncludeExcludeRule = z.infer<typeof IncludeExcludeRuleSchema>;
 
@@ -69,7 +74,7 @@ export type MessageData = Prettify<Omit<z.infer<typeof MessageDataSchema>, 'sour
 // #region Reactions
 
 const BaseReactionSchema = z.object({
-  id: z.string().default(uuidv4()),
+  id: z.string().default(() => uuidv4()),
   name: z.string().default('New Reaction'),
   type: ReactionTypeSchema
 });
@@ -118,7 +123,7 @@ export type ReactionInput = z.infer<typeof ReactionInputSchema>;
 // #region Triggers
 
 const BaseTriggerSchema = z.object({
-  id: z.string().default(uuidv4()),
+  id: z.string().default(() => uuidv4()),
   name: z.string().default('New Trigger'),
   type: TriggerTypeSchema,
   constraintMode: ConstraintModeSchema.optional(),
@@ -195,7 +200,7 @@ export type TriggerInput = z.infer<typeof TriggerInputSchema>;
 // #region Main
 
 export const BehaviorSchema = z.object({
-  id: z.string().default(uuidv4()),
+  id: z.string().default(() => uuidv4()),
   name: z.string().default('New Behavior'),
   enabled: z.boolean().default(true),
   triggers: z.array(z.string()).default([]),

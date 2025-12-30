@@ -1,31 +1,118 @@
-# Responses
-responses.title = - Responses -
+# Behaviors
+behaviors.title = - Behaviors -
 
-responses.text.select_zone = Please Select a Zone
-responses.text.clear_entry = Clear Entry
-responses.text.copy_entry = Copy Entry Settings
-responses.text.paste_entry = Paste Entry Settings
-responses.text.toggle_delete_mode = Click to toggle response delete mode
-responses.text.edit_mode = Click to edit
-responses.text.delete_mode = Click to delete
-responses.prompt.add = Enter new response
-responses.prompt.edit = Edit response
-responses.text.empty_response = Empty
-responses.text.do_not_show_this_again_until_leaving_this_screen = Do not show this again until leaving this screen
-responses.prompt.delete = Are you sure you want to delete this response?
-responses.button.add_response = Add Response
+# Search
+behaviors.search.placeholder = Search...
 
-responses.activity.dropdown.label = Activity
-responses.activity.dropdown.desc = Select an activity to respond to.
+# Tabs
+behaviors.tab.behaviors = Behaviors
+behaviors.tab.triggers = Triggers
+behaviors.tab.reactions = Reactions
 
-responses.setting.self_trigger.name = Self Trigger
-responses.setting.self_trigger.desc = Defines if response will be triggered when you are doing action on yourself.
+# Buttons
+behaviors.button.add_behavior = Add Behavior
+behaviors.button.add_trigger = Add Trigger
+behaviors.button.add_reaction = Add Reaction
+behaviors.button.add_content = Add Content
+behaviors.button.add_trigger_to_behavior = Add Trigger
+behaviors.button.add_reaction_to_behavior = Add Reaction
 
-responses.extra.low = Low
-responses.extra.light = Light
-responses.extra.medium = Medium
-responses.extra.hot = Hot
-responses.extra.orgasm = Orgasm
+# Text
+behaviors.text.select_item_to_edit = Select an item from the list to edit
+behaviors.text.edit_mode = Click to edit
+behaviors.text.delete_mode = Click to delete
+behaviors.text.toggle_delete_mode = Click to toggle delete mode
+behaviors.text.empty_content = Empty
+behaviors.text.new_behavior = New Behavior
+behaviors.text.new_trigger = New Trigger
+behaviors.text.new_reaction = New Reaction
+behaviors.text.triggers = triggers
+behaviors.text.reactions = reactions
+behaviors.text.has_constraints = Has Constraints
+behaviors.text.no_triggers_available = No triggers available. Create a trigger first.
+behaviors.text.no_reactions_available = No reactions available. Create a reaction first.
+behaviors.text.do_not_show_this_again_until_leaving_this_screen = Do not show this again until leaving this screen
 
-responses.extra.dropdown.label = Extra Response
-responses.extra.dropdown.desc = Select an extra response to respond to.
+# Prompts
+behaviors.prompt.behavior_name = Enter behavior name
+behaviors.prompt.trigger_name = Enter trigger name
+behaviors.prompt.reaction_name = Enter reaction name
+behaviors.prompt.add_content = Enter new content
+behaviors.prompt.edit_content = Edit content
+behaviors.prompt.delete_content = Are you sure you want to delete this content?
+behaviors.prompt.delete_confirm = Are you sure you want to delete {name}?
+behaviors.prompt.select_trigger = Select a trigger to add
+behaviors.prompt.select_reaction = Select a reaction to add
+
+# Fields
+behaviors.field.name = Name
+behaviors.field.enabled = Enabled
+behaviors.field.type = Type
+behaviors.field.reaction_mode = Reaction Mode
+behaviors.field.cooldown = Cooldown (seconds)
+behaviors.field.content = Content
+behaviors.field.speech_type = Speech Type
+behaviors.field.match_mode = Match Mode
+behaviors.field.activity_names = Activity Names
+behaviors.field.group_names = Group Names
+behaviors.field.orgasm_type = Orgasm Type
+behaviors.field.room_presence_event = Room Presence Event
+behaviors.field.constraint_mode = Constraint Mode
+behaviors.field.constraint_source = Source Constraint
+behaviors.field.constraint_target = Target Constraint
+behaviors.field.arousal_min = Arousal Minimum
+behaviors.field.arousal_max = Arousal Maximum
+behaviors.field.in_room_with_members = In Room With Members
+behaviors.field.in_room_named = In Room Named
+
+# Sections
+behaviors.section.triggers = Triggers
+behaviors.section.reactions = Reactions
+behaviors.section.advanced_options = Advanced Options
+
+# Trigger Types
+behaviors.trigger_type.speech = Speech
+behaviors.trigger_type.emote = Emote
+behaviors.trigger_type.action = Action
+behaviors.trigger_type.activity = Activity
+behaviors.trigger_type.orgasm = Orgasm
+behaviors.trigger_type.roomPresence = Room Presence
+
+# Reaction Types
+behaviors.reaction_type.speech = Speech
+behaviors.reaction_type.emote = Emote
+behaviors.reaction_type.action = Action
+behaviors.reaction_type.activity = Activity
+
+# Options
+behaviors.option.any = Any
+behaviors.option.all = All
+behaviors.option.random = Random
+behaviors.option.normal = Normal
+behaviors.option.whisper = Whisper
+behaviors.option.startsWith = Starts With
+behaviors.option.contains = Contains
+behaviors.option.endsWith = Ends With
+behaviors.option.exact = Exact
+behaviors.option.regex = Regex
+behaviors.option.resisted = Resisted
+behaviors.option.ruinedResisted = Ruined (Resisted)
+behaviors.option.ruinedTimeout = Ruined (Timeout)
+behaviors.option.ruinedSurrendered = Ruined (Surrendered)
+behaviors.option.leave = Leave
+behaviors.option.join = Join
+behaviors.option.leashed = Leashed
+behaviors.option.include = Include
+behaviors.option.exclude = Exclude
+
+behaviors.option.speech = Speech
+behaviors.option.emote = Emote
+behaviors.option.action = Action
+behaviors.option.activity = Activity
+
+behaviors.option.speech = Speech
+behaviors.option.emote = Emote
+behaviors.option.action = Action
+behaviors.option.activity = Activity
+behaviors.option.orgasm = Orgasm
+behaviors.option.roomPresence = Room Presence

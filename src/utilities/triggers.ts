@@ -15,16 +15,35 @@ const triggerExecutionMap: Map<string, number> = new Map();
 const triggerConstraints: TriggerConstraintHandlers = {
   arousalMax: (value) => Player.ArousalSettings.Progress >= value,
   arousalMin: (value) => Player.ArousalSettings.Progress <= value,
-  inRoomNamed: (rule) => rule.mode === 'include' ? rule.content.includes(ChatRoomData?.Name ?? '') : !rule.content.includes(ChatRoomData?.Name ?? ''),
+  inRoomNamed: (rule) => {
+    const roomName = ChatRoomData?.Name ?? '';
+    return rule.entries.some(entry => {
+      const matches = entry.value === roomName;
+      return entry.mode === 'include' ? matches : !matches;
+    });
+  },
   inRoomWithMembers: (rule) => {
     const members = ChatRoomData?.Character?.map(c => c.MemberNumber) ?? [];
-
-    return rule.mode === 'include'
-      ? rule.content.some(id => members.includes(parseInt(id, 10)))
-      : rule.content.every(id => !members.includes(parseInt(id, 10)));
+    return rule.entries.some(entry => {
+      const memberId = parseInt(entry.value, 10);
+      const matches = members.includes(memberId);
+      return entry.mode === 'include' ? matches : !matches;
+    });
   },
-  source: (rule, data) => rule.mode === 'include' ? rule.content.includes((data.source?.MemberNumber ?? -1).toString()) : !rule.content.includes((data.source?.MemberNumber ?? -1).toString()),
-  target: (rule, data) => rule.mode === 'include' ? rule.content.includes((data.target?.MemberNumber ?? -1).toString()) : !rule.content.includes((data.target?.MemberNumber ?? -1).toString())
+  source: (rule, data) => {
+    const sourceId = (data.source?.MemberNumber ?? -1).toString();
+    return rule.entries.some(entry => {
+      const matches = entry.value === sourceId;
+      return entry.mode === 'include' ? matches : !matches;
+    });
+  },
+  target: (rule, data) => {
+    const targetId = (data.target?.MemberNumber ?? -1).toString();
+    return rule.entries.some(entry => {
+      const matches = entry.value === targetId;
+      return entry.mode === 'include' ? matches : !matches;
+    });
+  }
 };
 
 export function processTrigger(type: TriggerType, messageData: MessageData): Behavior | undefined {
