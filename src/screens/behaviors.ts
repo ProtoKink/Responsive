@@ -1,3 +1,4 @@
+// #region SECTION Imports & Types
 import { advElement, BaseSubscreen, exportToGlobal, getText, layout, Modal, SettingElement, SubscreenOptions } from 'bc-deeplib/deeplib';
 import { BehaviorsSettingsModel, Behavior, Trigger, Reaction, ConstraintMode, MatchMode, SpeechType, OrgasmType, RoomPresenceEvent, ReactionMode, TriggerTypeSchema, ReactionTypeSchema, ReactionType, TriggerType } from '../models/behaviors';
 import { BehaviorsModule } from '../modules/behaviors';
@@ -6,7 +7,9 @@ import { domUtil } from 'bc-deeplib/deeplib';
 import { idSelectorModal } from '@/utilities/selectorModals';
 
 type TabType = 'behaviors' | 'triggers' | 'reactions';
+// #endregion !SECTION Imports & Types
 
+// #region SECTION Constants
 const selector = Object.freeze({
   tabContainer: 'rsp-behaviors-tab-container',
   tabButton: 'rsp-behaviors-tab-button',
@@ -23,7 +26,9 @@ const selector = Object.freeze({
   chip: 'rsp-behaviors-chip',
   chipRemove: 'rsp-behaviors-chip-remove',
 });
+// #endregion !SECTION Constants
 
+// #region SECTION Class Definition
 export class GuiBehaviors extends BaseSubscreen {
   static instance: GuiBehaviors;
 
@@ -50,7 +55,9 @@ export class GuiBehaviors extends BaseSubscreen {
   set settings(val: BehaviorsSettingsModel) {
     super.settings = val;
   }
+// #endregion !SECTION Class Definition
 
+// #region SECTION BaseSubscreen Lifecycle
   get pageStructure(): SettingElement[][] {
     return [
       [
@@ -105,7 +112,9 @@ export class GuiBehaviors extends BaseSubscreen {
 
     super.exit();
   }
+// #endregion !SECTION BaseSubscreen Lifecycle
 
+// #region SECTION Rendering
   render() {
     const container = ElementWrap(selector.tabContainer);
     if (!container) return;
@@ -173,7 +182,9 @@ export class GuiBehaviors extends BaseSubscreen {
 
     return content;
   }
+// #endregion !SECTION Rendering
 
+// #region SECTION List Panel Building
   buildListPanel(): HTMLElement {
     const panel = ElementCreate({
       tag: 'div',
@@ -486,7 +497,9 @@ export class GuiBehaviors extends BaseSubscreen {
     button.appendChild(mainDiv);
     return button;
   }
+// #endregion !SECTION List Panel Building
 
+// #region SECTION Editor Panel Building
   buildEditorPanel(): HTMLElement {
     const panel = ElementCreate({
       tag: 'div',
@@ -860,7 +873,9 @@ export class GuiBehaviors extends BaseSubscreen {
 
     return section;
   }
+// #endregion !SECTION Editor Panel Building
 
+// #region SECTION Field Builders
   buildChipList(items: Array<{ id: string; name: string }>, onRemove: (item: { id: string; name: string }) => void): HTMLElement {
     const container = ElementCreate({
       tag: 'div',
@@ -1249,7 +1264,9 @@ export class GuiBehaviors extends BaseSubscreen {
       setSettingValue: onChange
     });
   }
+// #endregion !SECTION Field Builders
 
+// #region SECTION Selection Methods
   selectBehavior(id: string) {
     this.selectedBehaviorId = id;
     this.render();
@@ -1264,8 +1281,9 @@ export class GuiBehaviors extends BaseSubscreen {
     this.selectedReactionId = id;
     this.render();
   }
+// #endregion !SECTION Selection Methods
 
-  // #region SECTION - Handlers
+// #region SECTION Handlers
 
   handleAdd() {
     if (this.activeTab === 'behaviors') {
@@ -1365,10 +1383,9 @@ export class GuiBehaviors extends BaseSubscreen {
 
     this.render();
   }
+// #endregion !SECTION Handlers
 
-  // #endregion
-
-  // #region SECTION - Selectors
+// #region SECTION Selectors
 
   async showTriggerSelector(behavior: Behavior) {
     const availableTriggers = Object.values(this.settings.triggers).filter(t => !behavior.triggers.includes(t.id));
@@ -1413,10 +1430,9 @@ export class GuiBehaviors extends BaseSubscreen {
     });
     this.render();
   }
+// #endregion !SECTION Selectors
 
-  // #endregion
-
-  // #region SECTION - Creators
+// #region SECTION Creators
 
   changeTriggerType(trigger: Trigger, newType: TriggerType): Trigger | undefined {
     let newTrigger: Trigger | undefined;
@@ -1525,9 +1541,9 @@ export class GuiBehaviors extends BaseSubscreen {
       id: reaction.id,
     };
   }
+// #endregion !SECTION Creators
 
-  // #endregion
-
+// #region SECTION Utility Methods
   toggleDeleteMode() {
     this.deleteMode = !this.deleteMode;
     this.updateDeleteModeToggle();
@@ -1554,6 +1570,7 @@ export class GuiBehaviors extends BaseSubscreen {
       })
     ], { modalId: 'rsp-modal' });
   }
+// #endregion !SECTION Utility Methods
 }
 
 exportToGlobal('GuiResponses', GuiBehaviors);

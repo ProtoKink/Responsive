@@ -1,3 +1,5 @@
+// #region SECTION Variables
+
 $speech-color: #4a90e2;
 $emote-color: #9b59b6;
 $action-color: #e67e22;
@@ -9,12 +11,28 @@ $delete-color: #B22222;
 $delete-hover-color: #8B0000;
 $active-color: #4a90e2;
 
+// #endregion !SECTION Variables
+
+// #region SECTION Container & Layout
+
 .rsp-behaviors-container {
   display: flex;
   flex-direction: column;
   height: 100%;
   gap: min(1dvh, 0.5dvw);
 }
+
+.rsp-behaviors-tab-content {
+  display: flex;
+  flex-direction: row;
+  gap: min(1dvh, 0.5dvw);
+  flex: 1;
+  min-height: 0;
+}
+
+// #endregion !SECTION Container & Layout
+
+// #region SECTION Tabs
 
 .rsp-behaviors-tabs {
   display: flex;
@@ -36,17 +54,12 @@ $active-color: #4a90e2;
         background-color: var(--tmd-accent-hover, #e0e0e0);
       }
     }
-
   }
 }
 
-.rsp-behaviors-tab-content {
-  display: flex;
-  flex-direction: row;
-  gap: min(1dvh, 0.5dvw);
-  flex: 1;
-  min-height: 0;
-}
+// #endregion !SECTION Tabs
+
+// #region SECTION List Panel
 
 .rsp-behaviors-list-panel {
   display: flex;
@@ -59,6 +72,7 @@ $active-color: #4a90e2;
   padding: min(1.8dvh, 0.6dvw);
   box-shadow: min(0.2vh, 0.1vw) min(0.2vh, 0.1vw) min(0.4vh, 0.2vw) black;
 
+  // List Header
   .rsp-behaviors-list-header {
     display: flex;
     flex-direction: row;
@@ -75,6 +89,7 @@ $active-color: #4a90e2;
     padding: 0;
   }
 
+  // Search
   .rsp-behaviors-search {
     flex: 1;
     display: flex;
@@ -90,6 +105,7 @@ $active-color: #4a90e2;
     }
   }
 
+  // List Items
   .rsp-behaviors-list-items {
     display: flex;
     flex-direction: column;
@@ -144,6 +160,7 @@ $active-color: #4a90e2;
         flex-direction: column;
         gap: min(0.5dvh, 0.25dvw);
 
+        // Type Badges
         .rsp-behaviors-item-badge {
           display: inline-block;
           padding: min(0.3dvh, 0.15dvw) min(0.6dvh, 0.3dvw);
@@ -191,6 +208,10 @@ $active-color: #4a90e2;
   }
 }
 
+// #endregion !SECTION List Panel
+
+// #region SECTION Editor Panel
+
 .rsp-behaviors-editor-panel {
   display: flex;
   flex-direction: column;
@@ -201,12 +222,14 @@ $active-color: #4a90e2;
   padding: min(1.8dvh, 0.6dvw);
   box-shadow: min(0.2vh, 0.1vw) min(0.2vh, 0.1vw) min(0.4vh, 0.2vw) black;
 
+  // Empty State
   .rsp-behaviors-editor-empty {
     text-align: center;
     padding: min(5dvh, 2.5dvw);
     opacity: 0.6;
   }
 
+  // Form Fields
   .rsp-behaviors-field {
     display: flex;
     flex-direction: row;
@@ -251,6 +274,7 @@ $active-color: #4a90e2;
     }
   }
 
+  // Sections
   .rsp-behaviors-section {
     display: flex;
     flex-direction: column;
@@ -292,53 +316,54 @@ $active-color: #4a90e2;
       }
     }
 
-
-  .rsp-behaviors-content-list {
-    display: flex;
-    flex-direction: column;
-    gap: min(1dvh, 0.5dvw);
-    max-height: min(30dvh, 15dvw);
-
-    &:not(:empty) {
-      padding: min(1dvh, 0.5dvw);
-    }
-
-    .rsp-content-item {
-      width: 100%;
-      text-align: left;
-      padding: min(1dvh, 0.5dvw);
-
-      &[data-deletable][data-delete-mode] {
-        background-color: $delete-color;
-        color: white;
-      }
-
-      &[data-empty-content='true'] .button-label {
-        color: var(--tmd-text-disabled, gray);
-      }
-    }
-
-    .rsp-constraint-entry {
+    // Content Lists
+    .rsp-behaviors-content-list {
       display: flex;
-      flex-direction: row;
+      flex-direction: column;
       gap: min(1dvh, 0.5dvw);
-      align-items: center;
-      padding: min(1dvh, 0.5dvw);
-      margin-bottom: min(0.5dvh, 0.25dvw);
-      background-color: var(--tmd-element-hover, white);
-      border-radius: var(--deeplib-border-radius);
+      max-height: min(30dvh, 15dvw);
 
-      .rsp-behaviors-dropdown-field {
-        flex: 0 1;
+      &:not(:empty) {
+        padding: min(1dvh, 0.5dvw);
       }
 
       .rsp-content-item {
-        flex: 1;
+        width: 100%;
+        text-align: left;
+        padding: min(1dvh, 0.5dvw);
+
+        &[data-deletable][data-delete-mode] {
+          background-color: $delete-color;
+          color: white;
+        }
+
+        &[data-empty-content='true'] .button-label {
+          color: var(--tmd-text-disabled, gray);
+        }
+      }
+
+      .rsp-constraint-entry {
+        display: flex;
+        flex-direction: row;
+        gap: min(1dvh, 0.5dvw);
+        align-items: center;
+        padding: min(1dvh, 0.5dvw);
+        margin-bottom: min(0.5dvh, 0.25dvw);
+        background-color: var(--tmd-element-hover, white);
+        border-radius: var(--deeplib-border-radius);
+
+        .rsp-behaviors-dropdown-field {
+          flex: 0 1;
+        }
+
+        .rsp-content-item {
+          flex: 1;
+        }
       }
     }
   }
-  }
 
+  // Chips
   .rsp-behaviors-chips {
     display: flex;
     flex-wrap: wrap;
@@ -367,6 +392,7 @@ $active-color: #4a90e2;
     }
   }
 
+  // Collapsible Sections
   .rsp-behaviors-collapsible {
     display: flex;
     flex-direction: column;
@@ -417,6 +443,10 @@ $active-color: #4a90e2;
   }
 }
 
+// #endregion !SECTION Editor Panel
+
+// #region SECTION Delete Mode
+
 #rsp-delete-mode-toggle[data-delete-mode] {
   background-color: $delete-color;
 
@@ -424,6 +454,10 @@ $active-color: #4a90e2;
     background-color: $delete-hover-color;
   }
 }
+
+// #endregion !SECTION Delete Mode
+
+// #region SECTION Modal
 
 #rsp-modal {
   .deeplib-modal-prompt {
@@ -466,3 +500,5 @@ $active-color: #4a90e2;
     }
   }
 }
+
+// #endregion !SECTION Modal
