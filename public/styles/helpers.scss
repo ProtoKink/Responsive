@@ -1,0 +1,26 @@
+// Function that returns min() with both vh/dvh
+@function min-vh($vh-value, $dvh-value: null) {
+  @if $dvh-value == null {
+    $dvh-value: $vh-value;
+  }
+  @return min(#{$vh-value}vh, #{$dvh-value}dvh);
+}
+
+// Function that returns min() with both vw/dvw
+@function min-vw($vw-value, $dvw-value: null) {
+  @if $dvw-value == null {
+    $dvw-value: $vw-value;
+  }
+  @return min(#{$vw-value}vw, #{$dvw-value}dvw);
+}
+
+// Combined function for both
+@function minv($vh-value, $vw-value, $dvh-value: null, $dvw-value: null) {
+  @if $dvh-value == null {
+    $dvh-value: $vh-value;
+  }
+  @if $dvw-value == null {
+    $dvw-value: $vw-value;
+  }
+  @return min(min-vh($vh-value, $dvh-value), min-vw($vw-value, $dvw-value));
+}

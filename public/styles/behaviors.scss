@@ -1,3 +1,5 @@
+@use 'helpers' as *;
+
 // #region SECTION Variables
 
 $speech-color: #4a90e2;
@@ -19,13 +21,13 @@ $active-color: #4a90e2;
   display: flex;
   flex-direction: column;
   height: 100%;
-  gap: min(1dvh, 0.5dvw);
+  gap: minv(1, 0.5);
 }
 
 .rsp-behaviors-tab-content {
   display: flex;
   flex-direction: row;
-  gap: min(1dvh, 0.5dvw);
+  gap: minv(1, 0.5);
   flex: 1;
   min-height: 0;
 }
@@ -36,15 +38,15 @@ $active-color: #4a90e2;
 
 .rsp-behaviors-tabs {
   display: flex;
-  gap: min(1dvh, 0.5dvw);
-  padding: min(1dvh, 0.5dvw);
+  gap: minv(1, 0.5);
+  padding: minv(1, 0.5);
   background-color: var(--tmd-element, lightgray);
   border-radius: var(--deeplib-border-radius);
-  box-shadow: min(0.2vh, 0.1vw) min(0.2vh, 0.1vw) min(0.4vh, 0.2vw) black;
+  box-shadow: minv(0.2, 0.1) minv(0.2, 0.1) minv(0.4, 0.2) black;
 
   .rsp-behaviors-tab-button {
     flex: 1;
-    padding: min(0.8dvh, 0.4dvw) min(1.5dvh, 0.75dvw);
+    padding: minv(0.8, 0.4) minv(1.5, 0.75);
 
     &[data-selected] {
       background-color: var(--tmd-accent, $active-color);
@@ -64,13 +66,13 @@ $active-color: #4a90e2;
 .rsp-behaviors-list-panel {
   display: flex;
   flex-direction: column;
-  gap: min(1dvh, 0.5dvw);
+  gap: minv(1, 0.5);
   width: 25%;
   min-width: 250px;
   background-color: var(--tmd-element, lightgray);
   border-radius: var(--deeplib-border-radius);
-  padding: min(1.8dvh, 0.6dvw);
-  box-shadow: min(0.2vh, 0.1vw) min(0.2vh, 0.1vw) min(0.4vh, 0.2vw) black;
+  padding: minv(1.8, 0.6);
+  box-shadow: minv(0.2, 0.1) minv(0.2, 0.1) minv(0.4, 0.2) black;
 
   // List Header
   .rsp-behaviors-list-header {
@@ -100,7 +102,7 @@ $active-color: #4a90e2;
 
     input {
       width: 100%;
-      padding: min(1dvh, 0.5dvw);
+      padding: minv(1, 0.5);
       font-size: 0.8em;
     }
   }
@@ -114,7 +116,7 @@ $active-color: #4a90e2;
     flex: 1;
 
     .rsp-behaviors-list-item {
-      padding: min(1dvh, 0.5dvw);
+      padding: minv(1, 0.5);
       transition: background-color 0.2s;
       height: unset;
 
@@ -162,17 +164,21 @@ $active-color: #4a90e2;
         flex-direction: column;
         gap: min(0.5dvh, 0.25dvw);
 
+        & * {
+          pointer-events: none;
+        }
+
         // Badges Container
         .rsp-behaviors-item-badges {
           display: flex;
           flex-wrap: wrap;
-          gap: min(0.5dvh, 0.25dvw);
+          gap: minv(1, 2);
           width: 100%;
 
           // Type Badges
           .rsp-behaviors-item-badge {
             display: inline-block;
-            padding: min(0.3dvh, 0.15dvw) min(0.6dvh, 0.3dvw);
+            padding: minv(0.3, 0.15) minv(1, 0.5);
             border-radius: var(--deeplib-border-radius);
             font-size: 0.85em;
             text-align: start;
@@ -225,17 +231,17 @@ $active-color: #4a90e2;
 .rsp-behaviors-editor-panel {
   display: flex;
   flex-direction: column;
-  gap: min(1.5dvh, 0.75dvw);
+  gap: minv(1.5, 0.75);
   flex: 1;
   background-color: var(--tmd-element, lightgray);
   border-radius: var(--deeplib-border-radius);
-  padding: min(1.8dvh, 0.6dvw);
-  box-shadow: min(0.2vh, 0.1vw) min(0.2vh, 0.1vw) min(0.4vh, 0.2vw) black;
+  padding: minv(1.8, 0.6);
+  box-shadow: minv(0.2, 0.1) minv(0.2, 0.1) minv(0.4, 0.2) black;
 
   // Empty State
   .rsp-behaviors-editor-empty {
     text-align: center;
-    padding: min(5dvh, 2.5dvw);
+    padding: minv(5, 2.5);
     opacity: 0.6;
   }
 
@@ -251,9 +257,9 @@ $active-color: #4a90e2;
     >label {
       font-weight: bold;
       font-size: 0.9em;
-      min-width: min(15dvh, 7.5dvw);
+      min-width: minv(15, 7.5);
       flex-shrink: 0;
-      padding-top: min(1dvh, 0.5dvw);
+      padding-top: minv(1, 0.5);
     }
 
     // All labels should be bold
@@ -271,7 +277,7 @@ $active-color: #4a90e2;
     input[type='text'],
     input[type='number'],
     select {
-      padding: min(1dvh, 0.5dvw);
+      padding: minv(1, 0.5);
       font-size: 0.9em;
     }
 
@@ -288,22 +294,22 @@ $active-color: #4a90e2;
   .rsp-behaviors-section {
     display: flex;
     flex-direction: column;
-    padding: min(1.5dvh, 0.75dvw);
+    padding: minv(1.5, 0.75);
     background-color: var(--tmd-element-hover, white);
     border-radius: var(--deeplib-border-radius);
 
     &:not(:has(.rsp-behaviors-content-list:empty)) {
-      gap: min(1dvh, 0.5dvw);
+      gap: minv(1, 0.5);
 
       .rsp-behaviors-content-list-header {
-        margin-bottom: min(1dvh, 0.5dvw);
+        margin-bottom: minv(1, 0.5);
       }
     }
 
     .rsp-behaviors-section-label {
       font-weight: bold;
       font-size: 1em;
-      margin-bottom: min(0.5dvh, 0.25dvw);
+      margin-bottom: minv(0.5, 0.25);
     }
 
     .rsp-behaviors-content-list-header {
@@ -311,7 +317,7 @@ $active-color: #4a90e2;
       flex-direction: row;
       align-items: center;
       justify-content: space-between;
-      gap: min(1dvh, 0.5dvw);
+      gap: minv(1, 0.5);
 
       label {
         font-weight: bold;
@@ -322,7 +328,7 @@ $active-color: #4a90e2;
       .rsp-content-add {
         flex: 1 1 auto;
         width: min-content;
-        padding: 0 min(1dvh, 0.5dvw);
+        padding: 0 minv(1, 0.5);
       }
     }
 
@@ -330,17 +336,17 @@ $active-color: #4a90e2;
     .rsp-behaviors-content-list {
       display: flex;
       flex-direction: column;
-      gap: min(1dvh, 0.5dvw);
-      max-height: min(30dvh, 15dvw);
+      gap: minv(1, 0.5);
+      max-height: minv(30, 15);
 
       &:not(:empty) {
-        padding: min(1dvh, 0.5dvw);
+        padding: minv(1, 0.5);
       }
 
       .rsp-content-item {
         width: 100%;
         text-align: left;
-        padding: min(1dvh, 0.5dvw);
+        padding: minv(1, 0.5);
 
         &[data-deletable][data-delete-mode] {
           background-color: $delete-color;
@@ -355,10 +361,10 @@ $active-color: #4a90e2;
       .rsp-constraint-entry {
         display: flex;
         flex-direction: row;
-        gap: min(1dvh, 0.5dvw);
+        gap: minv(1, 0.5);
         align-items: center;
-        padding: min(1dvh, 0.5dvw);
-        margin-bottom: min(0.5dvh, 0.25dvw);
+        padding: minv(1, 0.5);
+        margin-bottom: minv(0.5, 0.25);
         background-color: var(--tmd-element-hover, white);
         border-radius: var(--deeplib-border-radius);
 
@@ -377,22 +383,53 @@ $active-color: #4a90e2;
   .rsp-behaviors-chips {
     display: flex;
     flex-wrap: wrap;
-    gap: min(0.5dvh, 0.25dvw);
+    gap: minv(0.5, 0.25);
 
     .rsp-behaviors-chip {
       display: flex;
       align-items: center;
-      gap: min(0.5dvh, 0.25dvw);
-      padding: min(0.5dvh, 0.25dvw) min(1dvh, 0.5dvw);
+      gap: minv(0.5, 0.25);
+      padding: minv(0.5, 0.25) minv(1, 0.5);
       background-color: var(--tmd-accent, $active-color);
       color: white;
       border-radius: var(--deeplib-border-radius);
       font-size: 0.9em;
+      user-select: none;
+
+      &.type-speech {
+        background-color: $speech-color;
+        color: white;
+      }
+
+      &.type-emote {
+        background-color: $emote-color;
+        color: white;
+      }
+
+      &.type-action {
+        background-color: $action-color;
+        color: white;
+      }
+
+      &.type-activity {
+        background-color: $activity-color;
+        color: white;
+      }
+
+      &.type-orgasm {
+        background-color: $orgasm-color;
+        color: white;
+      }
+
+      &.type-roomPresence {
+        background-color: $roomPresence-color;
+        color: white;
+      }
 
       .rsp-behaviors-chip-remove {
         padding: 0;
-        width: min(3dvh, 1.5dvw);
-        height: min(3dvh, 1.5dvw);
+        width: minv(3, 1.5);
+        height: minv(3, 1.5);
         border-radius: 50%;
 
         &:hover {
@@ -410,7 +447,7 @@ $active-color: #4a90e2;
     border-radius: var(--deeplib-border-radius);
 
     .rsp-behaviors-collapsible-header {
-      padding: min(1.5dvh, 0.75dvw);
+      padding: minv(1.5, 0.75);
       background-color: var(--tmd-element-hover, white);
       color: var(--tmd-text, black);
       cursor: pointer;
@@ -432,7 +469,7 @@ $active-color: #4a90e2;
       &::after {
         content: '▼';
         position: absolute;
-        right: min(1.5dvh, 0.75dvw);
+        right: minv(1.5, 0.75);
         transition: transform 0.2s;
       }
 
@@ -442,11 +479,11 @@ $active-color: #4a90e2;
     }
 
     .rsp-behaviors-collapsible-content {
-      padding: min(1.5dvh, 0.75dvw);
+      padding: minv(1.5, 0.75);
       background-color: var(--tmd-element, lightgray);
       display: flex;
       flex-direction: column;
-      gap: min(1dvh, 0.5dvw);
+      gap: minv(1, 0.5);
       border-bottom-right-radius: var(--deeplib-border-radius);
       border-bottom-left-radius: var(--deeplib-border-radius);
     }
@@ -489,10 +526,10 @@ $active-color: #4a90e2;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    gap: min(0.8dvh, 0.4dvw);
+    gap: minv(0.8, 0.4);
     justify-content: flex-start;
     align-items: flex-start;
-    padding: min(1dvh, 0.5dvw) 0;
+    padding: minv(1, 0.5) 0;
     width: 100%;
     box-sizing: border-box;
 
@@ -501,7 +538,7 @@ $active-color: #4a90e2;
       width: auto !important;
       min-width: 0;
       max-width: none;
-      padding: min(1dvh, 0.5dvw) min(2dvh, 1dvw);
+      padding: minv(1, 0.5) minv(2, 1);
       white-space: nowrap;
       box-sizing: border-box;
 

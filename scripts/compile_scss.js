@@ -34,6 +34,7 @@ function compileSassOne(inputPath, outputPath) {
     sourceMap: true,
     style: 'expanded',
     syntax: 'scss',
+    loadPaths: [inputDir],
   });
   const cssWithMap = result.css + `\n/*# sourceMappingURL=${path.basename(outputPath).replace(/\.scss$/, '.css.map')} */\n`;
 

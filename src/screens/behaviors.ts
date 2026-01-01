@@ -331,6 +331,34 @@ export class GuiBehaviors extends BaseSubscreen {
   buildBehaviorListItem(behavior: Behavior): HTMLElement {
     const isSelected = this.selectedBehaviorId === behavior.id;
 
+    const mainDiv = ElementCreate({
+      tag: 'div',
+      classList: ['rsp-behaviors-item-main'],
+      children: [
+        advElement.createCheckbox({
+          id: `rsp-behavior-enabled-${CommonGenerateUniqueID()}`,
+          label: behavior.name,
+          setElementValue: () => behavior.enabled,
+          setSettingValue: (val) => behavior.enabled = val,
+          options: {
+            direction: 'rowReverse'
+          },
+          htmlOptions: {
+            label: {
+              classList: ['rsp-behaviors-item-name', 'truncated-text']
+            }
+          }
+        }),
+        {
+          tag: 'span',
+          classList: ['rsp-behaviors-item-info'],
+          children: [
+            `${behavior.triggers.length} ${getText('behaviors.text.triggers')}, ${behavior.reactions.length} ${getText('behaviors.text.reactions')}`
+          ]
+        }
+      ]
+    });
+
     const button = advElement.createButton({
       id: `rsp-behavior-list-item-${behavior.id}`,
       onClick: () => {
@@ -348,68 +376,20 @@ export class GuiBehaviors extends BaseSubscreen {
             deletable: 'true',
             deleteMode: this.deleteMode,
             selected: isSelected
-          }
-        }
+          },
+          children: [
+            mainDiv
+          ]
+        },
       }
     });
 
-    const mainDiv = ElementCreate({
-      tag: 'div',
-      classList: ['rsp-behaviors-item-main'],
-      children: [
-        advElement.createCheckbox({
-          id: `rsp-behavior-enabled-${CommonGenerateUniqueID()}`,
-          label: behavior.name,
-          setElementValue: () => behavior.enabled,
-          setSettingValue: (val) => behavior.enabled = val,
-          options: {
-            direction: 'rowReverse'
-          },
-          htmlOptions: {
-            label: {
-              classList: ['rsp-behaviors-item-name']
-            }
-          }
-        }),
-        {
-          tag: 'span',
-          classList: ['rsp-behaviors-item-info'],
-          children: [
-            `${behavior.triggers.length} ${getText('behaviors.text.triggers')}, ${behavior.reactions.length} ${getText('behaviors.text.reactions')}`
-          ]
-        }
-      ]
-    });
-
-    button.appendChild(mainDiv);
     return button;
   }
 
   buildTriggerListItem(trigger: Trigger): HTMLElement {
     const isSelected = this.selectedTriggerId === trigger.id;
     const hasConstraints = !!(trigger.constraints && Object.keys(trigger.constraints).length > 0);
-
-    const button = advElement.createButton({
-      id: `rsp-trigger-list-item-${trigger.id}`,
-      onClick: () => {
-        if (this.deleteMode) {
-          this.handleDelete('triggers', trigger.id);
-        } else {
-          this.selectTrigger(trigger.id);
-        }
-      },
-      htmlOptions: {
-        button: {
-          classList: [selector.listItem],
-          dataAttributes: {
-            id: trigger.id,
-            deletable: 'true',
-            deleteMode: this.deleteMode,
-            selected: isSelected
-          }
-        }
-      }
-    });
 
     const badges: Array<{ tag: 'span'; classList: string[]; children: string[] }> = [
       {
@@ -434,7 +414,7 @@ export class GuiBehaviors extends BaseSubscreen {
       children: [
         {
           tag: 'span',
-          classList: ['rsp-behaviors-item-name'],
+          classList: ['rsp-behaviors-item-name', 'truncated-text'],
           children: [
             trigger.name
           ]
@@ -447,36 +427,36 @@ export class GuiBehaviors extends BaseSubscreen {
       ]
     });
 
-    button.appendChild(mainDiv);
+    const button = advElement.createButton({
+      id: `rsp-trigger-list-item-${trigger.id}`,
+      onClick: () => {
+        if (this.deleteMode) {
+          this.handleDelete('triggers', trigger.id);
+        } else {
+          this.selectTrigger(trigger.id);
+        }
+      },
+      htmlOptions: {
+        button: {
+          classList: [selector.listItem],
+          dataAttributes: {
+            id: trigger.id,
+            deletable: 'true',
+            deleteMode: this.deleteMode,
+            selected: isSelected
+          },
+          children: [
+            mainDiv
+          ]
+        },
+      }
+    });
+
     return button;
   }
 
   buildReactionListItem(reaction: Reaction): HTMLElement {
     const isSelected = this.selectedReactionId === reaction.id;
-
-    const button = advElement.createButton({
-      id: `rsp-reaction-list-item-${reaction.id}`,
-      onClick: () => {
-        if (this.deleteMode) {
-          this.handleDelete('reactions', reaction.id);
-        } else {
-          this.selectReaction(reaction.id);
-        }
-      },
-      htmlOptions: {
-        button: {
-          classList: [
-            selector.listItem,
-          ],
-          dataAttributes: {
-            id: reaction.id,
-            deletable: 'true',
-            deleteMode: this.deleteMode,
-            selected: isSelected
-          }
-        }
-      }
-    });
 
     const mainDiv = ElementCreate({
       tag: 'div',
@@ -484,7 +464,7 @@ export class GuiBehaviors extends BaseSubscreen {
       children: [
         {
           tag: 'span',
-          classList: ['rsp-behaviors-item-name'],
+          classList: ['rsp-behaviors-item-name', 'truncated-text'],
           children: [reaction.name]
         },
         {
@@ -501,7 +481,31 @@ export class GuiBehaviors extends BaseSubscreen {
       ]
     });
 
-    button.appendChild(mainDiv);
+    const button = advElement.createButton({
+      id: `rsp-reaction-list-item-${reaction.id}`,
+      onClick: () => {
+        if (this.deleteMode) {
+          this.handleDelete('reactions', reaction.id);
+        } else {
+          this.selectReaction(reaction.id);
+        }
+      },
+      htmlOptions: {
+        button: {
+          classList: [selector.listItem],
+          dataAttributes: {
+            id: reaction.id,
+            deletable: 'true',
+            deleteMode: this.deleteMode,
+            selected: isSelected
+          },
+          children: [
+            mainDiv
+          ]
+        },
+      }
+    });
+
     return button;
   }
   // #endregion !SECTION List Panel Building
@@ -671,12 +675,12 @@ export class GuiBehaviors extends BaseSubscreen {
         ));
         break;
       case 'activity':
-        elements.push(this.buildStringArrayField(
+        elements.push(this.buildContentArrayField(
           'behaviors.field.activity_names',
           trigger.activityName,
           (val) => trigger.activityName = val
         ));
-        elements.push(this.buildStringArrayField(
+        elements.push(this.buildContentArrayField(
           'behaviors.field.group_names',
           trigger.groupName,
           (val) => trigger.groupName = val
@@ -812,85 +816,58 @@ export class GuiBehaviors extends BaseSubscreen {
   }
 
   buildTriggersSection(behavior: Behavior): HTMLElement {
-    const section = ElementCreate({
-      tag: 'div',
-      classList: ['rsp-behaviors-section'],
-      children: [
-        advElement.createLabel({
-          id: 'rsp-behaviors-section-label-triggers',
-          label: getText('behaviors.section.triggers'),
-          htmlOptions: {
-            classList: ['rsp-behaviors-section-label']
-          }
-        }),
-        this.buildChipList(
-          behavior.triggers.map(id => this.settings.triggers[id]).filter(Boolean) as Trigger[],
-          (trigger) => {
-            const index = behavior.triggers.indexOf(trigger.id);
-            if (index > -1) {
-              behavior.triggers.splice(index, 1);
-              this.render();
-            }
-          }
-        ),
-        advElement.createButton({
-          id: 'rsp-behavior-add-trigger',
-          onClick: () => this.showTriggerSelector(behavior),
-          options: {
-            label: getText('behaviors.button.add_trigger')
-          }
-        })
-      ]
-    });
+    const content = this.buildChipList(
+      behavior.triggers.map(id => this.settings.triggers[id]).filter(Boolean) as Trigger[],
+      (trigger) => {
+        const index = behavior.triggers.indexOf(trigger.id);
+        if (index > -1) {
+          behavior.triggers.splice(index, 1);
+          this.render();
+        }
+      }
+    );
 
-    return section;
+    return this.buildContentListSection(
+      'behaviors.section.triggers',
+      () => this.showTriggerSelector(behavior),
+      'behaviors.button.add_trigger',
+      content
+    );
   }
 
   buildReactionsSection(behavior: Behavior): HTMLElement {
-    const section = ElementCreate({
-      tag: 'div',
-      classList: ['rsp-behaviors-section'],
-      children: [
-        advElement.createLabel({
-          id: 'rsp-behaviors-section-label-reactions',
-          label: getText('behaviors.section.reactions'),
-          htmlOptions: {
-            classList: ['rsp-behaviors-section-label']
-          }
-        }),
-        this.buildChipList(
-          behavior.reactions.map(id => this.settings.reactions[id]).filter(Boolean) as Reaction[],
-          (reaction) => {
-            const index = behavior.reactions.indexOf(reaction.id);
-            if (index > -1) {
-              behavior.reactions.splice(index, 1);
-              this.render();
-            }
-          }
-        ),
-        advElement.createButton({
-          id: 'rsp-behavior-add-reaction',
-          onClick: () => this.showReactionSelector(behavior),
-          options: {
-            label: getText('behaviors.button.add_reaction')
-          }
-        })
-      ]
-    });
+    const content = this.buildChipList(
+      behavior.reactions.map(id => this.settings.reactions[id]).filter(Boolean) as Reaction[],
+      (reaction) => {
+        const index = behavior.reactions.indexOf(reaction.id);
+        if (index > -1) {
+          behavior.reactions.splice(index, 1);
+          this.render();
+        }
+      }
+    );
 
-    return section;
+    return this.buildContentListSection(
+      'behaviors.section.reactions',
+      () => this.showReactionSelector(behavior),
+      'behaviors.button.add_reaction',
+      content
+    );
   }
   // #endregion !SECTION Editor Panel Building
 
   // #region SECTION Field Builders
-  buildChipList(items: Array<{ id: string; name: string }>, onRemove: (item: { id: string; name: string }) => void): HTMLElement {
+  buildChipList(items: Array<{ id: string; name: string; type?: string }>, onRemove: (item: { id: string; name: string }) => void): HTMLElement {
     const container = ElementCreate({
       tag: 'div',
       classList: ['rsp-behaviors-chips'],
       children: items.map(item => {
+        const chipClassList = item.type
+          ? [selector.chip, `type-${item.type}`]
+          : [selector.chip];
         return ({
           tag: 'div',
-          classList: [selector.chip],
+          classList: chipClassList,
           children: [
             {
               tag: 'span',
@@ -918,49 +895,17 @@ export class GuiBehaviors extends BaseSubscreen {
   }
 
   buildContentArrayField(labelKey: string, values: string[], onChange: (values: string[]) => void): HTMLElement {
-    const addButton = advElement.createButton({
-      id: `rsp-content-add-${CommonGenerateUniqueID()}`,
-      onClick: () => {
-        Modal.prompt(getText('behaviors.prompt.add_content'), { modalId: 'rsp-modal' }).then((response) => {
-          if (response === null) return;
-          values.push(response);
-          onChange(values);
-          this.render();
-        });
-      },
-      options: {
-        image: `${PUBLIC_URL}/images/plus.svg`,
-        label: getText('behaviors.button.add_content')
-      },
-      htmlOptions: {
-        button: {
-          classList: ['rsp-content-add']
-        }
-      }
-    });
+    const content = this.buildContentList(values, onChange);
+    const onAdd = () => {
+      Modal.prompt(getText('behaviors.prompt.add_content'), { modalId: 'rsp-modal' }).then((response) => {
+        if (response === null) return;
+        values.push(response);
+        onChange(values);
+        this.render();
+      });
+    };
 
-    const header = ElementCreate({
-      tag: 'div',
-      classList: ['rsp-behaviors-content-list-header'],
-      children: [
-        advElement.createLabel({
-          id: `rsp-label-${CommonGenerateUniqueID()}`,
-          label: getText(labelKey)
-        }),
-        addButton
-      ]
-    });
-
-    const container = ElementCreate({
-      tag: 'div',
-      classList: ['rsp-behaviors-section'],
-      children: [
-        header,
-        this.buildContentList(values, onChange)
-      ]
-    });
-
-    return container;
+    return this.buildContentListSection(labelKey, onAdd, 'behaviors.button.add_content', content);
   }
 
   buildContentList(values: string[], onChange: (values: string[]) => void): HTMLElement {
@@ -1021,30 +966,13 @@ export class GuiBehaviors extends BaseSubscreen {
     return container;
   }
 
-  buildStringArrayField(labelKey: string, values: string[], onChange: (values: string[]) => void): HTMLElement {
-    return this.buildContentArrayField(labelKey, values, onChange);
-  }
-
-  buildIncludeExcludeField(labelKey: string, rule: { entries: Array<{ value: string; mode: 'include' | 'exclude' }> } | undefined, onChange: (rule: { entries: Array<{ value: string; mode: 'include' | 'exclude' }> } | undefined) => void): HTMLElement {
-    const entries = rule?.entries || [];
+  buildContentListSection(labelKey: string, onAdd: () => void, addLabel: string, content: HTMLElement): HTMLElement {
     const addButton = advElement.createButton({
-      id: `rsp-constraint-entry-add-${CommonGenerateUniqueID()}`,
-      onClick: () => {
-        Modal.prompt(getText('behaviors.prompt.add_content'), { modalId: 'rsp-modal' }).then((response) => {
-          if (response === null) return;
-          entries.push({ value: response, mode: 'include' });
-          if (!rule) {
-            rule = { entries: entries };
-          } else {
-            rule.entries = entries;
-          }
-          onChange(rule);
-          this.render();
-        });
-      },
+      id: `rsp-content-add-${CommonGenerateUniqueID()}`,
+      onClick: onAdd,
       options: {
         image: `${PUBLIC_URL}/images/plus.svg`,
-        label: getText('behaviors.button.add_content')
+        label: getText(addLabel)
       },
       htmlOptions: {
         button: {
@@ -1070,21 +998,42 @@ export class GuiBehaviors extends BaseSubscreen {
       classList: ['rsp-behaviors-section'],
       children: [
         header,
-        this.buildConstraintEntryList(
-          entries,
-          (updatedEntries) => {
-            if (!rule) {
-              rule = { entries: updatedEntries };
-            } else {
-              rule.entries = updatedEntries;
-            }
-            onChange(rule);
-          }
-        )
+        content
       ]
     });
 
     return container;
+  }
+
+  buildIncludeExcludeField(labelKey: string, rule: { entries: Array<{ value: string; mode: 'include' | 'exclude' }> } | undefined, onChange: (rule: { entries: Array<{ value: string; mode: 'include' | 'exclude' }> } | undefined) => void): HTMLElement {
+    const entries = rule?.entries || [];
+    const onAdd = () => {
+      Modal.prompt(getText('behaviors.prompt.add_content'), { modalId: 'rsp-modal' }).then((response) => {
+        if (response === null) return;
+        entries.push({ value: response, mode: 'include' });
+        if (!rule) {
+          rule = { entries: entries };
+        } else {
+          rule.entries = entries;
+        }
+        onChange(rule);
+        this.render();
+      });
+    };
+
+    const content = this.buildConstraintEntryList(
+      entries,
+      (updatedEntries) => {
+        if (!rule) {
+          rule = { entries: updatedEntries };
+        } else {
+          rule.entries = updatedEntries;
+        }
+        onChange(rule);
+      }
+    );
+
+    return this.buildContentListSection(labelKey, onAdd, 'behaviors.button.add_content', content);
   }
 
   buildConstraintEntryList(entries: Array<{ value: string; mode: 'include' | 'exclude' }>, onChange: (entries: Array<{ value: string; mode: 'include' | 'exclude' }>) => void): HTMLElement {
