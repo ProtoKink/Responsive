@@ -321,156 +321,170 @@ export class GuiBehaviors extends BaseSubscreen {
   buildBehaviorListItem(behavior: Behavior): HTMLElement {
     const isSelected = this.selectedBehaviorId === behavior.id;
 
-    return ElementCreate({
-      tag: 'div',
-      classList: [
-        selector.listItem,
-      ],
-      dataAttributes: {
-        id: behavior.id,
-        deletable: 'true',
-        deleteMode: this.deleteMode ? 'true' : undefined,
-        selected: isSelected
-      },
-      children: [
-        {
-          tag: 'div',
-          classList: ['rsp-behaviors-item-main'],
-          children: [
-            advElement.createCheckbox({
-              id: `rsp-behavior-enabled-${CommonGenerateUniqueID()}`,
-              label: behavior.name,
-              setElementValue: () => behavior.enabled,
-              setSettingValue: (val) => behavior.enabled = val,
-              options: {
-                direction: 'rowReverse'
-              },
-              htmlOptions: {
-                label: {
-                  classList: ['rsp-behaviors-item-name']
-                }
-              }
-            }),
-            {
-              tag: 'span',
-              classList: ['rsp-behaviors-item-info'],
-              children: [
-                `${behavior.triggers.length} ${getText('behaviors.text.triggers')}, ${behavior.reactions.length} ${getText('behaviors.text.reactions')}`
-              ]
-            }
-          ]
+    const button = advElement.createButton({
+      id: `rsp-behavior-list-item-${behavior.id}`,
+      onClick: () => {
+        if (this.deleteMode) {
+          this.handleDelete('behaviors', behavior.id);
+        } else {
+          this.selectBehavior(behavior.id);
         }
-      ],
-      eventListeners: {
-        click: () => {
-          if (this.deleteMode) {
-            this.handleDelete('behaviors', behavior.id);
-          } else {
-            this.selectBehavior(behavior.id);
+      },
+      htmlOptions: {
+        button: {
+          classList: [selector.listItem],
+          dataAttributes: {
+            id: behavior.id,
+            deletable: 'true',
+            deleteMode: this.deleteMode,
+            selected: isSelected
           }
         }
       }
     });
+
+    const mainDiv = ElementCreate({
+      tag: 'div',
+      classList: ['rsp-behaviors-item-main'],
+      children: [
+        advElement.createCheckbox({
+          id: `rsp-behavior-enabled-${CommonGenerateUniqueID()}`,
+          label: behavior.name,
+          setElementValue: () => behavior.enabled,
+          setSettingValue: (val) => behavior.enabled = val,
+          options: {
+            direction: 'rowReverse'
+          },
+          htmlOptions: {
+            label: {
+              classList: ['rsp-behaviors-item-name']
+            }
+          }
+        }),
+        {
+          tag: 'span',
+          classList: ['rsp-behaviors-item-info'],
+          children: [
+            `${behavior.triggers.length} ${getText('behaviors.text.triggers')}, ${behavior.reactions.length} ${getText('behaviors.text.reactions')}`
+          ]
+        }
+      ]
+    });
+
+    button.appendChild(mainDiv);
+    return button;
   }
 
   buildTriggerListItem(trigger: Trigger): HTMLElement {
     const isSelected = this.selectedTriggerId === trigger.id;
     const hasConstraints = !!(trigger.constraints && Object.keys(trigger.constraints).length > 0);
 
-    const item = ElementCreate({
-      tag: 'div',
-      classList: [selector.listItem],
-      dataAttributes: {
-        id: trigger.id,
-        deletable: 'true',
-        deleteMode: this.deleteMode ? 'true' : undefined,
-        selected: isSelected
-      },
-      children: [
-        {
-          tag: 'div',
-          classList: ['rsp-behaviors-item-main'],
-          children: [
-            {
-              tag: 'span',
-              classList: ['rsp-behaviors-item-name'],
-              children: [
-                trigger.name
-              ]
-            },
-            {
-              tag: 'span',
-              classList: ['rsp-behaviors-item-badge', `type-${trigger.type}`],
-              children: [
-                getText(`behaviors.trigger_type.${trigger.type}`)
-              ]
-            },
-            hasConstraints ? ({
-              tag: 'span',
-              classList: ['rsp-behaviors-item-badge', 'has-constraints'],
-              children: [
-                getText('behaviors.text.has_constraints')
-              ]
-            }) : undefined
-          ]
+    const button = advElement.createButton({
+      id: `rsp-trigger-list-item-${trigger.id}`,
+      onClick: () => {
+        if (this.deleteMode) {
+          this.handleDelete('triggers', trigger.id);
+        } else {
+          this.selectTrigger(trigger.id);
         }
-      ],
-      eventListeners: {
-        click: () => {
-          if (this.deleteMode) {
-            this.handleDelete('triggers', trigger.id);
-          } else {
-            this.selectTrigger(trigger.id);
+      },
+      options: {
+        noStyling: true
+      },
+      htmlOptions: {
+        button: {
+          classList: [selector.listItem],
+          dataAttributes: {
+            id: trigger.id,
+            deletable: 'true',
+            deleteMode: this.deleteMode,
+            selected: isSelected
           }
         }
       }
     });
 
-    return item;
+    const mainDiv = ElementCreate({
+      tag: 'div',
+      classList: ['rsp-behaviors-item-main'],
+      children: [
+        {
+          tag: 'span',
+          classList: ['rsp-behaviors-item-name'],
+          children: [
+            trigger.name
+          ]
+        },
+        {
+          tag: 'span',
+          classList: ['rsp-behaviors-item-badge', `type-${trigger.type}`],
+          children: [
+            getText(`behaviors.trigger_type.${trigger.type}`)
+          ]
+        },
+        hasConstraints ? ({
+          tag: 'span',
+          classList: ['rsp-behaviors-item-badge', 'has-constraints'],
+          children: [
+            getText('behaviors.text.has_constraints')
+          ]
+        }) : undefined
+      ]
+    });
+
+    button.appendChild(mainDiv);
+    return button;
   }
 
   buildReactionListItem(reaction: Reaction): HTMLElement {
     const isSelected = this.selectedReactionId === reaction.id;
 
-    return ElementCreate({
-      tag: 'div',
-      classList: [
-        selector.listItem,
-        isSelected ? 'selected' : undefined,
-      ],
-      dataAttributes: {
-        id: reaction.id,
-        deletable: 'true',
-        deleteMode: this.deleteMode ? 'true' : undefined
-      },
-      children: [
-        {
-          tag: 'div',
-          classList: ['rsp-behaviors-item-main'],
-          children: [
-            {
-              tag: 'span',
-              classList: ['rsp-behaviors-item-name'],
-              children: [reaction.name]
-            },
-            {
-              tag: 'span',
-              classList: ['rsp-behaviors-item-badge', `type-${reaction.type}`],
-              children: [getText(`behaviors.reaction_type.${reaction.type}`)]
-            }
-          ]
+    const button = advElement.createButton({
+      id: `rsp-reaction-list-item-${reaction.id}`,
+      onClick: () => {
+        if (this.deleteMode) {
+          this.handleDelete('reactions', reaction.id);
+        } else {
+          this.selectReaction(reaction.id);
         }
-      ],
-      eventListeners: {
-        click: () => {
-          if (this.deleteMode) {
-            this.handleDelete('reactions', reaction.id);
-          } else {
-            this.selectReaction(reaction.id);
+      },
+      options: {
+        noStyling: true
+      },
+      htmlOptions: {
+        button: {
+          classList: [
+            selector.listItem,
+          ],
+          dataAttributes: {
+            id: reaction.id,
+            deletable: 'true',
+            deleteMode: this.deleteMode,
+            selected: isSelected
           }
         }
       }
     });
+
+    const mainDiv = ElementCreate({
+      tag: 'div',
+      classList: ['rsp-behaviors-item-main'],
+      children: [
+        {
+          tag: 'span',
+          classList: ['rsp-behaviors-item-name'],
+          children: [reaction.name]
+        },
+        {
+          tag: 'span',
+          classList: ['rsp-behaviors-item-badge', `type-${reaction.type}`],
+          children: [getText(`behaviors.reaction_type.${reaction.type}`)]
+        }
+      ]
+    });
+
+    button.appendChild(mainDiv);
+    return button;
   }
 
   buildEditorPanel(): HTMLElement {
@@ -949,7 +963,7 @@ export class GuiBehaviors extends BaseSubscreen {
                 classList: ['rsp-content-item'],
                 dataAttributes: {
                   deletable: 'true',
-                  deleteMode: this.deleteMode ? 'true' : undefined,
+                  deleteMode: this.deleteMode,
                   emptyContent: (value === '').toString()
                 }
               },
@@ -1099,7 +1113,7 @@ export class GuiBehaviors extends BaseSubscreen {
                     },
                     dataAttributes: {
                       deletable: 'true',
-                      deleteMode: this.deleteMode ? 'true' : undefined,
+                      deleteMode: this.deleteMode,
                       emptyContent: (entry.value === '').toString()
                     }
                   },
@@ -1222,7 +1236,7 @@ export class GuiBehaviors extends BaseSubscreen {
           attributes: {
             value: opt,
             label: label,
-            selected: opt === value ? 'selected' : undefined
+            selected: opt === value
           },
         };
       }),

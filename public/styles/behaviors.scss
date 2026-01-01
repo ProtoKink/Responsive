@@ -99,21 +99,8 @@ $active-color: #4a90e2;
 
     .rsp-behaviors-list-item {
       padding: min(1dvh, 0.5dvw);
-      background-color: var(--tmd-element-hover, white);
-      border-radius: var(--deeplib-border-radius);
-      cursor: pointer;
       transition: background-color 0.2s;
-
-      .rsp-behaviors-item-name {
-        font-weight: bold;
-        color: var(--tmd-text, black);
-      }
-
-      .rsp-behaviors-item-info {
-        font-size: 0.9em;
-        opacity: 0.8;
-        color: var(--tmd-text-disabled, #666);
-      }
+      height: unset;
 
       &:hover {
         background-color: var(--tmd-accent-hover, #e0e0e0);
@@ -132,13 +119,24 @@ $active-color: #4a90e2;
         background-color: $delete-color;
         color: white;
 
-        .rsp-behaviors-item-name {
-          color: white;
-        }
-
         &:hover {
           background-color: $delete-hover-color;
         }
+
+        .rsp-behaviors-item-name {
+          color: white;
+        }
+      }
+
+      .rsp-behaviors-item-name {
+        font-weight: bold;
+        color: var(--tmd-text, black);
+      }
+
+      .rsp-behaviors-item-info {
+        font-size: 0.9em;
+        opacity: 0.8;
+        color: var(--tmd-text-disabled, #666);
       }
 
       .rsp-behaviors-item-main {
