@@ -440,6 +440,12 @@ $active-color: #4a90e2;
       border-bottom-right-radius: var(--deeplib-border-radius);
       border-bottom-left-radius: var(--deeplib-border-radius);
     }
+
+    &:has([data-expanded='false']) {
+      .rsp-behaviors-collapsible-content {
+        display: none;
+      }
+    }
   }
 }
 

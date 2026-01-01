@@ -3,7 +3,6 @@ import { advElement, BaseSubscreen, exportToGlobal, getText, layout, Modal, Sett
 import { BehaviorsSettingsModel, Behavior, Trigger, Reaction, ConstraintMode, MatchMode, SpeechType, OrgasmType, RoomPresenceEvent, ReactionMode, TriggerTypeSchema, ReactionTypeSchema, ReactionType, TriggerType } from '../models/behaviors';
 import { BehaviorsModule } from '../modules/behaviors';
 import { assertNever } from '../utilities/other';
-import { domUtil } from 'bc-deeplib/deeplib';
 import { idSelectorModal } from '@/utilities/selectorModals';
 
 type TabType = 'behaviors' | 'triggers' | 'reactions';
@@ -55,9 +54,9 @@ export class GuiBehaviors extends BaseSubscreen {
   set settings(val: BehaviorsSettingsModel) {
     super.settings = val;
   }
-// #endregion !SECTION Class Definition
+  // #endregion !SECTION Class Definition
 
-// #region SECTION BaseSubscreen Lifecycle
+  // #region SECTION BaseSubscreen Lifecycle
   get pageStructure(): SettingElement[][] {
     return [
       [
@@ -112,9 +111,9 @@ export class GuiBehaviors extends BaseSubscreen {
 
     super.exit();
   }
-// #endregion !SECTION BaseSubscreen Lifecycle
+  // #endregion !SECTION BaseSubscreen Lifecycle
 
-// #region SECTION Rendering
+  // #region SECTION Rendering
   render() {
     const container = ElementWrap(selector.tabContainer);
     if (!container) return;
@@ -182,9 +181,9 @@ export class GuiBehaviors extends BaseSubscreen {
 
     return content;
   }
-// #endregion !SECTION Rendering
+  // #endregion !SECTION Rendering
 
-// #region SECTION List Panel Building
+  // #region SECTION List Panel Building
   buildListPanel(): HTMLElement {
     const panel = ElementCreate({
       tag: 'div',
@@ -399,9 +398,6 @@ export class GuiBehaviors extends BaseSubscreen {
           this.selectTrigger(trigger.id);
         }
       },
-      options: {
-        noStyling: true
-      },
       htmlOptions: {
         button: {
           classList: [selector.listItem],
@@ -459,9 +455,6 @@ export class GuiBehaviors extends BaseSubscreen {
           this.selectReaction(reaction.id);
         }
       },
-      options: {
-        noStyling: true
-      },
       htmlOptions: {
         button: {
           classList: [
@@ -497,9 +490,9 @@ export class GuiBehaviors extends BaseSubscreen {
     button.appendChild(mainDiv);
     return button;
   }
-// #endregion !SECTION List Panel Building
+  // #endregion !SECTION List Panel Building
 
-// #region SECTION Editor Panel Building
+  // #region SECTION Editor Panel Building
   buildEditorPanel(): HTMLElement {
     const panel = ElementCreate({
       tag: 'div',
@@ -873,9 +866,9 @@ export class GuiBehaviors extends BaseSubscreen {
 
     return section;
   }
-// #endregion !SECTION Editor Panel Building
+  // #endregion !SECTION Editor Panel Building
 
-// #region SECTION Field Builders
+  // #region SECTION Field Builders
   buildChipList(items: Array<{ id: string; name: string }>, onRemove: (item: { id: string; name: string }) => void): HTMLElement {
     const container = ElementCreate({
       tag: 'div',
@@ -1093,16 +1086,6 @@ export class GuiBehaviors extends BaseSubscreen {
           const entryContainer = ElementCreate({
             tag: 'div',
             classList: ['rsp-constraint-entry'],
-            style: {
-              display: 'flex',
-              flexDirection: 'row',
-              gap: 'min(1dvh, 0.5dvw)',
-              alignItems: 'center',
-              padding: 'min(1dvh, 0.5dvw)',
-              marginBottom: 'min(0.5dvh, 0.25dvw)',
-              background: 'var(--tmd-element-hover, white)',
-              borderRadius: 'var(--deeplib-border-radius)'
-            },
             children: [
               this.createDropdownField(
                 '',
@@ -1123,9 +1106,6 @@ export class GuiBehaviors extends BaseSubscreen {
                 htmlOptions: {
                   button: {
                     classList: ['rsp-content-item'],
-                    style: {
-                      flex: '1'
-                    },
                     dataAttributes: {
                       deletable: 'true',
                       deleteMode: this.deleteMode,
@@ -1180,11 +1160,6 @@ export class GuiBehaviors extends BaseSubscreen {
         click: () => {
           const isExpanded = header.getAttribute('data-expanded') === 'true';
           header.setAttribute('data-expanded', (!isExpanded).toString());
-          if (isExpanded) {
-            domUtil.hide(contentDiv);
-          } else {
-            domUtil.unhide(contentDiv);
-          }
         }
       }
     });
@@ -1192,7 +1167,6 @@ export class GuiBehaviors extends BaseSubscreen {
     const contentDiv = ElementCreate({
       tag: 'div',
       classList: [selector.collapsibleContent],
-      style: { display: 'none' },
       children: content
     });
 
@@ -1264,9 +1238,9 @@ export class GuiBehaviors extends BaseSubscreen {
       setSettingValue: onChange
     });
   }
-// #endregion !SECTION Field Builders
+  // #endregion !SECTION Field Builders
 
-// #region SECTION Selection Methods
+  // #region SECTION Selection Methods
   selectBehavior(id: string) {
     this.selectedBehaviorId = id;
     this.render();
@@ -1281,9 +1255,9 @@ export class GuiBehaviors extends BaseSubscreen {
     this.selectedReactionId = id;
     this.render();
   }
-// #endregion !SECTION Selection Methods
+  // #endregion !SECTION Selection Methods
 
-// #region SECTION Handlers
+  // #region SECTION Handlers
 
   handleAdd() {
     if (this.activeTab === 'behaviors') {
@@ -1383,9 +1357,9 @@ export class GuiBehaviors extends BaseSubscreen {
 
     this.render();
   }
-// #endregion !SECTION Handlers
+  // #endregion !SECTION Handlers
 
-// #region SECTION Selectors
+  // #region SECTION Selectors
 
   async showTriggerSelector(behavior: Behavior) {
     const availableTriggers = Object.values(this.settings.triggers).filter(t => !behavior.triggers.includes(t.id));
@@ -1430,9 +1404,9 @@ export class GuiBehaviors extends BaseSubscreen {
     });
     this.render();
   }
-// #endregion !SECTION Selectors
+  // #endregion !SECTION Selectors
 
-// #region SECTION Creators
+  // #region SECTION Creators
 
   changeTriggerType(trigger: Trigger, newType: TriggerType): Trigger | undefined {
     let newTrigger: Trigger | undefined;
@@ -1541,9 +1515,9 @@ export class GuiBehaviors extends BaseSubscreen {
       id: reaction.id,
     };
   }
-// #endregion !SECTION Creators
+  // #endregion !SECTION Creators
 
-// #region SECTION Utility Methods
+  // #region SECTION Utility Methods
   toggleDeleteMode() {
     this.deleteMode = !this.deleteMode;
     this.updateDeleteModeToggle();
@@ -1570,7 +1544,7 @@ export class GuiBehaviors extends BaseSubscreen {
       })
     ], { modalId: 'rsp-modal' });
   }
-// #endregion !SECTION Utility Methods
+  // #endregion !SECTION Utility Methods
 }
 
 exportToGlobal('GuiResponses', GuiBehaviors);
