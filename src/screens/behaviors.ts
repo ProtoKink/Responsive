@@ -950,20 +950,12 @@ export class GuiBehaviors extends BaseSubscreen {
             },
             onClick: async () => {
               if (this.deleteMode) {
-                const confirmation = this.doNotShowConfirmation || await Modal.confirm([
-                  getText('behaviors.prompt.delete_content'),
-                  advElement.createCheckbox({
-                    id: 'rsp-do-not-show-confirmation',
-                    label: getText('behaviors.text.do_not_show_this_again_until_leaving_this_screen'),
-                    setSettingValue: (val) => this.doNotShowConfirmation = val
-                  })
-                ], { modalId: 'rsp-modal' });
+                const confirmed = await this.confirmationModal(getText('behaviors.prompt.delete_content'));
+                if (!confirmed) return;
 
-                if (confirmation) {
-                  values.splice(index, 1);
-                  onChange(values);
-                  this.render();
-                }
+                values.splice(index, 1);
+                onChange(values);
+                this.render();
               } else {
                 Modal.prompt(getText('behaviors.prompt.edit_content'), { defaultValue: value, modalId: 'rsp-modal' }).then((newValue) => {
                   if (newValue === value) return;
@@ -1092,20 +1084,12 @@ export class GuiBehaviors extends BaseSubscreen {
                 },
                 onClick: async () => {
                   if (this.deleteMode) {
-                    const confirmation = this.doNotShowConfirmation || await Modal.confirm([
-                      getText('behaviors.prompt.delete_content'),
-                      advElement.createCheckbox({
-                        id: 'rsp-do-not-show-confirmation',
-                        label: getText('behaviors.text.do_not_show_this_again_until_leaving_this_screen'),
-                        setSettingValue: (val) => this.doNotShowConfirmation = val
-                      })
-                    ], { modalId: 'rsp-modal' });
+                    const confirmed = await this.confirmationModal(getText('behaviors.prompt.delete_content'));
+                    if (!confirmed) return;
 
-                    if (confirmation) {
-                      entries.splice(index, 1);
-                      onChange(entries);
-                      this.render();
-                    }
+                    entries.splice(index, 1);
+                    onChange(entries);
+                    this.render();
                   } else {
                     Modal.prompt(getText('behaviors.prompt.edit_content'), { defaultValue: entry.value, modalId: 'rsp-modal' }).then((newValue) => {
                       if (newValue === entry.value) return;
@@ -1242,6 +1226,8 @@ export class GuiBehaviors extends BaseSubscreen {
     this.render();
   }
 
+  // #region SECTION - Handlers
+
   handleAdd() {
     if (this.activeTab === 'behaviors') {
       this.handleAddBehavior();
@@ -1307,7 +1293,7 @@ export class GuiBehaviors extends BaseSubscreen {
     });
   }
 
-  handleDelete(type: 'behaviors' | 'triggers' | 'reactions', id: string) {
+  async handleDelete(type: 'behaviors' | 'triggers' | 'reactions', id: string) {
     const itemMap = {
       behaviors: this.settings.behaviors,
       triggers: this.settings.triggers,
@@ -1318,50 +1304,44 @@ export class GuiBehaviors extends BaseSubscreen {
 
     if (!item) return;
 
-    Modal.confirm([
-      getText('behaviors.prompt.delete_confirm').replace('{name}', item.name),
-      advElement.createCheckbox({
-        id: 'rsp-do-not-show-confirmation',
-        label: getText('behaviors.text.do_not_show_this_again_until_leaving_this_screen'),
-        setSettingValue: (val) => this.doNotShowConfirmation = val
-      })
-    ], { modalId: 'rsp-modal' }).then((confirmed) => {
-      if (!confirmed) return;
+    const confirmed = await this.confirmationModal(getText('behaviors.prompt.delete_confirm').replace('{name}', item.name));
+    if (!confirmed) return;
 
-      if (type === 'behaviors') {
-        delete this.settings.behaviors[id];
-        if (this.selectedBehaviorId === id) {
-          this.selectedBehaviorId = null;
-        }
-      } else if (type === 'triggers') {
-        delete this.settings.triggers[id];
-        if (this.selectedTriggerId === id) {
-          this.selectedTriggerId = null;
-        }
-        // Remove from behaviors
-        Object.values(this.settings.behaviors).forEach(behavior => {
-          const index = behavior.triggers.indexOf(id);
-          if (index > -1) {
-            behavior.triggers.splice(index, 1);
-          }
-        });
-      } else if (type === 'reactions') {
-        delete this.settings.reactions[id];
-        if (this.selectedReactionId === id) {
-          this.selectedReactionId = null;
-        }
-        // Remove from behaviors
-        Object.values(this.settings.behaviors).forEach(behavior => {
-          const index = behavior.reactions.indexOf(id);
-          if (index > -1) {
-            behavior.reactions.splice(index, 1);
-          }
-        });
+    if (type === 'behaviors') {
+      delete this.settings.behaviors[id];
+      if (this.selectedBehaviorId === id) {
+        this.selectedBehaviorId = null;
       }
+    } else if (type === 'triggers') {
+      delete this.settings.triggers[id];
+      if (this.selectedTriggerId === id) {
+        this.selectedTriggerId = null;
+      }
+      Object.values(this.settings.behaviors).forEach(behavior => {
+        const index = behavior.triggers.indexOf(id);
+        if (index > -1) {
+          behavior.triggers.splice(index, 1);
+        }
+      });
+    } else if (type === 'reactions') {
+      delete this.settings.reactions[id];
+      if (this.selectedReactionId === id) {
+        this.selectedReactionId = null;
+      }
+      Object.values(this.settings.behaviors).forEach(behavior => {
+        const index = behavior.reactions.indexOf(id);
+        if (index > -1) {
+          behavior.reactions.splice(index, 1);
+        }
+      });
+    }
 
-      this.render();
-    });
+    this.render();
   }
+
+  // #endregion
+
+  // #region SECTION - Selectors
 
   async showTriggerSelector(behavior: Behavior) {
     const availableTriggers = Object.values(this.settings.triggers).filter(t => !behavior.triggers.includes(t.id));
@@ -1406,6 +1386,10 @@ export class GuiBehaviors extends BaseSubscreen {
     });
     this.render();
   }
+
+  // #endregion
+
+  // #region SECTION - Creators
 
   createNewTrigger(trigger: Trigger, newType: TriggerType): Trigger | undefined {
     switch (newType) {
@@ -1487,6 +1471,8 @@ export class GuiBehaviors extends BaseSubscreen {
     }
   }
 
+  // #endregion
+
   toggleDeleteMode() {
     this.deleteMode = !this.deleteMode;
     this.updateDeleteModeToggle();
@@ -1501,6 +1487,17 @@ export class GuiBehaviors extends BaseSubscreen {
     if (button) {
       button.toggleAttribute('data-delete-mode', this.deleteMode);
     }
+  }
+
+  async confirmationModal(message: string): Promise<boolean> {
+    return this.doNotShowConfirmation || await Modal.confirm([
+      message,
+      advElement.createCheckbox({
+        id: 'rsp-do-not-show-confirmation',
+        label: getText('behaviors.text.do_not_show_this_again_until_leaving_this_screen'),
+        setSettingValue: (val) => this.doNotShowConfirmation = val
+      })
+    ], { modalId: 'rsp-modal' });
   }
 }
 
