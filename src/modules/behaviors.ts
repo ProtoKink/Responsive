@@ -229,6 +229,31 @@ export class BehaviorsModule extends BaseModule {
     return ret.data;
   }
 
+  static deleteBehavior(id: string): void {
+    delete BehaviorsModule.instance.settings.behaviors[id];
+  }
+
+  static deleteTrigger(id: string): void {
+    delete BehaviorsModule.instance.settings.triggers[id];
+    Object.values(BehaviorsModule.instance.settings.behaviors).forEach(behavior => {
+      const index = behavior.triggers.indexOf(id);
+      if (index > -1) {
+        behavior.triggers.splice(index, 1);
+      }
+    });
+  }
+
+  static deleteReaction(id: string): void {
+    delete BehaviorsModule.instance.settings.reactions[id];
+    
+    Object.values(BehaviorsModule.instance.settings.behaviors).forEach(behavior => {
+      const index = behavior.reactions.indexOf(id);
+      if (index > -1) {
+        behavior.reactions.splice(index, 1);
+      }
+    });
+  }
+
   static processBehavior(type: TriggerType, messageData: MessageData) {
     type = TriggerTypeSchema.parse(type);
     messageData = MessageDataSchema.parse(messageData) as MessageData;

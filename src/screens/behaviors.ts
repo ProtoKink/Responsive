@@ -112,7 +112,6 @@ export class GuiBehaviors extends BaseSubscreen {
 
     container.innerHTML = '';
     container.append(this.buildTabNavigation(), this.buildTabContent());
-    this.updateDeleteModeToggle();
   }
 
   buildTabNavigation(): HTMLElement {
@@ -140,10 +139,10 @@ export class GuiBehaviors extends BaseSubscreen {
         button: {
           classList: [
             selector.tabButton,
-            this.activeTab === tab ? 'active' : undefined
           ],
           dataAttributes: {
-            tab: tab
+            tab: tab,
+            selected: this.activeTab === tab
           }
         }
       }
@@ -326,12 +325,12 @@ export class GuiBehaviors extends BaseSubscreen {
       tag: 'div',
       classList: [
         selector.listItem,
-        isSelected ? 'selected' : undefined,
       ],
       dataAttributes: {
         id: behavior.id,
         deletable: 'true',
-        deleteMode: this.deleteMode ? 'true' : undefined
+        deleteMode: this.deleteMode ? 'true' : undefined,
+        selected: isSelected
       },
       children: [
         {
@@ -380,11 +379,12 @@ export class GuiBehaviors extends BaseSubscreen {
 
     const item = ElementCreate({
       tag: 'div',
-      classList: [selector.listItem, isSelected ? 'selected' : undefined],
+      classList: [selector.listItem],
       dataAttributes: {
         id: trigger.id,
         deletable: 'true',
-        deleteMode: this.deleteMode ? 'true' : undefined
+        deleteMode: this.deleteMode ? 'true' : undefined,
+        selected: isSelected
       },
       children: [
         {
@@ -578,9 +578,8 @@ export class GuiBehaviors extends BaseSubscreen {
       trigger.type,
       typeOptions,
       (val) => {
-        const newTrigger = this.createNewTrigger(trigger, val as TriggerType);
+        const newTrigger = this.changeTriggerType(trigger, val as TriggerType);
         if (newTrigger) {
-          delete this.settings.triggers[trigger.id];
           this.settings.triggers[newTrigger.id] = newTrigger;
           this.selectedTriggerId = newTrigger.id;
           this.render();
@@ -757,9 +756,8 @@ export class GuiBehaviors extends BaseSubscreen {
       reaction.type,
       typeOptions,
       (val) => {
-        const newReaction = this.createNewReaction(reaction, val as ReactionType);
+        const newReaction = this.changeReactionType(reaction, val as ReactionType);
         if (newReaction) {
-          delete this.settings.reactions[reaction.id];
           this.settings.reactions[newReaction.id] = newReaction;
           this.selectedReactionId = newReaction.id;
           this.render();
@@ -866,7 +864,8 @@ export class GuiBehaviors extends BaseSubscreen {
               id: `rsp-chip-remove-${item.id}`,
               onClick: () => onRemove(item),
               options: {
-                image: `${PUBLIC_URL}/images/cross.svg`
+                image: `${PUBLIC_URL}/images/cross.svg`,
+                noStyling: true
               },
               htmlOptions: {
                 button: {
@@ -883,14 +882,44 @@ export class GuiBehaviors extends BaseSubscreen {
   }
 
   buildContentArrayField(labelKey: string, values: string[], onChange: (values: string[]) => void): HTMLElement {
-    const container = ElementCreate({
+    const addButton = advElement.createButton({
+      id: `rsp-content-add-${CommonGenerateUniqueID()}`,
+      onClick: () => {
+        Modal.prompt(getText('behaviors.prompt.add_content'), { modalId: 'rsp-modal' }).then((response) => {
+          if (response === null) return;
+          values.push(response);
+          onChange(values);
+          this.render();
+        });
+      },
+      options: {
+        image: `${PUBLIC_URL}/images/plus.svg`,
+        label: getText('behaviors.button.add_content')
+      },
+      htmlOptions: {
+        button: {
+          classList: ['rsp-content-add']
+        }
+      }
+    });
+
+    const header = ElementCreate({
       tag: 'div',
-      classList: ['rsp-behaviors-field'],
+      classList: ['rsp-behaviors-content-list-header'],
       children: [
         advElement.createLabel({
           id: `rsp-label-${CommonGenerateUniqueID()}`,
           label: getText(labelKey)
         }),
+        addButton
+      ]
+    });
+
+    const container = ElementCreate({
+      tag: 'div',
+      classList: ['rsp-behaviors-section'],
+      children: [
+        header,
         this.buildContentList(values, onChange)
       ]
     });
@@ -907,26 +936,6 @@ export class GuiBehaviors extends BaseSubscreen {
       tag: 'div',
       classList: [selector.contentList, 'scroll-box'],
       children: [
-        advElement.createButton({
-          id: `rsp-content-add-${CommonGenerateUniqueID()}`,
-          onClick: () => {
-            Modal.prompt(getText('behaviors.prompt.add_content'), { modalId: 'rsp-modal' }).then((response) => {
-              if (response === null) return;
-              values.push(response);
-              onChange(values);
-              this.render();
-            });
-          },
-          options: {
-            image: `${PUBLIC_URL}/images/plus.svg`,
-            label: getText('behaviors.button.add_content')
-          },
-          htmlOptions: {
-            button: {
-              classList: ['rsp-content-add']
-            }
-          }
-        }),
         ...values.map((value, index) => {
           return advElement.createButton({
             id: `rsp-content-${index}-${CommonGenerateUniqueID()}`,
@@ -981,21 +990,57 @@ export class GuiBehaviors extends BaseSubscreen {
   }
 
   buildIncludeExcludeField(labelKey: string, rule: { entries: Array<{ value: string; mode: 'include' | 'exclude' }> } | undefined, onChange: (rule: { entries: Array<{ value: string; mode: 'include' | 'exclude' }> } | undefined) => void): HTMLElement {
-    const container = ElementCreate({
+    const entries = rule?.entries || [];
+    const addButton = advElement.createButton({
+      id: `rsp-constraint-entry-add-${CommonGenerateUniqueID()}`,
+      onClick: () => {
+        Modal.prompt(getText('behaviors.prompt.add_content'), { modalId: 'rsp-modal' }).then((response) => {
+          if (response === null) return;
+          entries.push({ value: response, mode: 'include' });
+          if (!rule) {
+            rule = { entries: entries };
+          } else {
+            rule.entries = entries;
+          }
+          onChange(rule);
+          this.render();
+        });
+      },
+      options: {
+        image: `${PUBLIC_URL}/images/plus.svg`,
+        label: getText('behaviors.button.add_content')
+      },
+      htmlOptions: {
+        button: {
+          classList: ['rsp-content-add']
+        }
+      }
+    });
+
+    const header = ElementCreate({
       tag: 'div',
-      classList: ['rsp-behaviors-field'],
+      classList: ['rsp-behaviors-content-list-header'],
       children: [
         advElement.createLabel({
           id: `rsp-label-${CommonGenerateUniqueID()}`,
           label: getText(labelKey)
         }),
+        addButton
+      ]
+    });
+
+    const container = ElementCreate({
+      tag: 'div',
+      classList: ['rsp-behaviors-section'],
+      children: [
+        header,
         this.buildConstraintEntryList(
-          rule?.entries || [],
-          (entries) => {
+          entries,
+          (updatedEntries) => {
             if (!rule) {
-              rule = { entries: entries };
+              rule = { entries: updatedEntries };
             } else {
-              rule.entries = entries;
+              rule.entries = updatedEntries;
             }
             onChange(rule);
           }
@@ -1015,26 +1060,6 @@ export class GuiBehaviors extends BaseSubscreen {
       tag: 'div',
       classList: [selector.contentList, 'scroll-box'],
       children: [
-        advElement.createButton({
-          id: `rsp-constraint-entry-add-${CommonGenerateUniqueID()}`,
-          onClick: () => {
-            Modal.prompt(getText('behaviors.prompt.add_content'), { modalId: 'rsp-modal' }).then((response) => {
-              if (response === null) return;
-              entries.push({ value: response, mode: 'include' });
-              onChange(entries);
-              this.render();
-            });
-          },
-          options: {
-            image: `${PUBLIC_URL}/images/plus.svg`,
-            label: getText('behaviors.button.add_content')
-          },
-          htmlOptions: {
-            button: {
-              classList: ['rsp-content-add']
-            }
-          }
-        }),
         ...entries.map((entry, index) => {
           const entryContainer = ElementCreate({
             tag: 'div',
@@ -1308,32 +1333,20 @@ export class GuiBehaviors extends BaseSubscreen {
     if (!confirmed) return;
 
     if (type === 'behaviors') {
-      delete this.settings.behaviors[id];
       if (this.selectedBehaviorId === id) {
         this.selectedBehaviorId = null;
       }
+      BehaviorsModule.deleteBehavior(id);
     } else if (type === 'triggers') {
-      delete this.settings.triggers[id];
       if (this.selectedTriggerId === id) {
         this.selectedTriggerId = null;
       }
-      Object.values(this.settings.behaviors).forEach(behavior => {
-        const index = behavior.triggers.indexOf(id);
-        if (index > -1) {
-          behavior.triggers.splice(index, 1);
-        }
-      });
+      BehaviorsModule.deleteTrigger(id);
     } else if (type === 'reactions') {
-      delete this.settings.reactions[id];
       if (this.selectedReactionId === id) {
         this.selectedReactionId = null;
       }
-      Object.values(this.settings.behaviors).forEach(behavior => {
-        const index = behavior.reactions.indexOf(id);
-        if (index > -1) {
-          behavior.reactions.splice(index, 1);
-        }
-      });
+      BehaviorsModule.deleteReaction(id);
     }
 
     this.render();
@@ -1391,84 +1404,112 @@ export class GuiBehaviors extends BaseSubscreen {
 
   // #region SECTION - Creators
 
-  createNewTrigger(trigger: Trigger, newType: TriggerType): Trigger | undefined {
+  changeTriggerType(trigger: Trigger, newType: TriggerType): Trigger | undefined {
+    let newTrigger: Trigger | undefined;
+
     switch (newType) {
       case 'speech':
-        return BehaviorsModule.createTrigger({
+        newTrigger = BehaviorsModule.createTrigger({
           name: trigger.name || getText('behaviors.text.new_trigger'),
           type: 'speech',
           speechType: 'any',
           content: [],
           matchMode: 'contains'
         });
+        break;
       case 'emote':
-        return BehaviorsModule.createTrigger({
+        newTrigger = BehaviorsModule.createTrigger({
           name: trigger.name || getText('behaviors.text.new_trigger'),
           type: 'emote',
           content: [],
           matchMode: 'contains'
         });
+        break;
       case 'action':
-        return BehaviorsModule.createTrigger({
+        newTrigger = BehaviorsModule.createTrigger({
           name: trigger.name || getText('behaviors.text.new_trigger'),
           type: 'action',
           content: [],
           matchMode: 'contains'
         });
+        break;
       case 'activity':
-        return BehaviorsModule.createTrigger({
+        newTrigger = BehaviorsModule.createTrigger({
           name: trigger.name || getText('behaviors.text.new_trigger'),
           type: 'activity',
           activityName: [],
           groupName: []
         });
+        break;
       case 'orgasm':
-        return BehaviorsModule.createTrigger({
+        newTrigger = BehaviorsModule.createTrigger({
           name: trigger.name || getText('behaviors.text.new_trigger'),
           type: 'orgasm',
           orgasmType: 'any'
         });
+        break;
       case 'roomPresence':
-        return BehaviorsModule.createTrigger({
+        newTrigger = BehaviorsModule.createTrigger({
           name: trigger.name || getText('behaviors.text.new_trigger'),
           type: 'roomPresence',
           event: 'join'
         });
+        break;
       default:
         assertNever(newType);
     }
+
+    if (!newTrigger) return undefined;
+
+    return {
+      ...newTrigger,
+      id: trigger.id,
+    };
   }
 
-  createNewReaction(reaction: Reaction, newType: ReactionType): Reaction | undefined {
+  changeReactionType(reaction: Reaction, newType: ReactionType): Reaction | undefined {
+    let newReaction: Reaction | undefined;
+
     switch (newType) {
       case 'speech':
-        return BehaviorsModule.createReaction({
+        newReaction = BehaviorsModule.createReaction({
           name: reaction.name || getText('behaviors.text.new_reaction'),
           type: 'speech',
           content: []
         });
+        break;
       case 'emote':
-        return BehaviorsModule.createReaction({
+        newReaction = BehaviorsModule.createReaction({
           name: reaction.name || getText('behaviors.text.new_reaction'),
           type: 'emote',
           content: []
         });
+        break;
       case 'action':
-        return BehaviorsModule.createReaction({
+        newReaction = BehaviorsModule.createReaction({
           name: reaction.name || getText('behaviors.text.new_reaction'),
           type: 'action',
           content: []
         });
+        break;
       case 'activity':
-        return BehaviorsModule.createReaction({
+        newReaction = BehaviorsModule.createReaction({
           name: reaction.name || getText('behaviors.text.new_reaction'),
           type: 'activity',
           activityName: '',
           groupName: ''
         });
+        break;
       default:
-        return assertNever(newType);
+        assertNever(newType);
     }
+
+    if (!newReaction) return undefined;
+
+    return {
+      ...newReaction,
+      id: reaction.id,
+    };
   }
 
   // #endregion

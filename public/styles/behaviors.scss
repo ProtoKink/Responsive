@@ -1,3 +1,14 @@
+$speech-color: #4a90e2;
+$emote-color: #9b59b6;
+$action-color: #e67e22;
+$activity-color: #27ae60;
+$orgasm-color: #e74c3c;
+$roomPresence-color: #3498db;
+$constraint-color: #f39c12;
+$delete-color: #B22222;
+$delete-hover-color: #8B0000;
+$active-color: #4a90e2;
+
 .rsp-behaviors-container {
   display: flex;
   flex-direction: column;
@@ -17,8 +28,8 @@
     flex: 1;
     padding: min(0.8dvh, 0.4dvw) min(1.5dvh, 0.75dvw);
 
-    &.active {
-      background-color: var(--tmd-accent, #4a90e2);
+    &[data-selected] {
+      background-color: var(--tmd-accent, $active-color);
       color: white;
 
       &:hover {
@@ -75,9 +86,7 @@
     input {
       width: 100%;
       padding: min(1dvh, 0.5dvw);
-      border-radius: var(--deeplib-border-radius);
       font-size: 0.8em;
-      text-align: center;
     }
   }
 
@@ -110,8 +119,8 @@
         background-color: var(--tmd-accent-hover, #e0e0e0);
       }
 
-      &.selected {
-        background-color: var(--tmd-accent, #4a90e2);
+      &[data-selected] {
+        background-color: var(--tmd-accent, $active-color);
         color: white;
 
         .rsp-behaviors-item-info {
@@ -120,7 +129,7 @@
       }
 
       &[data-deletable][data-delete-mode] {
-        background-color: #B22222;
+        background-color: $delete-color;
         color: white;
 
         .rsp-behaviors-item-name {
@@ -128,7 +137,7 @@
         }
 
         &:hover {
-          background-color: #8B0000;
+          background-color: $delete-hover-color;
         }
       }
 
@@ -145,37 +154,37 @@
           margin-right: min(0.5dvh, 0.25dvw);
 
           &.type-speech {
-            background-color: #4a90e2;
+            background-color: $speech-color;
             color: white;
           }
 
           &.type-emote {
-            background-color: #9b59b6;
+            background-color: $emote-color;
             color: white;
           }
 
           &.type-action {
-            background-color: #e67e22;
+            background-color: $action-color;
             color: white;
           }
 
           &.type-activity {
-            background-color: #27ae60;
+            background-color: $activity-color;
             color: white;
           }
 
           &.type-orgasm {
-            background-color: #e74c3c;
+            background-color: $orgasm-color;
             color: white;
           }
 
           &.type-roomPresence {
-            background-color: #3498db;
+            background-color: $roomPresence-color;
             color: white;
           }
 
           &.has-constraints {
-            background-color: #f39c12;
+            background-color: $constraint-color;
             color: white;
           }
         }
@@ -200,7 +209,7 @@
     opacity: 0.6;
   }
 
-  .rsp-behaviors-field:not(:has(.rsp-behaviors-content-list)) {
+  .rsp-behaviors-field {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -208,7 +217,7 @@
     width: 100%;
 
     // Direct label children (for manually created fields)
-    > label {
+    >label {
       font-weight: bold;
       font-size: 0.9em;
       min-width: min(15dvh, 7.5dvw);
@@ -223,7 +232,7 @@
     }
 
     // Elements on the right side (excluding labels)
-    > *:not(label):not(input[type='checkbox']) {
+    >*:not(label):not(input[type='checkbox']) {
       flex: 1;
       min-width: 0;
     }
@@ -247,66 +256,53 @@
   .rsp-behaviors-section {
     display: flex;
     flex-direction: column;
-    gap: min(1dvh, 0.5dvw);
     padding: min(1.5dvh, 0.75dvw);
     background-color: var(--tmd-element-hover, white);
     border-radius: var(--deeplib-border-radius);
+
+    &:not(:has(.rsp-behaviors-content-list:empty)) {
+      gap: min(1dvh, 0.5dvw);
+
+      .rsp-behaviors-content-list-header {
+        margin-bottom: min(1dvh, 0.5dvw);
+      }
+    }
 
     .rsp-behaviors-section-label {
       font-weight: bold;
       font-size: 1em;
       margin-bottom: min(0.5dvh, 0.25dvw);
     }
-  }
 
-  .rsp-behaviors-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: min(0.5dvh, 0.25dvw);
-
-    .rsp-behaviors-chip {
+    .rsp-behaviors-content-list-header {
       display: flex;
+      flex-direction: row;
       align-items: center;
-      gap: min(0.5dvh, 0.25dvw);
-      padding: min(0.5dvh, 0.25dvw) min(1dvh, 0.5dvw);
-      background-color: var(--tmd-accent, #4a90e2);
-      color: white;
-      border-radius: var(--deeplib-border-radius);
-      font-size: 0.9em;
+      justify-content: space-between;
+      gap: min(1dvh, 0.5dvw);
 
-      .rsp-behaviors-chip-remove {
-        background: none;
-        border: none;
-        color: white;
-        cursor: pointer;
-        font-size: 1.2em;
-        line-height: 1;
-        padding: 0;
-        width: min(3dvh, 1.5dvw);
-        height: min(3dvh, 1.5dvw);
-        display: flex;
-        align-items: center;
-        justify-content: center;
+      label {
+        font-weight: bold;
+        font-size: 0.9em;
+        flex: 1 1 auto;
+      }
 
-        &:hover {
-          background-color: rgba(255, 255, 255, 0.2);
-          border-radius: 50%;
-        }
+      .rsp-content-add {
+        flex: 1 1 auto;
+        width: min-content;
+        padding: 0 min(1dvh, 0.5dvw);
       }
     }
-  }
+
 
   .rsp-behaviors-content-list {
     display: flex;
     flex-direction: column;
     gap: min(1dvh, 0.5dvw);
     max-height: min(30dvh, 15dvw);
-    padding: min(1dvh, 0.5dvw);
 
-    .rsp-content-add {
-      width: 50%;
-      align-self: center;
-      margin-bottom: min(2dvh, 1dvw);
+    &:not(:empty) {
+      padding: min(1dvh, 0.5dvw);
     }
 
     .rsp-content-item {
@@ -315,7 +311,7 @@
       padding: min(1dvh, 0.5dvw);
 
       &[data-deletable][data-delete-mode] {
-        background-color: #B22222;
+        background-color: $delete-color;
         color: white;
       }
 
@@ -340,6 +336,35 @@
 
       .rsp-content-item {
         flex: 1;
+      }
+    }
+  }
+  }
+
+  .rsp-behaviors-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: min(0.5dvh, 0.25dvw);
+
+    .rsp-behaviors-chip {
+      display: flex;
+      align-items: center;
+      gap: min(0.5dvh, 0.25dvw);
+      padding: min(0.5dvh, 0.25dvw) min(1dvh, 0.5dvw);
+      background-color: var(--tmd-accent, $active-color);
+      color: white;
+      border-radius: var(--deeplib-border-radius);
+      font-size: 0.9em;
+
+      .rsp-behaviors-chip-remove {
+        padding: 0;
+        width: min(3dvh, 1.5dvw);
+        height: min(3dvh, 1.5dvw);
+        border-radius: 50%;
+
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.2);
+        }
       }
     }
   }
@@ -395,10 +420,10 @@
 }
 
 #rsp-delete-mode-toggle[data-delete-mode] {
-  background-color: #B22222;
+  background-color: $delete-color;
 
   &:hover {
-    background-color: #8B0000;
+    background-color: $delete-hover-color;
   }
 }
 
@@ -433,7 +458,7 @@
       box-sizing: border-box;
 
       &[data-selected] {
-        background-color: var(--tmd-accent, #4a90e2);
+        background-color: var(--tmd-accent, $active-color);
         color: var(--tmd-text, white);
 
         &:hover {
