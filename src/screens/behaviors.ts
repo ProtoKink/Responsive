@@ -3,6 +3,7 @@ import { BehaviorsSettingsModel, Behavior, Trigger, TriggerInput, ReactionInput,
 import { BehaviorsModule } from '../modules/behaviors';
 import { assertNever } from '../utilities/other';
 import { domUtil } from 'bc-deeplib/deeplib';
+import { idSelectorModal } from '@/utilities/selectorModals';
 
 type TabType = 'behaviors' | 'triggers' | 'reactions';
 
@@ -865,7 +866,7 @@ export class GuiBehaviors extends BaseSubscreen {
               id: `rsp-chip-remove-${item.id}`,
               onClick: () => onRemove(item),
               options: {
-                label: '×'
+                image: `${PUBLIC_URL}/images/cross.svg`
               },
               htmlOptions: {
                 button: {
@@ -1364,7 +1365,7 @@ export class GuiBehaviors extends BaseSubscreen {
     });
   }
 
-  showTriggerSelector(behavior: Behavior) {
+  async showTriggerSelector(behavior: Behavior) {
     const availableTriggers = Object.values(this.settings.triggers).filter(t => !behavior.triggers.includes(t.id));
 
     if (availableTriggers.length === 0) {
@@ -1377,18 +1378,16 @@ export class GuiBehaviors extends BaseSubscreen {
       value: t.id
     }));
 
-    // TODO: Better UI for selecting a trigger
-    const selected = prompt(getText('behaviors.prompt.select_trigger') + '\n' + options.map((o, i) => `${i + 1}. ${o.label}`).join('\n'));
-    if (!selected) return;
+    const selectedIds = await idSelectorModal(options);
+    if (selectedIds.length === 0) return;
 
-    const index = parseInt(selected) - 1;
-    if (index >= 0 && index < options.length) {
-      behavior.triggers.push(options[index].value);
-      this.render();
-    }
+    selectedIds.forEach((id: string) => {
+      behavior.triggers.push(id);
+    });
+    this.render();
   }
 
-  showReactionSelector(behavior: Behavior) {
+  async showReactionSelector(behavior: Behavior) {
     const availableReactions = Object.values(this.settings.reactions).filter(r => !behavior.reactions.includes(r.id));
 
     if (availableReactions.length === 0) {
@@ -1401,15 +1400,13 @@ export class GuiBehaviors extends BaseSubscreen {
       value: r.id
     }));
 
-    // TODO: Better UI for selecting a reaction
-    const selected = prompt(getText('behaviors.prompt.select_reaction') + '\n' + options.map((o, i) => `${i + 1}. ${o.label}`).join('\n'));
-    if (!selected) return;
+    const selectedIds = await idSelectorModal(options);
+    if (selectedIds.length === 0) return;
 
-    const index = parseInt(selected) - 1;
-    if (index >= 0 && index < options.length) {
-      behavior.reactions.push(options[index].value);
-      this.render();
-    }
+    selectedIds.forEach((id: string) => {
+      behavior.reactions.push(id);
+    });
+    this.render();
   }
 
   createNewTrigger(trigger: Trigger, newType: TriggerType): Trigger | undefined {

@@ -282,8 +282,8 @@
         font-size: 1.2em;
         line-height: 1;
         padding: 0;
-        width: min(2dvh, 1dvw);
-        height: min(2dvh, 1dvw);
+        width: min(3dvh, 1.5dvw);
+        height: min(3dvh, 1.5dvw);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -409,6 +409,37 @@
     input.deeplib-modal-input {
       width: 100%;
       max-width: none;
+    }
+  }
+
+  .rsp-selector-buttons-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: min(0.8dvh, 0.4dvw);
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: min(1dvh, 0.5dvw) 0;
+    width: 100%;
+    box-sizing: border-box;
+
+    .rsp-selector-button {
+      flex: 1 1 auto;
+      width: auto !important;
+      min-width: 0;
+      max-width: none;
+      padding: min(1dvh, 0.5dvw) min(2dvh, 1dvw);
+      white-space: nowrap;
+      box-sizing: border-box;
+
+      &[data-selected] {
+        background-color: var(--tmd-accent, #4a90e2);
+        color: var(--tmd-text, white);
+
+        &:hover {
+          background-color: var(--tmd-accent-hover, #e0e0e0);
+        }
+      }
     }
   }
 }
