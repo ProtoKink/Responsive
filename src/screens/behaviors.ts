@@ -1,5 +1,5 @@
 import { advElement, BaseSubscreen, exportToGlobal, getText, layout, Modal, SettingElement, SubscreenOptions } from 'bc-deeplib/deeplib';
-import { BehaviorsSettingsModel, Behavior, Trigger, TriggerInput, ReactionInput, Reaction, ConstraintMode, MatchMode, SpeechType, OrgasmType, RoomPresenceEvent, ReactionMode, TriggerTypeSchema, ReactionTypeSchema, ReactionType, TriggerType } from '../models/behaviors';
+import { BehaviorsSettingsModel, Behavior, Trigger, Reaction, ConstraintMode, MatchMode, SpeechType, OrgasmType, RoomPresenceEvent, ReactionMode, TriggerTypeSchema, ReactionTypeSchema, ReactionType, TriggerType } from '../models/behaviors';
 import { BehaviorsModule } from '../modules/behaviors';
 import { assertNever } from '../utilities/other';
 import { domUtil } from 'bc-deeplib/deeplib';
@@ -1273,7 +1273,6 @@ export class GuiBehaviors extends BaseSubscreen {
     Modal.prompt(getText('behaviors.prompt.trigger_name'), { modalId: 'rsp-modal' }).then((name) => {
       if (name === null) return;
 
-      // Default to speech type
       const trigger = BehaviorsModule.createTrigger({
         name: name || getText('behaviors.text.new_trigger'),
         type: 'speech',
@@ -1294,7 +1293,6 @@ export class GuiBehaviors extends BaseSubscreen {
     Modal.prompt(getText('behaviors.prompt.reaction_name'), { modalId: 'rsp-modal' }).then((name) => {
       if (name === null) return;
 
-      // Default to speech type
       const reaction = BehaviorsModule.createReaction({
         name: name || getText('behaviors.text.new_reaction'),
         type: 'speech',
@@ -1418,40 +1416,40 @@ export class GuiBehaviors extends BaseSubscreen {
           speechType: 'any',
           content: [],
           matchMode: 'contains'
-        } as TriggerInput);
+        });
       case 'emote':
         return BehaviorsModule.createTrigger({
           name: trigger.name || getText('behaviors.text.new_trigger'),
           type: 'emote',
           content: [],
           matchMode: 'contains'
-        } as TriggerInput);
+        });
       case 'action':
         return BehaviorsModule.createTrigger({
           name: trigger.name || getText('behaviors.text.new_trigger'),
           type: 'action',
           content: [],
           matchMode: 'contains'
-        } as TriggerInput);
+        });
       case 'activity':
         return BehaviorsModule.createTrigger({
           name: trigger.name || getText('behaviors.text.new_trigger'),
           type: 'activity',
           activityName: [],
           groupName: []
-        } as TriggerInput);
+        });
       case 'orgasm':
         return BehaviorsModule.createTrigger({
           name: trigger.name || getText('behaviors.text.new_trigger'),
           type: 'orgasm',
           orgasmType: 'any'
-        } as TriggerInput);
+        });
       case 'roomPresence':
         return BehaviorsModule.createTrigger({
           name: trigger.name || getText('behaviors.text.new_trigger'),
           type: 'roomPresence',
           event: 'join'
-        } as TriggerInput);
+        });
       default:
         assertNever(newType);
     }
@@ -1464,26 +1462,26 @@ export class GuiBehaviors extends BaseSubscreen {
           name: reaction.name || getText('behaviors.text.new_reaction'),
           type: 'speech',
           content: []
-        } as ReactionInput);
+        });
       case 'emote':
         return BehaviorsModule.createReaction({
-          name: getText('behaviors.text.new_reaction'),
+          name: reaction.name || getText('behaviors.text.new_reaction'),
           type: 'emote',
           content: []
-        } as ReactionInput);
+        });
       case 'action':
         return BehaviorsModule.createReaction({
-          name: getText('behaviors.text.new_reaction'),
+          name: reaction.name || getText('behaviors.text.new_reaction'),
           type: 'action',
           content: []
-        } as ReactionInput);
+        });
       case 'activity':
         return BehaviorsModule.createReaction({
-          name: getText('behaviors.text.new_reaction'),
+          name: reaction.name || getText('behaviors.text.new_reaction'),
           type: 'activity',
           activityName: '',
           groupName: ''
-        } as ReactionInput);
+        });
       default:
         return assertNever(newType);
     }
