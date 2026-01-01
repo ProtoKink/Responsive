@@ -147,12 +147,14 @@ $active-color: #4a90e2;
       .rsp-behaviors-item-name {
         font-weight: bold;
         color: var(--tmd-text, black);
+        text-align: start;
       }
 
       .rsp-behaviors-item-info {
         font-size: 0.9em;
         opacity: 0.8;
         color: var(--tmd-text-disabled, #666);
+        text-align: start;
       }
 
       .rsp-behaviors-item-main {
@@ -160,47 +162,55 @@ $active-color: #4a90e2;
         flex-direction: column;
         gap: min(0.5dvh, 0.25dvw);
 
-        // Type Badges
-        .rsp-behaviors-item-badge {
-          display: inline-block;
-          padding: min(0.3dvh, 0.15dvw) min(0.6dvh, 0.3dvw);
-          border-radius: var(--deeplib-border-radius);
-          font-size: 0.85em;
-          margin-right: min(0.5dvh, 0.25dvw);
+        // Badges Container
+        .rsp-behaviors-item-badges {
+          display: flex;
+          flex-wrap: wrap;
+          gap: min(0.5dvh, 0.25dvw);
+          width: 100%;
 
-          &.type-speech {
-            background-color: $speech-color;
-            color: white;
-          }
+          // Type Badges
+          .rsp-behaviors-item-badge {
+            display: inline-block;
+            padding: min(0.3dvh, 0.15dvw) min(0.6dvh, 0.3dvw);
+            border-radius: var(--deeplib-border-radius);
+            font-size: 0.85em;
+            text-align: start;
 
-          &.type-emote {
-            background-color: $emote-color;
-            color: white;
-          }
+            &.type-speech {
+              background-color: $speech-color;
+              color: white;
+            }
 
-          &.type-action {
-            background-color: $action-color;
-            color: white;
-          }
+            &.type-emote {
+              background-color: $emote-color;
+              color: white;
+            }
 
-          &.type-activity {
-            background-color: $activity-color;
-            color: white;
-          }
+            &.type-action {
+              background-color: $action-color;
+              color: white;
+            }
 
-          &.type-orgasm {
-            background-color: $orgasm-color;
-            color: white;
-          }
+            &.type-activity {
+              background-color: $activity-color;
+              color: white;
+            }
 
-          &.type-roomPresence {
-            background-color: $roomPresence-color;
-            color: white;
-          }
+            &.type-orgasm {
+              background-color: $orgasm-color;
+              color: white;
+            }
 
-          &.has-constraints {
-            background-color: $constraint-color;
-            color: white;
+            &.type-roomPresence {
+              background-color: $roomPresence-color;
+              color: white;
+            }
+
+            &.has-constraints {
+              background-color: $constraint-color;
+              color: white;
+            }
           }
         }
       }

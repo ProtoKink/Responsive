@@ -411,6 +411,23 @@ export class GuiBehaviors extends BaseSubscreen {
       }
     });
 
+    const badges: Array<{ tag: 'span'; classList: string[]; children: string[] }> = [
+      {
+        tag: 'span' as const,
+        classList: ['rsp-behaviors-item-badge', `type-${trigger.type}`],
+        children: [
+          getText(`behaviors.trigger_type.${trigger.type}`)
+        ]
+      },
+      ...(hasConstraints ? [{
+        tag: 'span' as const,
+        classList: ['rsp-behaviors-item-badge', 'has-constraints'],
+        children: [
+          getText('behaviors.text.has_constraints')
+        ]
+      }] : [])
+    ];
+
     const mainDiv = ElementCreate({
       tag: 'div',
       classList: ['rsp-behaviors-item-main'],
@@ -423,19 +440,10 @@ export class GuiBehaviors extends BaseSubscreen {
           ]
         },
         {
-          tag: 'span',
-          classList: ['rsp-behaviors-item-badge', `type-${trigger.type}`],
-          children: [
-            getText(`behaviors.trigger_type.${trigger.type}`)
-          ]
-        },
-        hasConstraints ? ({
-          tag: 'span',
-          classList: ['rsp-behaviors-item-badge', 'has-constraints'],
-          children: [
-            getText('behaviors.text.has_constraints')
-          ]
-        }) : undefined
+          tag: 'div',
+          classList: ['rsp-behaviors-item-badges'],
+          children: badges
+        }
       ]
     });
 
@@ -480,9 +488,15 @@ export class GuiBehaviors extends BaseSubscreen {
           children: [reaction.name]
         },
         {
-          tag: 'span',
-          classList: ['rsp-behaviors-item-badge', `type-${reaction.type}`],
-          children: [getText(`behaviors.reaction_type.${reaction.type}`)]
+          tag: 'div',
+          classList: ['rsp-behaviors-item-badges'],
+          children: [
+            {
+              tag: 'span',
+              classList: ['rsp-behaviors-item-badge', `type-${reaction.type}`],
+              children: [getText(`behaviors.reaction_type.${reaction.type}`)]
+            }
+          ]
         }
       ]
     });
