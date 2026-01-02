@@ -554,4 +554,17 @@ $active-color: #4a90e2;
   }
 }
 
+#rsp-body-part-selector {
+  width: minv(30, 15);
+  height: minv(60, 30);
+
+  & > div {
+    border: none;
+  }
+
+  .button[data-selected] {
+    background-color: color-mix(in srgb, var(--tmd-accent, $active-color) 50%, transparent);
+  }
+}
+
 // #endregion !SECTION Modal
