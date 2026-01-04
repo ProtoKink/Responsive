@@ -1,6 +1,6 @@
 import { BaseModule, Subscreen, exportToGlobal, getModule, modLogger, sdk } from 'bc-deeplib/deeplib';
 import { areBehaviorsEnabled } from '../utilities/handlers';
-import { Behavior, BehaviorsSettingsModel, Reaction, Trigger, MessageData, TriggerType, TriggerOrgasmType, BehaviorSchema, TriggerSchema, ReactionSchema, TriggerTypeSchema, MessageDataSchema, BehaviorInput, TriggerInput, ReactionInput } from '../models/behaviors';
+import { Behavior, BehaviorsSettingsModel, Reaction, Trigger, MessageData, TriggerType, TriggerOrgasmType, BehaviorSchema, TriggerSchema, ReactionSchema, TriggerTypeSchema, MessageDataSchema, BehaviorInput, TriggerInput, ReactionInput, SpeechType } from '../models/behaviors';
 import { GuiBehaviors } from '../screens/behaviors';
 import { HookPriority, ModuleCategory } from '../utilities/sdk';
 import { processTrigger } from '../utilities/triggers';
@@ -57,9 +57,11 @@ export class BehaviorsModule extends BaseModule {
 
         let type: TriggerType = data.Type.toLowerCase() as TriggerType;
         let orgasmType: TriggerOrgasmType | undefined = undefined;
+        let speechType: SpeechType | undefined = undefined;
 
         if (data.Type === 'Chat' || data.Type === 'Whisper') {
           type = 'speech';
+          speechType = data.Type === 'Chat' ? 'normal' : 'whisper';
         }
 
         if (data.Type === 'Activity' && data.Content.startsWith('Orgasm')) {
@@ -74,7 +76,8 @@ export class BehaviorsModule extends BaseModule {
           message: msg,
           activityName: metadata.ActivityName,
           groupName: metadata.GroupName as AssetGroupItemName,
-          orgasmType
+          orgasmType,
+          speechType,
         };
 
         BehaviorsModule.processBehavior(type, messageData);
@@ -235,6 +238,7 @@ export class BehaviorsModule extends BaseModule {
 
   static deleteTrigger(id: string): void {
     delete BehaviorsModule.instance.settings.triggers[id];
+    
     Object.values(BehaviorsModule.instance.settings.behaviors).forEach(behavior => {
       const index = behavior.triggers.indexOf(id);
       if (index > -1) {

@@ -60,7 +60,8 @@ export const MessageDataSchema = z.object({
   activityName: z.string().optional(),
   groupName: z.string().optional(),
   orgasmType: OrgasmTypeSchema.optional(),
-  roomPrecenseEvent: RoomPresenceEventSchema.optional()
+  roomPrecenseEvent: RoomPresenceEventSchema.optional(),
+  speechType: SpeechTypeSchema.optional()
 });
 export type MessageData = Prettify<Omit<z.infer<typeof MessageDataSchema>, 'source' | 'target' | 'activityName' | 'groupName'> & {
   source?: Character;

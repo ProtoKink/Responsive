@@ -1,19 +1,5 @@
 @use 'helpers' as *;
-
-// #region SECTION Variables
-
-$speech-color: #4a90e2;
-$emote-color: #9b59b6;
-$action-color: #e67e22;
-$activity-color: #27ae60;
-$orgasm-color: #e74c3c;
-$roomPresence-color: #3498db;
-$constraint-color: #f39c12;
-$delete-color: #B22222;
-$delete-hover-color: #8B0000;
-$active-color: #4a90e2;
-
-// #endregion !SECTION Variables
+@use 'variables' as *;
 
 // #region SECTION Container & Layout
 
@@ -509,62 +495,3 @@ $active-color: #4a90e2;
 }
 
 // #endregion !SECTION Delete Mode
-
-// #region SECTION Modal
-
-#rsp-modal {
-  .deeplib-modal-prompt {
-    width: 100%;
-
-    input.deeplib-modal-input {
-      width: 100%;
-      max-width: none;
-    }
-  }
-
-  .rsp-selector-buttons-container {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: minv(0.8, 0.4);
-    justify-content: flex-start;
-    align-items: flex-start;
-    padding: minv(1, 0.5) 0;
-    width: 100%;
-    box-sizing: border-box;
-
-    .rsp-selector-button {
-      flex: 1 1 auto;
-      width: auto !important;
-      min-width: 0;
-      max-width: none;
-      padding: minv(1, 0.5) minv(2, 1);
-      white-space: nowrap;
-      box-sizing: border-box;
-
-      &[data-selected] {
-        background-color: var(--tmd-accent, $active-color);
-        color: var(--tmd-text, white);
-
-        &:hover {
-          background-color: var(--tmd-accent-hover, #e0e0e0);
-        }
-      }
-    }
-  }
-}
-
-#rsp-body-part-selector {
-  width: minv(30, 15);
-  height: minv(60, 30);
-
-  & > div {
-    border: none;
-  }
-
-  .button[data-selected] {
-    background-color: color-mix(in srgb, var(--tmd-accent, $active-color) 50%, transparent);
-  }
-}
-
-// #endregion !SECTION Modal

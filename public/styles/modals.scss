@@ -1,0 +1,184 @@
+@use 'variables' as *;
+@use 'helpers' as *;
+
+#rsp-modal {
+  .deeplib-modal-prompt {
+    width: 100%;
+
+    input.deeplib-modal-input {
+      width: 100%;
+      max-width: none;
+    }
+  }
+
+  .rsp-selector-buttons-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: minv(0.8, 0.4);
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: minv(1, 0.5) 0;
+    width: 100%;
+    box-sizing: border-box;
+
+    .rsp-selector-button {
+      flex: 1 1 auto;
+      width: auto !important;
+      min-width: 0;
+      max-width: none;
+      padding: minv(1, 0.5) minv(2, 1);
+      white-space: nowrap;
+      box-sizing: border-box;
+
+      &[data-selected] {
+        background-color: var(--tmd-accent, $active-color);
+        color: var(--tmd-text, white);
+
+        &:hover {
+          background-color: var(--tmd-accent-hover, #e0e0e0);
+        }
+      }
+    }
+  }
+}
+
+.rsp-body-part-selector-modal {
+  justify-content: center;
+  align-items: center;
+
+  .deeplib-modal-prompt-container {
+    gap: var(--gap)
+  }
+
+  #rsp-body-part-selector {
+    width: minv(30, 15);
+    height: minv(60, 30);
+
+    &>div {
+      border: none;
+    }
+
+    .button {
+      border: var(--border-width) solid color-mix(in srgb, var(--tmd-accent, $active-color) 30%, transparent);
+      transition: background-color 0.2s ease,
+        border-color 0.2s ease;
+
+      &:hover {
+        background-color: color-mix(in srgb, var(--tmd-accent, $active-color) 20%, transparent);
+        border-color: color-mix(in srgb, var(--tmd-accent, $active-color) 50%, transparent);
+      }
+
+      &[data-selected] {
+        background-color: color-mix(in srgb, var(--tmd-accent, $active-color) 50%, transparent);
+        border-color: var(--tmd-accent, $active-color);
+        color: var(--tmd-text, white);
+
+        &:hover {
+          background-color: color-mix(in srgb, var(--tmd-accent, $active-color) 70%, transparent);
+        }
+      }
+    }
+  }
+}
+
+.rsp-activity-selector-modal {
+  justify-content: center;
+  align-items: center;
+
+  .deeplib-modal-prompt-container {
+    gap: var(--gap);
+    width: 100%;
+  }
+
+  .rsp-activity-search-input {
+    width: 100%;
+    padding: minv(0.8, 0.4) minv(1.5, 0.75);
+    box-sizing: border-box;
+    border: var(--border-width) solid color-mix(in srgb, var(--tmd-accent, $active-color) 30%, transparent);
+    border-radius: var(--border-radius, 4px);
+    font-size: inherit;
+    transition: border-color 0.2s ease;
+
+    &:focus {
+      outline: none;
+      border-color: var(--tmd-accent, $active-color);
+    }
+
+    &::placeholder {
+      opacity: 0.6;
+    }
+  }
+
+  .rsp-activity-selector-grid {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: minv(0.8, 0.4);
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: minv(1, 0.5) 0;
+    width: 100%;
+    max-height: minv(60, 30);
+
+    .rsp-activity-selector-button {
+      flex: 1 1 auto;
+      width: auto !important;
+      min-width: 0;
+      max-width: none;
+      padding: minv(1, 0.5) minv(2, 1);
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: clip;
+      border: var(--border-width) solid color-mix(in srgb, var(--tmd-accent, $active-color) 30%, transparent);
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+
+      &:hover {
+        background-color: color-mix(in srgb, var(--tmd-accent, $active-color) 20%, transparent);
+        border-color: color-mix(in srgb, var(--tmd-accent, $active-color) 50%, transparent);
+      }
+
+      &[data-selected] {
+        background-color: color-mix(in srgb, var(--tmd-accent, $active-color) 50%, transparent);
+        border-color: var(--tmd-accent, $active-color);
+        color: var(--tmd-text, white);
+
+        &:hover {
+          background-color: color-mix(in srgb, var(--tmd-accent, $active-color) 70%, transparent);
+        }
+      }
+    }
+  }
+}
+
+
+
+.deeplib-modal-button-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+
+  .rsp-selector-controls {
+    display: flex;
+    flex-direction: row;
+    gap: minv(0.8, 0.4);
+    align-items: center;
+    margin-right: auto;
+
+    .rsp-body-part-select-all-button,
+    .rsp-body-part-deselect-all-button,
+    .rsp-activity-select-all-button,
+    .rsp-activity-deselect-all-button {
+      padding: minv(0.8, 0.4) minv(1.5, 0.75);
+      white-space: nowrap;
+      border: var(--border-width) solid color-mix(in srgb, var(--tmd-accent, $active-color) 30%, transparent);
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+
+      &:hover {
+        background-color: color-mix(in srgb, var(--tmd-accent, $active-color) 20%, transparent);
+        border-color: color-mix(in srgb, var(--tmd-accent, $active-color) 50%, transparent);
+      }
+    }
+  }
+}

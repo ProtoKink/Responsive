@@ -68,11 +68,12 @@ function processReaction(reaction: Reaction, messageData: MessageData) {
 
       if (!activity || !group || !character) return;
 
+      if (!ActivityCanBeDone(character, activity.Name, group.Name)) return;
+
       ActivityRun(Player, character, group, { Activity: activity, Group: group.Name });
 
       break;
     }
-
     default:
       assertNever(reaction);
   }

@@ -1,5 +1,5 @@
 import { modLogger } from 'bc-deeplib/deeplib';
-import { TriggerConstraint, MessageData, ConstraintMode, TriggerType, Behavior, TriggerTypeSchema, MessageDataSchema, TriggerConstraintSchema, ConstraintModeSchema } from '../models/behaviors';
+import { TriggerConstraint, MessageData, ConstraintMode, TriggerType, Behavior, TriggerTypeSchema, MessageDataSchema, TriggerConstraintSchema, ConstraintModeSchema, Trigger, TriggerSpeech, TriggerEmote, TriggerAction } from '../models/behaviors';
 import { BehaviorsModule } from '../modules/behaviors';
 import { assertNever } from './other';
 
@@ -10,7 +10,108 @@ type TriggerConstraintHandlers = {
   ) => boolean;
 };
 
+type TriggerPredicate = (trigger: Trigger, data: MessageData) => boolean;
+
+type TriggerPredicatesMap = Map<TriggerType, TriggerPredicate[]>;
+
 const triggerExecutionMap: Map<string, number> = new Map();
+
+// Helper function to register predicates for multiple trigger types
+function registerPredicate(types: TriggerType[], predicate: TriggerPredicate): void {
+  types.forEach(type => {
+    if (!triggerPredicates.has(type)) {
+      triggerPredicates.set(type, []);
+    }
+    triggerPredicates.get(type)!.push(predicate);
+  });
+}
+
+// Shared predicate for emote, speech, and action (message content matching)
+const messageContentPredicate: TriggerPredicate = (trigger, data) => {
+  if (trigger.type !== 'emote' && trigger.type !== 'speech' && trigger.type !== 'action') {
+    return false;
+  }
+
+  const typedTrigger = trigger as TriggerEmote | TriggerSpeech | TriggerAction;
+
+  if (!data.message) return false;
+
+  return typedTrigger.content.some(c => {
+    switch (typedTrigger.matchMode) {
+      case 'startsWith': return data.message!.startsWith(c);
+      case 'endsWith': return data.message!.endsWith(c);
+      case 'contains': return data.message!.includes(c);
+      case 'exact': return c === data.message;
+      case 'regex': return new RegExp(c, 'i').test(data.message!);
+      default:
+        assertNever(typedTrigger.matchMode);
+    }
+  });
+};
+
+// Speech-specific predicate (speechType matching)
+const speechTypePredicate: TriggerPredicate = (trigger, data) => {
+  if (trigger.type !== 'speech') return true;
+
+  const typedTrigger = trigger as TriggerSpeech;
+
+  if (typedTrigger.speechType === 'any') return true;
+
+  return typedTrigger.speechType === data.speechType;
+};
+
+// Activity predicate
+const activityPredicate: TriggerPredicate = (trigger, data) => {
+  if (trigger.type !== 'activity') return false;
+
+  if (!data.activityName || !data.groupName) return false;
+
+  return trigger.activityName.includes(data.activityName) &&
+    trigger.groupName.includes(data.groupName);
+};
+
+// Orgasm predicate
+const orgasmPredicate: TriggerPredicate = (trigger, data) => {
+  if (trigger.type !== 'orgasm') return false;
+
+  if (trigger.orgasmType === 'any') return true;
+
+  return trigger.orgasmType === data.orgasmType;
+};
+
+// Room presence predicate
+const roomPresencePredicate: TriggerPredicate = (trigger, data) => {
+  if (trigger.type !== 'roomPresence') return false;
+
+  return trigger.event === data.roomPrecenseEvent;
+};
+
+// Initialize trigger predicates
+const triggerPredicates: TriggerPredicatesMap = new Map();
+
+// Register shared predicate for emote, speech, and action
+registerPredicate(['emote', 'speech', 'action'], messageContentPredicate);
+
+// Register speech-specific predicate
+registerPredicate(['speech'], speechTypePredicate);
+
+// Register other predicates
+registerPredicate(['activity'], activityPredicate);
+registerPredicate(['orgasm'], orgasmPredicate);
+registerPredicate(['roomPresence'], roomPresencePredicate);
+
+// Function to check if trigger passes all predicates
+function checkTriggerPredicates(trigger: Trigger, data: MessageData): boolean {
+  const predicates = triggerPredicates.get(trigger.type);
+
+  if (!predicates || predicates.length === 0) {
+    modLogger.warn(`No predicates registered for trigger type: ${trigger.type}`);
+    return false;
+  }
+
+  // All predicates must pass
+  return predicates.every(predicate => predicate(trigger, data));
+}
 
 const triggerConstraints: TriggerConstraintHandlers = {
   arousalMax: (value) => Player.ArousalSettings.Progress >= value,
@@ -78,40 +179,7 @@ export function processTrigger(type: TriggerType, messageData: MessageData): Beh
 
         if (!isConstraintMet) return false;
 
-        const isTriggerMet = (() => {
-          switch (t.type) {
-            case 'emote':
-            case 'speech':
-            case 'action':
-              return t.content.some(c => {
-                if (!messageData.message) return false;
-                switch (t.matchMode) {
-                  case 'startsWith': return messageData.message.startsWith(c);
-                  case 'endsWith': return messageData.message.endsWith(c);
-                  case 'contains': return messageData.message.includes(c);
-                  case 'exact': return c === messageData.message;
-                  case 'regex': return new RegExp(c, 'i').test(messageData.message);
-                  default:
-                    assertNever(t.matchMode);
-                }
-              });
-            case 'activity':
-              if (messageData.activityName && messageData.groupName) {
-                return t.activityName.includes(messageData.activityName) && t.groupName.includes(messageData.groupName);
-              }
-              break;
-            case 'orgasm':
-              if (t.orgasmType === 'any') return true;
-              return t.orgasmType === messageData.orgasmType;
-
-            case 'roomPresence':
-              if (t.event === messageData.roomPrecenseEvent) return true;
-              break;
-
-            default:
-              assertNever(t);
-          }
-        })();
+        const isTriggerMet = checkTriggerPredicates(t, messageData);
 
         if (isTriggerMet && t.cooldownSec) {
           triggerExecutionMap.set(`${b.id}-${t?.id}`, CommonTime());
@@ -150,4 +218,20 @@ export function processTriggerConstraint(triggerConstraint: TriggerConstraint, m
   }
 
   return true;
+}
+
+export function triggerHasConstraints(trigger: Trigger): boolean {
+  const contraints = Object.values(trigger.constraints ?? {});
+  if (contraints.length === 0) return false;
+
+  return contraints.some(c => {
+    switch (typeof c) {
+      case 'number':
+        return true;
+      case 'object':
+        return c.entries.length > 0;
+      default:
+        return assertNever(c);
+    }
+  });
 }

@@ -3,3 +3,4 @@ behaviors.lang
 settings.lang
 profiles.lang
 reset.lang
+modals.lang

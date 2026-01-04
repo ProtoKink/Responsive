@@ -1,9 +1,10 @@
 // #region SECTION Imports & Types
 import { advElement, BaseSubscreen, exportToGlobal, getText, layout, Modal, SettingElement, SubscreenOptions } from 'bc-deeplib/deeplib';
-import { BehaviorsSettingsModel, Behavior, Trigger, Reaction, ConstraintMode, MatchMode, SpeechType, OrgasmType, RoomPresenceEvent, ReactionMode, TriggerTypeSchema, ReactionTypeSchema, ReactionType, TriggerType } from '../models/behaviors';
+import { BehaviorsSettingsModel, Behavior, Trigger, Reaction, ConstraintMode, MatchMode, SpeechType, OrgasmType, RoomPresenceEvent, ReactionMode, TriggerTypeSchema, ReactionTypeSchema, ReactionType, TriggerType, IncludeExcludeEntry } from '../models/behaviors';
 import { BehaviorsModule } from '../modules/behaviors';
 import { assertNever } from '../utilities/other';
-import { idSelectorModal } from '@/utilities/selectorModals';
+import { activitySelectorModal, bodyPartSelectorModal, idSelectorModal } from '@/utilities/selectorModals';
+import { triggerHasConstraints } from '@/utilities/triggers';
 
 type TabType = 'behaviors' | 'triggers' | 'reactions';
 // #endregion !SECTION Imports & Types
@@ -15,7 +16,7 @@ const selector = Object.freeze({
   tabContent: 'rsp-behaviors-tab-content',
   listPanel: 'rsp-behaviors-list-panel',
   editorPanel: 'rsp-behaviors-editor-panel',
-  listItem: 'rsp-behaviors-list-item',
+  listItemC: 'rsp-behaviors-list-item',
   addButton: 'rsp-behaviors-add-button',
   deleteModeToggle: 'rsp-delete-mode-toggle',
   collapsibleSection: 'rsp-behaviors-collapsible',
@@ -24,6 +25,13 @@ const selector = Object.freeze({
   contentList: 'rsp-behaviors-content-list',
   chip: 'rsp-behaviors-chip',
   chipRemove: 'rsp-behaviors-chip-remove',
+  chipList: (id: string) => `rsp-chip-list-${id}`,
+  contentListSection: (id: string) => `rsp-content-list-section-${id}`,
+  listItem: (id: string) => `rsp-list-item-${id}`,
+  inputField: (id: string) => `rsp-input-field-${id}`,
+  dropdownField: (id: string) => `rsp-dropdown-field-${id}`,
+  numberInputField: (id: string) => `rsp-number-input-field-${id}`,
+  constraintEntryList: (id: string) => `rsp-constraint-entry-list-${id}`,
 });
 // #endregion !SECTION Constants
 
@@ -118,7 +126,7 @@ export class GuiBehaviors extends BaseSubscreen {
     const container = ElementWrap(selector.tabContainer);
     if (!container) return;
 
-    container.innerHTML = '';
+    container.replaceChildren();
     container.append(this.buildTabNavigation(), this.buildTabContent());
   }
 
@@ -313,23 +321,18 @@ export class GuiBehaviors extends BaseSubscreen {
         });
     }
 
-    listItemsContainer.innerHTML = '';
+    listItemsContainer.replaceChildren();
     listItemsContainer.append(...children);
     listItemsContainer.scrollTop = scrollPosition;
   }
 
-  updateListItemName(id: string, newName: string) {
-    const listItem = document.querySelector(`[data-id="${id}"]`) as HTMLElement;
-    if (!listItem) return;
-
-    const nameElement = listItem.querySelector('.rsp-behaviors-item-name') as HTMLElement;
-    if (nameElement) {
-      nameElement.textContent = newName;
-    }
-  }
-
   buildBehaviorListItem(behavior: Behavior): HTMLElement {
     const isSelected = this.selectedBehaviorId === behavior.id;
+
+    const thisElement = ElementWrap(selector.listItem(behavior.id));
+    if (thisElement) {
+      thisElement.replaceChildren();
+    }
 
     const mainDiv = ElementCreate({
       tag: 'div',
@@ -339,7 +342,6 @@ export class GuiBehaviors extends BaseSubscreen {
           id: `rsp-behavior-enabled-${CommonGenerateUniqueID()}`,
           label: behavior.name,
           setElementValue: () => behavior.enabled,
-          setSettingValue: (val) => behavior.enabled = val,
           options: {
             direction: 'rowReverse'
           },
@@ -360,7 +362,7 @@ export class GuiBehaviors extends BaseSubscreen {
     });
 
     const button = advElement.createButton({
-      id: `rsp-behavior-list-item-${behavior.id}`,
+      id: selector.listItem(thisElement ? CommonGenerateUniqueID() : behavior.id),
       onClick: () => {
         if (this.deleteMode) {
           this.handleDelete('behaviors', behavior.id);
@@ -370,9 +372,8 @@ export class GuiBehaviors extends BaseSubscreen {
       },
       htmlOptions: {
         button: {
-          classList: [selector.listItem],
+          classList: [selector.listItemC],
           dataAttributes: {
-            id: behavior.id,
             deletable: 'true',
             deleteMode: this.deleteMode,
             selected: isSelected
@@ -384,14 +385,24 @@ export class GuiBehaviors extends BaseSubscreen {
       }
     });
 
+    if (thisElement) {
+      thisElement.replaceWith(button);
+      button.id = selector.listItem(behavior.id);
+    }
+
     return button;
   }
 
   buildTriggerListItem(trigger: Trigger): HTMLElement {
-    const isSelected = this.selectedTriggerId === trigger.id;
-    const hasConstraints = !!(trigger.constraints && Object.keys(trigger.constraints).length > 0);
+    const thisElement = ElementWrap(selector.listItem(trigger.id));
+    if (thisElement) {
+      thisElement.replaceChildren();
+    }
 
-    const badges: Array<{ tag: 'span'; classList: string[]; children: string[] }> = [
+    const isSelected = this.selectedTriggerId === trigger.id;
+    const hasConstraints = triggerHasConstraints(trigger);
+
+    const badges: HTMLOptions<keyof HTMLElementTagNameMap>[] = [
       {
         tag: 'span' as const,
         classList: ['rsp-behaviors-item-badge', `type-${trigger.type}`],
@@ -428,7 +439,7 @@ export class GuiBehaviors extends BaseSubscreen {
     });
 
     const button = advElement.createButton({
-      id: `rsp-trigger-list-item-${trigger.id}`,
+      id: selector.listItem(thisElement ? CommonGenerateUniqueID() : trigger.id),
       onClick: () => {
         if (this.deleteMode) {
           this.handleDelete('triggers', trigger.id);
@@ -438,9 +449,8 @@ export class GuiBehaviors extends BaseSubscreen {
       },
       htmlOptions: {
         button: {
-          classList: [selector.listItem],
+          classList: [selector.listItemC],
           dataAttributes: {
-            id: trigger.id,
             deletable: 'true',
             deleteMode: this.deleteMode,
             selected: isSelected
@@ -452,11 +462,21 @@ export class GuiBehaviors extends BaseSubscreen {
       }
     });
 
+    if (thisElement) {
+      thisElement.replaceWith(button);
+      button.id = selector.listItem(trigger.id);
+    }
+
     return button;
   }
 
   buildReactionListItem(reaction: Reaction): HTMLElement {
     const isSelected = this.selectedReactionId === reaction.id;
+
+    const thisElement = ElementWrap(selector.listItem(reaction.id));
+    if (thisElement) {
+      thisElement.replaceChildren();
+    }
 
     const mainDiv = ElementCreate({
       tag: 'div',
@@ -482,7 +502,7 @@ export class GuiBehaviors extends BaseSubscreen {
     });
 
     const button = advElement.createButton({
-      id: `rsp-reaction-list-item-${reaction.id}`,
+      id: selector.listItem(thisElement ? CommonGenerateUniqueID() : reaction.id),
       onClick: () => {
         if (this.deleteMode) {
           this.handleDelete('reactions', reaction.id);
@@ -492,9 +512,8 @@ export class GuiBehaviors extends BaseSubscreen {
       },
       htmlOptions: {
         button: {
-          classList: [selector.listItem],
+          classList: [selector.listItemC],
           dataAttributes: {
-            id: reaction.id,
             deletable: 'true',
             deleteMode: this.deleteMode,
             selected: isSelected
@@ -506,14 +525,27 @@ export class GuiBehaviors extends BaseSubscreen {
       }
     });
 
+    if (thisElement) {
+      thisElement.replaceWith(button);
+      button.id = selector.listItem(reaction.id);
+    }
+
     return button;
   }
   // #endregion !SECTION List Panel Building
 
   // #region SECTION Editor Panel Building
   buildEditorPanel(): HTMLElement {
+    const thisElement = ElementWrap(selector.editorPanel);
+    if (thisElement) {
+      thisElement.replaceChildren();
+    }
+
     const panel = ElementCreate({
       tag: 'div',
+      attributes: {
+        id: selector.editorPanel,
+      },
       classList: [selector.editorPanel, 'scroll-box'],
       children: []
     });
@@ -543,6 +575,10 @@ export class GuiBehaviors extends BaseSubscreen {
       }));
     }
 
+    if (thisElement) {
+      thisElement.replaceWith(panel);
+    }
+
     return panel;
   }
 
@@ -550,21 +586,26 @@ export class GuiBehaviors extends BaseSubscreen {
     const elements: HTMLElement[] = [];
 
     // Name
-    elements.push(this.createInputField(
+    const nameField = this.createInputField(
+      `${behavior.id}-name`,
       'behaviors.field.name',
       behavior.name,
       (val) => {
         behavior.name = val;
-        this.updateListItemName(behavior.id, val);
+        this.buildBehaviorListItem(behavior);
       }
-    ));
+    );
+    elements.push(nameField);
 
     // Enabled
     elements.push(advElement.createCheckbox({
-      id: 'rsp-behavior-editor-enabled',
+      id: `${behavior.id}-enabled`,
       label: getText('behaviors.field.enabled'),
       setElementValue: () => behavior.enabled,
-      setSettingValue: (val) => behavior.enabled = val,
+      setSettingValue: (val) => {
+        behavior.enabled = val;
+        this.buildBehaviorListItem(behavior);
+      },
       htmlOptions: {
         container: {
           classList: ['rsp-behaviors-field'],
@@ -573,19 +614,23 @@ export class GuiBehaviors extends BaseSubscreen {
     }));
 
     // Reaction Mode
-    elements.push(this.createDropdownField(
+    const reactionModeField = this.createDropdownField(
+      `${behavior.id}-reaction-mode`,
       'behaviors.field.reaction_mode',
       behavior.reactionMode,
       ['all', 'random'] as ReactionMode[],
       (val) => behavior.reactionMode = val as ReactionMode,
-    ));
+    );
+    elements.push(reactionModeField);
 
     // Cooldown
-    elements.push(this.createNumberInputField(
+    const cooldownField = this.createNumberInputField(
+      `${behavior.id}-cooldown`,
       'behaviors.field.cooldown',
       behavior.cooldownSec?.toString() || '',
       (val) => behavior.cooldownSec = val ? parseFloat(val) : undefined,
-    ));
+    );
+    elements.push(cooldownField);
 
     // Triggers Section
     elements.push(this.buildTriggersSection(behavior));
@@ -600,18 +645,21 @@ export class GuiBehaviors extends BaseSubscreen {
     const elements: HTMLElement[] = [];
 
     // Name
-    elements.push(this.createInputField(
+    const nameField = this.createInputField(
+      `${trigger.id}-name`,
       'behaviors.field.name',
       trigger.name,
       (val) => {
         trigger.name = val;
-        this.updateListItemName(trigger.id, val);
+        this.buildTriggerListItem(trigger);
       }
-    ));
+    );
+    elements.push(nameField);
 
     // Type
     const typeOptions = TriggerTypeSchema.options;
-    elements.push(this.createDropdownField(
+    const typeField = this.createDropdownField(
+      `${trigger.id}-type`,
       'behaviors.field.type',
       trigger.type,
       typeOptions,
@@ -623,7 +671,8 @@ export class GuiBehaviors extends BaseSubscreen {
           this.render();
         }
       }
-    ));
+    );
+    elements.push(typeField);
 
     // Type-specific fields
     elements.push(...this.buildTriggerTypeFields(trigger));
@@ -631,144 +680,7 @@ export class GuiBehaviors extends BaseSubscreen {
     // Advanced Options (Collapsible)
     elements.push(this.buildCollapsibleSection(
       'behaviors.section.advanced_options',
-      this.buildTriggerAdvancedOptions(trigger)
-    ));
-
-    return elements;
-  }
-
-  buildTriggerTypeFields(trigger: Trigger): HTMLElement[] {
-    const elements: HTMLElement[] = [];
-
-    switch (trigger.type) {
-      case 'speech':
-        elements.push(this.createDropdownField(
-          'behaviors.field.speech_type',
-          trigger.speechType,
-          ['any', 'normal', 'whisper'] as SpeechType[],
-          (val) => trigger.speechType = val as SpeechType
-        ));
-        elements.push(this.buildContentArrayField(
-          'behaviors.field.content',
-          trigger.content,
-          (val) => trigger.content = val
-        ));
-        elements.push(this.createDropdownField(
-          'behaviors.field.match_mode',
-          trigger.matchMode,
-          ['startsWith', 'contains', 'endsWith', 'exact', 'regex'] as MatchMode[],
-          (val) => trigger.matchMode = val as MatchMode
-        ));
-        break;
-      case 'emote':
-      case 'action':
-        elements.push(this.buildContentArrayField(
-          'behaviors.field.content',
-          trigger.content,
-          (val) => trigger.content = val
-        ));
-        elements.push(this.createDropdownField(
-          'behaviors.field.match_mode',
-          trigger.matchMode,
-          ['startsWith', 'contains', 'endsWith', 'exact', 'regex'] as MatchMode[],
-          (val) => trigger.matchMode = val as MatchMode
-        ));
-        break;
-      case 'activity':
-        elements.push(this.buildContentArrayField(
-          'behaviors.field.activity_names',
-          trigger.activityName,
-          (val) => trigger.activityName = val
-        ));
-        elements.push(this.buildContentArrayField(
-          'behaviors.field.group_names',
-          trigger.groupName,
-          (val) => trigger.groupName = val
-        ));
-        break;
-      case 'orgasm':
-        elements.push(this.createDropdownField(
-          'behaviors.field.orgasm_type',
-          trigger.orgasmType,
-          ['any', 'normal', 'resisted', 'ruinedResisted', 'ruinedTimeout', 'ruinedSurrendered'] as OrgasmType[],
-          (val) => trigger.orgasmType = val as OrgasmType
-        ));
-        break;
-      case 'roomPresence':
-        elements.push(this.createDropdownField(
-          'behaviors.field.room_presence_event',
-          trigger.event,
-          ['leave', 'join', 'leashed'] as RoomPresenceEvent[],
-          (val) => trigger.event = val as RoomPresenceEvent
-        ));
-        break;
-      default:
-        assertNever(trigger);
-    }
-
-    return elements;
-  }
-
-  buildTriggerAdvancedOptions(trigger: Trigger): HTMLElement[] {
-    const elements: HTMLElement[] = [];
-
-    // Constraint Mode
-    elements.push(this.createDropdownField(
-      'behaviors.field.constraint_mode',
-      trigger.constraintMode || 'all',
-      ['any', 'all'] as ConstraintMode[],
-      (val) => trigger.constraintMode = val as ConstraintMode
-    ));
-
-    // Constraints
-    trigger.constraints ??= {};
-
-    // Source
-    elements.push(this.buildIncludeExcludeField(
-      'behaviors.field.constraint_source',
-      trigger.constraints.source,
-      (val) => trigger.constraints!.source = val
-    ));
-
-    // Target
-    elements.push(this.buildIncludeExcludeField(
-      'behaviors.field.constraint_target',
-      trigger.constraints.target,
-      (val) => trigger.constraints!.target = val
-    ));
-
-    // Arousal Min/Max
-    elements.push(this.createNumberInputField(
-      'behaviors.field.arousal_min',
-      trigger.constraints.arousalMin?.toString() || '',
-      (val) => trigger.constraints!.arousalMin = val ? parseFloat(val) : undefined
-    ));
-
-    elements.push(this.createNumberInputField(
-      'behaviors.field.arousal_max',
-      trigger.constraints.arousalMax?.toString() || '',
-      (val) => trigger.constraints!.arousalMax = val ? parseFloat(val) : undefined
-    ));
-
-    // In Room With Members
-    elements.push(this.buildIncludeExcludeField(
-      'behaviors.field.in_room_with_members',
-      trigger.constraints.inRoomWithMembers,
-      (val) => trigger.constraints!.inRoomWithMembers = val
-    ));
-
-    // In Room Named
-    elements.push(this.buildIncludeExcludeField(
-      'behaviors.field.in_room_named',
-      trigger.constraints.inRoomNamed,
-      (val) => trigger.constraints!.inRoomNamed = val
-    ));
-
-    // Cooldown
-    elements.push(this.createNumberInputField(
-      'behaviors.field.cooldown',
-      trigger.cooldownSec?.toString() || '',
-      (val) => trigger.cooldownSec = val ? parseFloat(val) : undefined
+      this.buildTriggerContraintsOptions(trigger)
     ));
 
     return elements;
@@ -778,18 +690,21 @@ export class GuiBehaviors extends BaseSubscreen {
     const elements: HTMLElement[] = [];
 
     // Name
-    elements.push(this.createInputField(
+    const nameField = this.createInputField(
+      `${reaction.id}-name`,
       'behaviors.field.name',
       reaction.name,
       (val) => {
         reaction.name = val;
-        this.updateListItemName(reaction.id, val);
+        this.buildReactionListItem(reaction);
       }
-    ));
+    );
+    elements.push(nameField);
 
     // Type
     const typeOptions = ReactionTypeSchema.options;
-    elements.push(this.createDropdownField(
+    const typeField = this.createDropdownField(
+      `${reaction.id}-type`,
       'behaviors.field.type',
       reaction.type,
       typeOptions,
@@ -801,71 +716,426 @@ export class GuiBehaviors extends BaseSubscreen {
           this.render();
         }
       }
-    ));
+    );
+    elements.push(typeField);
 
     // Type-specific fields
     if (reaction.type === 'speech' || reaction.type === 'emote' || reaction.type === 'action') {
-      elements.push(this.buildContentArrayField(
+      const renderContent = () => this.buildContentArrayField(
+        `${reaction.id}-content`,
         'behaviors.field.content',
         reaction.content,
-        (val) => reaction.content = val
-      ));
+        (val) => {
+          reaction.content = val;
+          renderContent();
+        }
+      );
+      const contentSection = renderContent();
+      elements.push(contentSection);
+    } else if (reaction.type === 'activity') {
+      const renderActivityNames = () => this.buildContentListSection(
+        `${reaction.id}-activity-names`,
+        'behaviors.field.activity_names',
+        async () => {
+          const selectedActivity = (await activitySelectorModal({ selectedActivities: [reaction.activityName], limit: 1 }))[0];
+          let updated = false;
+
+          if (reaction.activityName !== selectedActivity) {
+            reaction.activityName = selectedActivity;
+            updated = true;
+          }
+          if (updated) {
+            renderActivityNames();
+          }
+        },
+        'behaviors.button.add_activity_name',
+        this.buildChipList(
+          `${reaction.id}-activity-names`,
+          reaction.activityName ? [{ id: reaction.activityName, name: ActivityDictionaryText(`Activity${reaction.activityName}`) }] : [],
+          function () {
+            reaction.activityName = '';
+            this.remove();
+          }
+        )
+      );
+      const activityNamesSection = renderActivityNames();
+      elements.push(activityNamesSection);
+
+      const rerenderGroupNames = () => this.buildContentListSection(
+        `${reaction.id}-group-names`,
+        'behaviors.field.group_names',
+        async () => {
+          const selectedPart = (await bodyPartSelectorModal({ selectedParts: [reaction.groupName] as AssetGroupItemName[], limit: 1 }))[0];
+          let updated = false;
+
+          if (reaction.groupName !== selectedPart) {
+            reaction.groupName = selectedPart;
+            updated = true;
+          }
+          if (updated) {
+            rerenderGroupNames();
+          }
+        },
+        'behaviors.button.add_group_name',
+        this.buildChipList(
+          `${reaction.id}-group-names`,
+          reaction.groupName ? [{ id: reaction.groupName, name: reaction.groupName }] : [],
+          function () {
+            reaction.groupName = '';
+            this.remove();
+          }
+        )
+      );
+      const groupNamesSection = rerenderGroupNames();
+      elements.push(groupNamesSection);
     }
 
     return elements;
   }
 
+  buildTriggerTypeFields(trigger: Trigger): HTMLElement[] {
+    const elements: HTMLElement[] = [];
+
+    switch (trigger.type) {
+      case 'speech': {
+        const speechTypeField = this.createDropdownField(
+          `${trigger.id}-speech-type`,
+          'behaviors.field.speech_type',
+          trigger.speechType,
+          ['any', 'normal', 'whisper'] as SpeechType[],
+          (val) => trigger.speechType = val as SpeechType
+        );
+        elements.push(speechTypeField);
+        const renderContent = () => this.buildContentArrayField(
+          `${trigger.id}-content`,
+          'behaviors.field.content',
+          trigger.content,
+          (val) => {
+            trigger.content = val;
+            renderContent();
+          }
+        );
+        const contentSection = renderContent();
+        elements.push(contentSection);
+        const matchModeField1 = this.createDropdownField(
+          `${trigger.id}-match-mode`,
+          'behaviors.field.match_mode',
+          trigger.matchMode,
+          ['startsWith', 'contains', 'endsWith', 'exact', 'regex'] as MatchMode[],
+          (val) => trigger.matchMode = val as MatchMode
+        );
+        elements.push(matchModeField1);
+        break;
+      }
+      case 'emote':
+      case 'action': {
+        const renderContent = () => this.buildContentArrayField(
+          `${trigger.id}-content`,
+          'behaviors.field.content',
+          trigger.content,
+          (val) => {
+            trigger.content = val;
+            renderContent();
+          }
+        );
+        const contentSection = renderContent();
+        elements.push(contentSection);
+        const matchModeField2 = this.createDropdownField(
+          `${trigger.id}-match-mode`,
+          'behaviors.field.match_mode',
+          trigger.matchMode,
+          ['startsWith', 'contains', 'endsWith', 'exact', 'regex'] as MatchMode[],
+          (val) => trigger.matchMode = val as MatchMode
+        );
+        elements.push(matchModeField2);
+        break;
+      }
+      case 'activity': {
+        const renderActivityNames = () => this.buildContentListSection(
+          `${trigger.id}-activity-names`,
+          'behaviors.field.activity_names',
+          async () => {
+            const selectedActivities = await activitySelectorModal({ selectedActivities: trigger.activityName });
+            let updated = false;
+            selectedActivities.forEach(activity => {
+              if (!trigger.activityName.includes(activity)) {
+                trigger.activityName.push(activity);
+                updated = true;
+              }
+            });
+            if (updated) {
+              renderActivityNames();
+            }
+          },
+          'behaviors.button.add_activity_name',
+          this.buildChipList(
+            trigger.id,
+            trigger.activityName.map(activity => ({ id: activity, name: ActivityDictionaryText(`Activity${activity}`) })),
+            function (item) {
+              trigger.activityName.splice(trigger.activityName.indexOf(item.id), 1);
+              this.remove();
+            }
+          )
+        );
+        const activityNamesSection = renderActivityNames();
+        elements.push(activityNamesSection);
+
+        const rerenderGroupNames = () => this.buildContentListSection(
+          `${trigger.id}-group-names`,
+          'behaviors.field.group_names',
+          async () => {
+            const selectedParts = await bodyPartSelectorModal({ selectedParts: trigger.groupName as AssetGroupItemName[] });
+            let updated = false;
+            selectedParts.forEach(part => {
+              if (!trigger.groupName.includes(part)) {
+                trigger.groupName.push(part);
+                updated = true;
+              }
+            });
+            if (updated) {
+              rerenderGroupNames();
+            }
+          },
+          'behaviors.button.add_group_name',
+          this.buildChipList(
+            trigger.id,
+            trigger.groupName.map(name => ({ id: name, name: name })),
+            function (item) {
+              trigger.groupName.splice(trigger.groupName.indexOf(item.name), 1);
+              this.remove();
+            }
+          )
+        );
+        const groupNamesSection = rerenderGroupNames();
+        elements.push(groupNamesSection);
+        break;
+      }
+      case 'orgasm': {
+        const orgasmTypeField = this.createDropdownField(
+          `${trigger.id}-orgasm-type`,
+          'behaviors.field.orgasm_type',
+          trigger.orgasmType,
+          ['any', 'normal', 'resisted', 'ruinedResisted', 'ruinedTimeout', 'ruinedSurrendered'] as OrgasmType[],
+          (val) => trigger.orgasmType = val as OrgasmType
+        );
+        elements.push(orgasmTypeField);
+        break;
+      }
+      case 'roomPresence': {
+        const roomPresenceField = this.createDropdownField(
+          `${trigger.id}-room-presence-event`,
+          'behaviors.field.room_presence_event',
+          trigger.event,
+          ['leave', 'join', 'leashed'] as RoomPresenceEvent[],
+          (val) => trigger.event = val as RoomPresenceEvent
+        );
+        elements.push(roomPresenceField);
+        break;
+      }
+      default:
+        assertNever(trigger);
+    }
+
+    return elements;
+  }
+
+  buildTriggerContraintsOptions(trigger: Trigger): HTMLElement[] {
+    const elements: HTMLElement[] = [];
+
+    // Constraint Mode
+    const constraintModeField = this.createDropdownField(
+      `${trigger.id}-constraint-mode`,
+      'behaviors.field.constraint_mode',
+      trigger.constraintMode || 'all',
+      ['any', 'all'] as ConstraintMode[],
+      (val) => trigger.constraintMode = val as ConstraintMode
+    );
+    elements.push(constraintModeField);
+
+    // Constraints
+    trigger.constraints ??= {};
+
+    // Source
+    const renderSource = () => this.buildIncludeExcludeField(
+      `${trigger.id}-constraint-source`,
+      'behaviors.field.constraint_source',
+      trigger.constraints?.source,
+      (val) => {
+        trigger.constraints!.source = val;
+        renderSource();
+        this.buildTriggerListItem(trigger);
+      }
+    );
+    const sourceSection = renderSource();
+    elements.push(sourceSection);
+
+    // Target
+    const renderTarget = () => this.buildIncludeExcludeField(
+      `${trigger.id}-constraint-target`,
+      'behaviors.field.constraint_target',
+      trigger.constraints?.target,
+      (val) => {
+        trigger.constraints!.target = val;
+        renderTarget();
+        this.buildTriggerListItem(trigger);
+      }
+    );
+    const targetSection = renderTarget();
+    elements.push(targetSection);
+
+    // Arousal Min/Max
+    const arousalMinField = this.createNumberInputField(
+      `${trigger.id}-arousal-min`,
+      'behaviors.field.arousal_min',
+      trigger.constraints.arousalMin?.toString() || '',
+      (val) => trigger.constraints!.arousalMin = val ? parseFloat(val) : undefined
+    );
+    elements.push(arousalMinField);
+
+    const arousalMaxField = this.createNumberInputField(
+      `${trigger.id}-arousal-max`,
+      'behaviors.field.arousal_max',
+      trigger.constraints.arousalMax?.toString() || '',
+      (val) => trigger.constraints!.arousalMax = val ? parseFloat(val) : undefined
+    );
+    elements.push(arousalMaxField);
+
+    // In Room With Members
+    const renderInRoomWithMembers = () => this.buildIncludeExcludeField(
+      `${trigger.id}-in-room-with-members`,
+      'behaviors.field.in_room_with_members',
+      trigger.constraints?.inRoomWithMembers,
+      (val) => {
+        trigger.constraints!.inRoomWithMembers = val;
+        renderInRoomWithMembers();
+        this.buildTriggerListItem(trigger);
+      }
+    );
+    const inRoomWithMembersSection = renderInRoomWithMembers();
+    elements.push(inRoomWithMembersSection);
+
+    // In Room Named
+    const renderInRoomNamed = () => this.buildIncludeExcludeField(
+      `${trigger.id}-in-room-named`,
+      'behaviors.field.in_room_named',
+      trigger.constraints?.inRoomNamed,
+      (val) => {
+        trigger.constraints!.inRoomNamed = val;
+        renderInRoomNamed();
+        this.buildTriggerListItem(trigger);
+      }
+    );
+    const inRoomNamedSection = renderInRoomNamed();
+    elements.push(inRoomNamedSection);
+
+    // Cooldown
+    const cooldownField = this.createNumberInputField(
+      `${trigger.id}-cooldown`,
+      'behaviors.field.cooldown',
+      trigger.cooldownSec?.toString() || '',
+      (val) => trigger.cooldownSec = val ? parseFloat(val) : undefined
+    );
+    elements.push(cooldownField);
+
+    return elements;
+  }
+
   buildTriggersSection(behavior: Behavior): HTMLElement {
+    const thisElement = ElementWrap(selector.contentListSection(`${behavior.id}-triggers`));
+    if (thisElement) thisElement.replaceChildren();
+
     const content = this.buildChipList(
+      thisElement ? CommonGenerateUniqueID() : `${behavior.id}-triggers`,
       behavior.triggers.map(id => this.settings.triggers[id]).filter(Boolean) as Trigger[],
-      (trigger) => {
+      async (trigger) => {
         const index = behavior.triggers.indexOf(trigger.id);
         if (index > -1) {
           behavior.triggers.splice(index, 1);
-          this.render();
+          this.buildTriggersSection(behavior);
+          this.buildBehaviorListItem(behavior);
         }
       }
     );
 
-    return this.buildContentListSection(
+    const section = this.buildContentListSection(
+      thisElement ? CommonGenerateUniqueID() : `${behavior.id}-triggers`,
       'behaviors.section.triggers',
-      () => this.showTriggerSelector(behavior),
+      async () => {
+        await this.showTriggerSelector(behavior);
+        this.buildTriggersSection(behavior);
+        this.buildBehaviorListItem(behavior);
+      },
       'behaviors.button.add_trigger',
       content
     );
+
+    if (thisElement) {
+      thisElement.replaceWith(section);
+      section.id = selector.contentListSection(`${behavior.id}-triggers`);
+    }
+
+    return section;
   }
 
   buildReactionsSection(behavior: Behavior): HTMLElement {
+    const thisElement = ElementWrap(selector.contentListSection(`${behavior.id}-reactions`));
+    if (thisElement) {
+      thisElement.replaceChildren();
+    }
+
     const content = this.buildChipList(
+      thisElement ? CommonGenerateUniqueID() : `${behavior.id}-reactions`,
       behavior.reactions.map(id => this.settings.reactions[id]).filter(Boolean) as Reaction[],
-      (reaction) => {
+      async (reaction) => {
         const index = behavior.reactions.indexOf(reaction.id);
         if (index > -1) {
           behavior.reactions.splice(index, 1);
-          this.render();
+          this.buildReactionsSection(behavior);
+          this.buildBehaviorListItem(behavior);
         }
       }
     );
 
-    return this.buildContentListSection(
+    const section = this.buildContentListSection(
+      thisElement ? CommonGenerateUniqueID() : `${behavior.id}-reactions`,
       'behaviors.section.reactions',
-      () => this.showReactionSelector(behavior),
+      async () => {
+        await this.showReactionSelector(behavior);
+        this.buildReactionsSection(behavior);
+        this.buildBehaviorListItem(behavior);
+      },
       'behaviors.button.add_reaction',
       content
     );
+
+    if (thisElement) {
+      thisElement.replaceWith(section);
+      section.id = selector.contentListSection(`${behavior.id}-reactions`);
+    }
+
+    return section;
   }
   // #endregion !SECTION Editor Panel Building
 
   // #region SECTION Field Builders
-  buildChipList(items: Array<{ id: string; name: string; type?: string }>, onRemove: (item: { id: string; name: string }) => void): HTMLElement {
+  buildChipList(id: string, items: Array<{ id: string; name: string; type?: string }>, onRemove: (this: HTMLElement, item: { id: string; name: string }) => void): HTMLElement {
+    const chipListId = selector.chipList(id);
+    const thisElement = ElementWrap(chipListId);
+    if (thisElement) {
+      thisElement.replaceChildren();
+    }
+
     const container = ElementCreate({
       tag: 'div',
       classList: ['rsp-behaviors-chips'],
+      attributes: {
+        id: chipListId,
+      },
       children: items.map(item => {
         const chipClassList = item.type
           ? [selector.chip, `type-${item.type}`]
           : [selector.chip];
-        return ({
+        const chip = ElementCreate({
           tag: 'div',
           classList: chipClassList,
           children: [
@@ -875,7 +1145,7 @@ export class GuiBehaviors extends BaseSubscreen {
             },
             advElement.createButton({
               id: `rsp-chip-remove-${item.id}`,
-              onClick: () => onRemove(item),
+              onClick: function () { onRemove.call(chip, item); },
               options: {
                 image: `${PUBLIC_URL}/images/cross.svg`,
                 noStyling: true
@@ -888,24 +1158,39 @@ export class GuiBehaviors extends BaseSubscreen {
             })
           ]
         });
+        return chip;
       })
     });
+
+    if (thisElement) {
+      thisElement.replaceWith(container);
+    }
 
     return container;
   }
 
-  buildContentArrayField(labelKey: string, values: string[], onChange: (values: string[]) => void): HTMLElement {
+  buildContentArrayField(id: string, labelKey: string, values: string[], onChange: (values: string[]) => void): HTMLElement {
     const content = this.buildContentList(values, onChange);
     const onAdd = () => {
       Modal.prompt(getText('behaviors.prompt.add_content'), { modalId: 'rsp-modal' }).then((response) => {
         if (response === null) return;
         values.push(response);
         onChange(values);
-        this.render();
       });
     };
 
-    return this.buildContentListSection(labelKey, onAdd, 'behaviors.button.add_content', content);
+    const thisElement = ElementWrap(selector.contentListSection(id));
+    if (thisElement) {
+      thisElement.replaceChildren();
+    }
+
+    const section = this.buildContentListSection(id, labelKey, onAdd, 'behaviors.button.add_content', content);
+
+    if (thisElement) {
+      thisElement.replaceWith(section);
+    }
+
+    return section;
   }
 
   buildContentList(values: string[], onChange: (values: string[]) => void): HTMLElement {
@@ -966,7 +1251,13 @@ export class GuiBehaviors extends BaseSubscreen {
     return container;
   }
 
-  buildContentListSection(labelKey: string, onAdd: () => void, addLabel: string, content: HTMLElement): HTMLElement {
+  buildContentListSection(id: string, labelKey: string, onAdd: () => void, addLabel: string, content: HTMLElement): HTMLElement {
+    const sectionId = selector.contentListSection(id);
+    const thisElement = ElementWrap(sectionId);
+    if (thisElement) {
+      thisElement.replaceChildren();
+    }
+
     const addButton = advElement.createButton({
       id: `rsp-content-add-${CommonGenerateUniqueID()}`,
       onClick: onAdd,
@@ -995,6 +1286,9 @@ export class GuiBehaviors extends BaseSubscreen {
 
     const container = ElementCreate({
       tag: 'div',
+      attributes: {
+        id: sectionId,
+      },
       classList: ['rsp-behaviors-section'],
       children: [
         header,
@@ -1002,10 +1296,14 @@ export class GuiBehaviors extends BaseSubscreen {
       ]
     });
 
+    if (thisElement) {
+      thisElement.replaceWith(container);
+    }
+
     return container;
   }
 
-  buildIncludeExcludeField(labelKey: string, rule: { entries: Array<{ value: string; mode: 'include' | 'exclude' }> } | undefined, onChange: (rule: { entries: Array<{ value: string; mode: 'include' | 'exclude' }> } | undefined) => void): HTMLElement {
+  buildIncludeExcludeField(id: string, labelKey: string, rule: { entries: Array<{ value: string; mode: 'include' | 'exclude' }> } | undefined, onChange: (rule: { entries: Array<{ value: string; mode: 'include' | 'exclude' }> } | undefined) => void): HTMLElement {
     const entries = rule?.entries || [];
     const onAdd = () => {
       Modal.prompt(getText('behaviors.prompt.add_content'), { modalId: 'rsp-modal' }).then((response) => {
@@ -1017,11 +1315,11 @@ export class GuiBehaviors extends BaseSubscreen {
           rule.entries = entries;
         }
         onChange(rule);
-        this.render();
       });
     };
 
-    const content = this.buildConstraintEntryList(
+    const list = this.buildConstraintEntryList(
+      id,
       entries,
       (updatedEntries) => {
         if (!rule) {
@@ -1033,32 +1331,54 @@ export class GuiBehaviors extends BaseSubscreen {
       }
     );
 
-    return this.buildContentListSection(labelKey, onAdd, 'behaviors.button.add_content', content);
+    const thisElement = ElementWrap(selector.contentListSection(id));
+    if (thisElement) {
+      thisElement.replaceChildren();
+    }
+
+    const section = this.buildContentListSection(id, labelKey, onAdd, 'behaviors.button.add_content', list);
+
+
+    if (thisElement) {
+      thisElement.replaceWith(section);
+    }
+
+    return section;
   }
 
-  buildConstraintEntryList(entries: Array<{ value: string; mode: 'include' | 'exclude' }>, onChange: (entries: Array<{ value: string; mode: 'include' | 'exclude' }>) => void): HTMLElement {
+  buildConstraintEntryList(id: string, entries: IncludeExcludeEntry[], onChange: (entries: IncludeExcludeEntry[]) => void): HTMLElement {
     const tooltip = this.deleteMode
       ? getText('behaviors.text.delete_mode')
       : getText('behaviors.text.edit_mode');
 
+    const thisElement = ElementWrap(selector.constraintEntryList(id));
+    if (thisElement) {
+      thisElement.replaceChildren();
+    }
+
     const container = ElementCreate({
       tag: 'div',
+      attributes: {
+        id: selector.constraintEntryList(id),
+      },
       classList: [selector.contentList, 'scroll-box'],
       children: [
         ...entries.map((entry, index) => {
+          const modeField = this.createDropdownField(
+            `${id}-entry-${index}-mode`,
+            '',
+            entry.mode,
+            ['include', 'exclude'],
+            (val) => {
+              entries[index].mode = val as 'include' | 'exclude';
+              onChange(entries);
+            }
+          );
           const entryContainer = ElementCreate({
             tag: 'div',
             classList: ['rsp-constraint-entry'],
             children: [
-              this.createDropdownField(
-                '',
-                entry.mode,
-                ['include', 'exclude'],
-                (val) => {
-                  entries[index].mode = val as 'include' | 'exclude';
-                  onChange(entries);
-                }
-              ),
+              modeField,
               advElement.createButton({
                 id: `rsp-constraint-entry-${index}-${CommonGenerateUniqueID()}`,
                 options: {
@@ -1086,7 +1406,6 @@ export class GuiBehaviors extends BaseSubscreen {
 
                     entries.splice(index, 1);
                     onChange(entries);
-                    this.render();
                   } else {
                     Modal.prompt(getText('behaviors.prompt.edit_content'), { defaultValue: entry.value, modalId: 'rsp-modal' }).then((newValue) => {
                       if (newValue === entry.value) return;
@@ -1094,7 +1413,6 @@ export class GuiBehaviors extends BaseSubscreen {
                       else {
                         entries[index].value = newValue;
                         onChange(entries);
-                        this.render();
                       }
                     });
                   }
@@ -1107,6 +1425,10 @@ export class GuiBehaviors extends BaseSubscreen {
         })
       ]
     });
+
+    if (thisElement) {
+      thisElement.replaceWith(container);
+    }
 
     return container;
   }
@@ -1142,9 +1464,15 @@ export class GuiBehaviors extends BaseSubscreen {
     return section;
   }
 
-  createInputField(labelKey: string, value: string, onChange: (value: string) => void): HTMLElement {
-    return advElement.createInput({
-      id: `rsp-input-${CommonGenerateUniqueID()}`,
+  createInputField(id: string, labelKey: string, value: string, onChange: (value: string) => void): HTMLElement {
+    const elementId = selector.inputField(id);
+    const thisElement = ElementWrap(elementId);
+    if (thisElement) {
+      thisElement.replaceChildren();
+    }
+
+    const element = advElement.createInput({
+      id: elementId,
       type: 'text',
       label: getText(labelKey),
       setElementValue: () => value,
@@ -1155,11 +1483,22 @@ export class GuiBehaviors extends BaseSubscreen {
         }
       }
     });
+    if (thisElement) {
+      thisElement.replaceWith(element);
+    }
+
+    return element;
   }
 
-  createNumberInputField(labelKey: string, value: string, onChange: (value: string) => void): HTMLElement {
-    return advElement.createInput({
-      id: `rsp-input-${CommonGenerateUniqueID()}`,
+  createNumberInputField(id: string, labelKey: string, value: string, onChange: (value: string) => void): HTMLElement {
+    const elementId = selector.inputField(id);
+    const thisElement = ElementWrap(elementId);
+    if (thisElement) {
+      thisElement.replaceChildren();
+    }
+
+    const element = advElement.createInput({
+      id: elementId,
       type: 'number',
       label: getText(labelKey),
       setElementValue: () => value,
@@ -1175,11 +1514,22 @@ export class GuiBehaviors extends BaseSubscreen {
         }
       }
     });
+    if (thisElement) {
+      thisElement.replaceWith(element);
+    }
+
+    return element;
   }
 
-  createDropdownField(labelKey: string, value: string, options: string[], onChange: (value: string) => void): HTMLElement {
-    return advElement.createDropdown({
-      id: `rsp-dropdown-${CommonGenerateUniqueID()}`,
+  createDropdownField(id: string, labelKey: string, value: string, options: string[], onChange: (value: string) => void): HTMLElement {
+    const elementId = selector.dropdownField(id);
+    const thisElement = ElementWrap(elementId);
+    if (thisElement) {
+      thisElement.replaceChildren();
+    }
+
+    const element = advElement.createDropdown({
+      id: elementId,
       label: getText(labelKey),
       optionsList: options.map(opt => {
         const label = getText('behaviors.option.' + opt);
@@ -1200,23 +1550,47 @@ export class GuiBehaviors extends BaseSubscreen {
       setElementValue: () => value,
       setSettingValue: onChange
     });
+
+    if (thisElement) {
+      thisElement.replaceWith(element);
+    }
+
+    return element;
   }
   // #endregion !SECTION Field Builders
 
   // #region SECTION Selection Methods
   selectBehavior(id: string) {
+    let oldBehavior: Behavior | undefined;
+    if (this.selectedBehaviorId) {
+      oldBehavior = this.settings.behaviors[this.selectedBehaviorId];
+    }
     this.selectedBehaviorId = id;
-    this.render();
+    if (oldBehavior) this.buildBehaviorListItem(oldBehavior);
+    this.buildBehaviorListItem(this.settings.behaviors[id]);
+    this.buildEditorPanel();
   }
 
   selectTrigger(id: string) {
+    let oldTrigger: Trigger | undefined;
+    if (this.selectedTriggerId) {
+      oldTrigger = this.settings.triggers[this.selectedTriggerId];
+    }
     this.selectedTriggerId = id;
-    this.render();
+    if (oldTrigger) this.buildTriggerListItem(oldTrigger);
+    this.buildTriggerListItem(this.settings.triggers[id]);
+    this.buildEditorPanel();
   }
 
   selectReaction(id: string) {
+    let oldReaction: Reaction | undefined;
+    if (this.selectedReactionId) {
+      oldReaction = this.settings.reactions[this.selectedReactionId];
+    }
     this.selectedReactionId = id;
-    this.render();
+    if (oldReaction) this.buildReactionListItem(oldReaction);
+    this.buildReactionListItem(this.settings.reactions[id]);
+    this.buildEditorPanel();
   }
   // #endregion !SECTION Selection Methods
 
@@ -1318,7 +1692,8 @@ export class GuiBehaviors extends BaseSubscreen {
       BehaviorsModule.deleteReaction(id);
     }
 
-    this.render();
+    ElementWrap(selector.listItem(id))?.remove();
+    this.buildEditorPanel();
   }
   // #endregion !SECTION Handlers
 
@@ -1343,7 +1718,8 @@ export class GuiBehaviors extends BaseSubscreen {
     selectedIds.forEach((id: string) => {
       behavior.triggers.push(id);
     });
-    this.render();
+    this.buildBehaviorListItem(behavior);
+    this.buildTriggersSection(behavior);
   }
 
   async showReactionSelector(behavior: Behavior) {
@@ -1365,7 +1741,8 @@ export class GuiBehaviors extends BaseSubscreen {
     selectedIds.forEach((id: string) => {
       behavior.reactions.push(id);
     });
-    this.render();
+    this.buildBehaviorListItem(behavior);
+    this.buildReactionsSection(behavior);
   }
   // #endregion !SECTION Selectors
 
@@ -1498,7 +1875,7 @@ export class GuiBehaviors extends BaseSubscreen {
   }
 
   async confirmationModal(message: string): Promise<boolean> {
-    return this.doNotShowConfirmation || await Modal.confirm([
+    const result = this.doNotShowConfirmation || await Modal.confirm([
       message,
       advElement.createCheckbox({
         id: 'rsp-do-not-show-confirmation',
@@ -1506,6 +1883,9 @@ export class GuiBehaviors extends BaseSubscreen {
         setSettingValue: (val) => this.doNotShowConfirmation = val
       })
     ], { modalId: 'rsp-modal' });
+    if (result === false) this.doNotShowConfirmation = false;
+
+    return result ?? false;
   }
   // #endregion !SECTION Utility Methods
 }
