@@ -11,6 +11,10 @@
     }
   }
 
+  .deeplib-label {
+    user-select: none;
+  }
+
   .deeplib-modal-prompt-container {
     gap: var(--gap);
     width: 100%;
@@ -51,6 +55,10 @@
 .rsp-body-part-selector-modal {
   justify-content: center;
   align-items: center;
+
+  .rsp-selector-buttons-container {
+    justify-content: center;
+  }
 
   #rsp-body-part-selector {
     width: minv(30, 15);
@@ -178,11 +186,6 @@
   align-items: center;
   width: minv(90, 45);
 
-  .deeplib-modal-prompt-container {
-    max-width: minv(90, 45);
-    width: 100%;
-  }
-
   #rsp-member-search {
     width: min(60dvh, 30dvw);
     padding: minv(0.8, 0.4) minv(1.5, 0.75);
@@ -287,6 +290,80 @@
       &.rsp-member-grid-cell-context {
         font-style: italic;
         color: color-mix(in srgb, var(--tmd-text, currentColor) 70%, transparent);
+      }
+    }
+  }
+}
+
+.rsp-text-reaction-modal {
+  justify-content: center;
+  align-items: center;
+  width: minv(80, 40);
+
+  .rsp-text-reaction-container {
+    display: flex;
+    flex-direction: column;
+    gap: minv(1.5, 0.75);
+    width: 100%;
+
+    .rsp-text-reaction-label {
+      font-weight: bold;
+      font-size: 0.9em;
+    }
+
+    .rsp-text-reaction-textarea {
+      width: 100%;
+      min-height: 2em;
+      max-height: minv(20, 10);
+      padding: minv(0.8, 0.4) minv(1, 0.5);
+      border: var(--border-width) solid color-mix(in srgb, var(--tmd-accent, $active-color) 30%, transparent);
+      border-radius: var(--deeplib-border-radius);
+      font-size: 0.8em;
+      resize: vertical;
+      transition: border-color 0.2s ease;
+      overflow: clip;
+
+      &:focus {
+        outline: none;
+        border-color: var(--tmd-accent, $active-color);
+      }
+    }
+
+    .rsp-template-section {
+      display: flex;
+      flex-direction: column;
+      gap: minv(0.8, 0.4);
+
+      .rsp-template-section-label {
+        font-weight: bold;
+        font-size: 0.85em;
+        color: color-mix(in srgb, var(--tmd-text, currentColor) 80%, transparent);
+        user-select: none;
+      }
+
+      .rsp-template-buttons-container {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: minv(0.6, 0.3);
+        justify-content: flex-start;
+        align-items: flex-start;
+        width: 100%;
+
+        .rsp-template-button {
+          flex: 1 1 fit-content;
+          width: min-content;
+          padding: minv(0.6, 0.3) minv(1.2, 0.6);
+          white-space: nowrap;
+          font-size: 0.85em;
+          border: var(--border-width) solid color-mix(in srgb, var(--tmd-accent, $active-color) 30%, transparent);
+          transition: background-color 0.2s ease, border-color 0.2s ease;
+
+          &:hover {
+            background-color: color-mix(in srgb, var(--tmd-accent, $active-color) 20%, transparent);
+            border-color: color-mix(in srgb, var(--tmd-accent, $active-color) 50%, transparent);
+          }
+        }
       }
     }
   }

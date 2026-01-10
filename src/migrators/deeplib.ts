@@ -31,19 +31,19 @@ function replaceTemplates() {
   const data = modStorage.playerStorage.ResponsesModule as ResponsesSettingsModel;
 
   const replacements = Object.freeze({
-    tname: '{{ target name }}',
-    tpronoun: '{{ target pronoun }}',
-    tpossessive: '{{ target possessive }}',
-    tintensive: '{{ target intensive }}',
-    tself: '{{ target self }}',
+    tname: '{{target-name}}',
+    tpronoun: '{{target-pronoun}}',
+    tpossessive: '{{target-possessive}}',
+    tintensive: '{{target-intensive}}',
+    tself: '{{target-self}}',
 
-    sname: '{{ source name }}',
-    spronoun: '{{ source pronoun }}',
-    spossessive: '{{ source possessive }}',
-    sintensive: '{{ source intensive }}',
-    sself: '{{ source self }}',
+    sname: '{{source-name}}',
+    spronoun: '{{source-pronoun}}',
+    spossessive: '{{source-possessive}}',
+    sintensive: '{{source-intensive}}',
+    sself: '{{source-self}}',
 
-    player: '{{ player name }}',
+    player: '{{player-name}}',
   });
 
   data.mainResponses.forEach((entry) => {

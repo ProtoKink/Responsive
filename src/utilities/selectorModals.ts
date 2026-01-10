@@ -24,7 +24,7 @@ export async function idSelectorModal(buttons: { label: string, value: string }[
   }));
 
   return await Modal.confirm([
-    getText('behaviors.prompt.select_item'),
+    advElement.createLabel({ id: null, label: getText('behaviors.prompt.select_item') }),
     ElementCreate({ tag: 'br' }),
     {
       tag: 'div',
@@ -173,7 +173,7 @@ export async function bodyPartSelectorModal(options?: { selectedParts?: AssetGro
   });
 
   return await Modal.confirm([
-    getText('behaviors.prompt.select_item'),
+    advElement.createLabel({ id: null, label: getText('behaviors.prompt.select_item') }),
     ElementCreate({ tag: 'br' }),
     {
       tag: 'div',
@@ -356,7 +356,7 @@ export async function activitySelectorModal(options?: { selectedActivities?: str
   });
 
   return await Modal.confirm([
-    getText('behaviors.prompt.select_item'),
+    advElement.createLabel({ id: null, label: getText('behaviors.prompt.select_item') }),
     searchInput,
     activityGrid
   ], {
@@ -800,7 +800,7 @@ export async function memberNumberSelectorModal(options?: {
   });
 
   return await Modal.confirm([
-    getText('behaviors.prompt.select_item'),
+    advElement.createLabel({ id: null, label: getText('behaviors.prompt.select_item') }),
     searchInput,
     customInputContainer,
     gridContainer
@@ -828,6 +828,136 @@ export async function memberNumberSelectorModal(options?: {
   });
 }
 
+export async function textReactionSelectorModal(options?: { initialValue?: string, prompt?: string }): Promise<string | null> {
+  options ??= {};
+  const initialValue = options?.initialValue ?? '';
+  const prompt = options?.prompt ?? getText('behaviors.prompt.edit_text_reaction');
+  let textValue = initialValue;
+
+  const textareaId = 'rsp-text-reaction-textarea';
+  const textarea = ElementCreate({
+    tag: 'textarea',
+    attributes: {
+      id: textareaId,
+      rows: '2',
+    },
+    classList: ['rsp-text-reaction-textarea'],
+    eventListeners: {
+      input: function () {
+        textValue = this.value;
+      }
+    }
+  }) as HTMLTextAreaElement;
+  textarea.value = initialValue;
+
+  const insertAtCursor = (text: string) => {
+    const textareaElement = ElementWrap(textareaId) as HTMLTextAreaElement;
+    if (!textareaElement) return;
+
+    const start = textareaElement.selectionStart;
+    const end = textareaElement.selectionEnd;
+    const currentValue = textareaElement.value;
+
+    const newValue = currentValue.slice(0, start) + text + currentValue.slice(end);
+    textareaElement.value = newValue;
+    textValue = newValue;
+
+    const newPosition = start + text.length;
+    textareaElement.setSelectionRange(newPosition, newPosition);
+    textareaElement.focus();
+  };
+
+  const templateStrings: { label: string, value: string }[] = [
+    { label: 'Player Name', value: '{{player-name}}' },
+    { label: 'Player Pronoun', value: '{{player-pronoun}}' },
+    { label: 'Player Possessive', value: '{{player-possessive}}' },
+    { label: 'Player Intensive', value: '{{player-intensive}}' },
+    { label: 'Player Self', value: '{{player-self}}' },
+    { label: 'Target Name', value: '{{target-name}}' },
+    { label: 'Target Pronoun', value: '{{target-pronoun}}' },
+    { label: 'Target Possessive', value: '{{target-possessive}}' },
+    { label: 'Target Intensive', value: '{{target-intensive}}' },
+    { label: 'Target Self', value: '{{target-self}}' },
+    { label: 'Source Name', value: '{{source-name}}' },
+    { label: 'Source Pronoun', value: '{{source-pronoun}}' },
+    { label: 'Source Possessive', value: '{{source-possessive}}' },
+    { label: 'Source Intensive', value: '{{source-intensive}}' },
+    { label: 'Source Self', value: '{{source-self}}' }
+  ];
+
+  const templateButtons = templateStrings.map(template =>
+    advElement.createButton({
+      id: `rsp-template-${template.label.toLowerCase().replace(/\s+/g, '-')}`,
+      onClick: function () {
+        insertAtCursor(template.value);
+      },
+      options: {
+        label: template.label
+      },
+      htmlOptions: {
+        button: {
+          classList: ['rsp-template-button']
+        }
+      }
+    })
+  );
+
+  const templateButtonsContainer = ElementCreate({
+    tag: 'div',
+    classList: ['rsp-template-buttons-container'],
+    children: templateButtons
+  });
+
+  const container = ElementCreate({
+    tag: 'div',
+    classList: ['rsp-text-reaction-container'],
+    children: [
+      advElement.createLabel({
+        id: null,
+        label: getText('behaviors.prompt.enter_text'),
+        htmlOptions: {
+          classList: ['rsp-text-reaction-label']
+        }
+      }),
+      textarea,
+      {
+        tag: 'div',
+        classList: ['rsp-template-section'],
+        children: [
+          advElement.createLabel({
+            id: null,
+            label: getText('behaviors.prompt.insert_template'),
+            htmlOptions: {
+              classList: ['rsp-template-section-label']
+            }
+          }),
+          templateButtonsContainer
+        ]
+      }
+    ]
+  });
+
+  return await Modal.confirm([
+    advElement.createLabel({ id: null, label: prompt }),
+    container
+  ], {
+    modalClassList: ['rsp-modal', 'rsp-text-reaction-modal'],
+    onShow() {
+      const textareaElement = ElementWrap(textareaId) as HTMLTextAreaElement;
+      if (textareaElement) {
+        textareaElement.focus();
+        textareaElement.setSelectionRange(textareaElement.value.length, textareaElement.value.length);
+      }
+    }
+  }).then((result) => {
+    if (!result) {
+      return null;
+    }
+    return textValue;
+  });
+}
+
 exportToGlobal('activitySelectorModal', activitySelectorModal);
 exportToGlobal('bodyPartSelectorModal', bodyPartSelectorModal);
 exportToGlobal('memberNumberSelectorModal', memberNumberSelectorModal);
+exportToGlobal('textReactionSelectorModal', textReactionSelectorModal);

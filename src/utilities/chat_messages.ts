@@ -83,28 +83,28 @@ export function replaceTemplate(msg: string, target?: Character, source?: Charac
   const sourceName = source ? CharacterNickname(source) : undefined;
 
   const replacements: Record<string, string | undefined> = {
-    'player name': playerName,
-    'player pronoun': playerEntry.pronoun,
-    'player possessive': playerEntry.possessive,
-    'player intensive': playerEntry.intensive,
-    'player self': playerEntry.intensiveSelf,
+    'player-name': playerName,
+    'player-pronoun': playerEntry.pronoun,
+    'player-possessive': playerEntry.possessive,
+    'player-intensive': playerEntry.intensive,
+    'player-self': playerEntry.intensiveSelf,
 
-    'target name': targetName,
-    'target pronoun': targetEntry?.pronoun,
-    'target possessive': targetEntry?.possessive,
-    'target intensive': targetEntry?.intensive,
-    'target self': targetEntry?.intensiveSelf,
+    'target-name': targetName,
+    'target-pronoun': targetEntry?.pronoun,
+    'target-possessive': targetEntry?.possessive,
+    'target-intensive': targetEntry?.intensive,
+    'target-self': targetEntry?.intensiveSelf,
 
-    'source name': sourceName,
-    'source pronoun': sourceEntry?.pronoun,
-    'source possessive': sourceEntry?.possessive,
-    'source intensive': sourceEntry?.intensive,
-    'source self': sourceEntry?.intensiveSelf
+    'source-name': sourceName,
+    'source-pronoun': sourceEntry?.pronoun,
+    'source-possessive': sourceEntry?.possessive,
+    'source-intensive': sourceEntry?.intensive,
+    'source-self': sourceEntry?.intensiveSelf
   };
 
-  return msg.replace(/{{\s*([^}]+?)\s*}}/g, (_, key) => {
+  return msg.replace(/{{([a-zA-Z-]+)}}/g, (_, key) => {
     const normalized = key.trim().toLowerCase();
-    return replacements[normalized] ?? `{{ ${key} }}`;
+    return replacements[normalized] ?? `{{${key}}}`;
   });
 }
 

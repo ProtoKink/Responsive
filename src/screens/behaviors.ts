@@ -3,7 +3,7 @@ import { advElement, BaseSubscreen, exportToGlobal, getText, layout, Modal, Sett
 import { BehaviorsSettingsModel, Behavior, Trigger, Reaction, ConstraintMode, MatchMode, SpeechType, OrgasmType, RoomPresenceEvent, ReactionMode, TriggerTypeSchema, ReactionTypeSchema, ReactionType, TriggerType, IncludeExcludeEntry, SpeechTypeSchema, MatchModeSchema, OrgasmTypeSchema, RoomPresenceEventSchema, ReactionModeSchema, ConstraintModeSchema, IncludeExcludeEntrySchema } from '../models/behaviors';
 import { BehaviorsModule } from '../modules/behaviors';
 import { assertNever } from '../utilities/other';
-import { activitySelectorModal, bodyPartSelectorModal, idSelectorModal } from '@/utilities/selectorModals';
+import { activitySelectorModal, bodyPartSelectorModal, idSelectorModal, textReactionSelectorModal } from '@/utilities/selectorModals';
 import { triggerHasConstraints } from '@/utilities/triggers';
 import { createDropdownField, createInputField, createNumberInputField } from '@/utilities/fields';
 
@@ -1172,7 +1172,7 @@ export class GuiBehaviors extends BaseSubscreen {
   buildContentArrayField(id: string, labelKey: string, values: string[], onChange: (values: string[]) => void): HTMLElement {
     const content = this.buildContentList(values, onChange);
     const onAdd = () => {
-      Modal.prompt(getText('behaviors.prompt.add_content'), { modalClassList: ['rsp-modal'] }).then((response) => {
+      textReactionSelectorModal({ prompt: getText('behaviors.prompt.add_content')}).then((response) => {
         if (response === null) return;
         values.push(response);
         onChange(values);
@@ -1236,7 +1236,7 @@ export class GuiBehaviors extends BaseSubscreen {
                   label.textContent = value === '' ? getText('behaviors.text.empty_content') : value;
                 }
               } else {
-                Modal.prompt(getText('behaviors.prompt.edit_content'), { defaultValue: value, modalClassList: ['rsp-modal'] }).then((newValue) => {
+                textReactionSelectorModal({ initialValue: value, prompt: getText('behaviors.prompt.edit_text_reaction') }).then((newValue) => {
                   if (newValue === value) return;
                   else if (newValue === null) return;
                   else {
@@ -1244,7 +1244,7 @@ export class GuiBehaviors extends BaseSubscreen {
                     onChange(values);
                     const label = this.querySelector('.button-label');
                     if (label?.textContent) {
-                      label.textContent = value === '' ? getText('behaviors.text.empty_content') : value;
+                      label.textContent = newValue === '' ? getText('behaviors.text.empty_content') : newValue;
                     }
                   }
                 });
