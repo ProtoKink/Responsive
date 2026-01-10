@@ -25,8 +25,8 @@
   const devPath = `${prodPath}dev/`;
   const localPath = 'http://localhost:45000/';
 
-  const isDev = window.location.search.includes('RSP=dev');
-  const isLocal = window.location.search.includes('RSP=local');
+  const isDev = window.location.search.toLowerCase().includes('rsp=dev');
+  const isLocal = window.location.search.toLowerCase().includes('rsp=local');
   const isPublic = isDev || !isLocal;
 
   let modLink = prodPath;

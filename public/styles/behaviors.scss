@@ -376,7 +376,7 @@
       align-items: center;
       gap: minv(0.5, 0.25);
       padding: minv(0.5, 0.25) minv(1, 0.5);
-      background-color: var(--tmd-accent, $active-color);
+      background-color: var(--tmd-element, $active-color);
       color: white;
       border-radius: var(--deeplib-border-radius);
       font-size: 0.9em;

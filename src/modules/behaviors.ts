@@ -22,6 +22,7 @@ export class BehaviorsModule extends BaseModule {
   static instance: BehaviorsModule;
 
   leashedLeave: boolean = false;
+  behaviorExecutionMap: Map<string, number> = new Map();
 
   get settings(): BehaviorsSettingsModel {
     return super.settings as BehaviorsSettingsModel;
@@ -270,7 +271,11 @@ export class BehaviorsModule extends BaseModule {
       .map(r => BehaviorsModule.instance.getReaction(r))
       .filter(r => r !== undefined);
 
-    processReactions(reactions, behavior.reactionMode, messageData);
+    const isReactionProcessed = processReactions(reactions, behavior.reactionMode, messageData);
+
+    if (isReactionProcessed && behavior.cooldownSec) {
+      BehaviorsModule.instance.behaviorExecutionMap.set(behavior.id, CommonTime());
+    }
   }
 }
 

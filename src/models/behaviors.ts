@@ -129,8 +129,6 @@ const BaseTriggerSchema = z.object({
   type: TriggerTypeSchema,
   constraintMode: ConstraintModeSchema.optional(),
   constraints: TriggerConstraintSchema.optional(),
-  /** Cooldown in seconds before behavior can fire again */
-  cooldownSec: z.number().optional()
 });
 export type BaseTrigger = z.infer<typeof BaseTriggerSchema>;
 

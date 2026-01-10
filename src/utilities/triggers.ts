@@ -14,9 +14,6 @@ type TriggerPredicate = (trigger: Trigger, data: MessageData) => boolean;
 
 type TriggerPredicatesMap = Map<TriggerType, TriggerPredicate[]>;
 
-const triggerExecutionMap: Map<string, number> = new Map();
-
-// Helper function to register predicates for multiple trigger types
 function registerPredicate(types: TriggerType[], predicate: TriggerPredicate): void {
   types.forEach(type => {
     if (!triggerPredicates.has(type)) {
@@ -26,7 +23,6 @@ function registerPredicate(types: TriggerType[], predicate: TriggerPredicate): v
   });
 }
 
-// Shared predicate for emote, speech, and action (message content matching)
 const messageContentPredicate: TriggerPredicate = (trigger, data) => {
   if (trigger.type !== 'emote' && trigger.type !== 'speech' && trigger.type !== 'action') {
     return false;
@@ -49,7 +45,6 @@ const messageContentPredicate: TriggerPredicate = (trigger, data) => {
   });
 };
 
-// Speech-specific predicate (speechType matching)
 const speechTypePredicate: TriggerPredicate = (trigger, data) => {
   if (trigger.type !== 'speech') return true;
 
@@ -60,7 +55,6 @@ const speechTypePredicate: TriggerPredicate = (trigger, data) => {
   return typedTrigger.speechType === data.speechType;
 };
 
-// Activity predicate
 const activityPredicate: TriggerPredicate = (trigger, data) => {
   if (trigger.type !== 'activity') return false;
 
@@ -70,7 +64,6 @@ const activityPredicate: TriggerPredicate = (trigger, data) => {
     trigger.groupName.includes(data.groupName);
 };
 
-// Orgasm predicate
 const orgasmPredicate: TriggerPredicate = (trigger, data) => {
   if (trigger.type !== 'orgasm') return false;
 
@@ -79,28 +72,22 @@ const orgasmPredicate: TriggerPredicate = (trigger, data) => {
   return trigger.orgasmType === data.orgasmType;
 };
 
-// Room presence predicate
 const roomPresencePredicate: TriggerPredicate = (trigger, data) => {
   if (trigger.type !== 'roomPresence') return false;
 
   return trigger.event === data.roomPrecenseEvent;
 };
 
-// Initialize trigger predicates
 const triggerPredicates: TriggerPredicatesMap = new Map();
 
-// Register shared predicate for emote, speech, and action
 registerPredicate(['emote', 'speech', 'action'], messageContentPredicate);
 
-// Register speech-specific predicate
 registerPredicate(['speech'], speechTypePredicate);
 
-// Register other predicates
 registerPredicate(['activity'], activityPredicate);
 registerPredicate(['orgasm'], orgasmPredicate);
 registerPredicate(['roomPresence'], roomPresencePredicate);
 
-// Function to check if trigger passes all predicates
 function checkTriggerPredicates(trigger: Trigger, data: MessageData): boolean {
   const predicates = triggerPredicates.get(trigger.type);
 
@@ -109,7 +96,6 @@ function checkTriggerPredicates(trigger: Trigger, data: MessageData): boolean {
     return false;
   }
 
-  // All predicates must pass
   return predicates.every(predicate => predicate(trigger, data));
 }
 
@@ -156,37 +142,36 @@ export function processTrigger(type: TriggerType, messageData: MessageData): Beh
     return undefined;
   }
 
-  return Object.values(BehaviorsModule.instance.settings.behaviors)
-    .filter(b => b.enabled)
-    .find(b => {
-      const triggers = b.triggers.map(t => BehaviorsModule.instance.getTrigger(t))
-        .filter(t => t?.type === type)
-        .filter(t => {
-          const last = triggerExecutionMap.get(`${b.id}-${t?.id}`);
+  const enabledBehaviors = Object.values(BehaviorsModule.instance.settings.behaviors)
+    .filter(b => b.enabled);
 
-          if (!last) return true;
+  if (enabledBehaviors.length === 0) return undefined;
 
-          return CommonTime() - last >= (t?.cooldownSec ?? 0) * 1000;
-        })
-        .filter(t => t !== undefined);
+  return enabledBehaviors
+    .filter(behavior => {
+      const last = BehaviorsModule.instance.behaviorExecutionMap.get(behavior.id);
 
-      return triggers.find(t => {
+      if (!last) return true;
+
+      return CommonTime() - last >= (behavior.cooldownSec ?? 0) * 1000;
+    })
+    .find(behavior => {
+      const triggers = behavior.triggers.map(t => BehaviorsModule.instance.getTrigger(t));
+      const triggersOfType = triggers.filter(t => t?.type === type).filter(t => t !== undefined);
+
+      const metTrigger = triggersOfType.find(trigger => {
         let isConstraintMet = true;
 
-        if (t.constraints && t.constraintMode) {
-          isConstraintMet = processTriggerConstraint(t.constraints, t.constraintMode, messageData);
+        if (trigger.constraints && trigger.constraintMode) {
+          isConstraintMet = processTriggerConstraint(trigger.constraints, trigger.constraintMode, messageData);
         };
 
         if (!isConstraintMet) return false;
 
-        const isTriggerMet = checkTriggerPredicates(t, messageData);
-
-        if (isTriggerMet && t.cooldownSec) {
-          triggerExecutionMap.set(`${b.id}-${t?.id}`, CommonTime());
-        }
-
-        return isTriggerMet;
+        return checkTriggerPredicates(trigger, messageData);
       });
+
+      return metTrigger;
     });
 }
 
@@ -230,6 +215,8 @@ export function triggerHasConstraints(trigger: Trigger): boolean {
         return true;
       case 'object':
         return c.entries.length > 0;
+      case 'undefined':
+        return false;
       default:
         return assertNever(c);
     }

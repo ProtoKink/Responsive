@@ -1,10 +1,11 @@
 // #region SECTION Imports & Types
 import { advElement, BaseSubscreen, exportToGlobal, getText, layout, Modal, SettingElement, SubscreenOptions } from 'bc-deeplib/deeplib';
-import { BehaviorsSettingsModel, Behavior, Trigger, Reaction, ConstraintMode, MatchMode, SpeechType, OrgasmType, RoomPresenceEvent, ReactionMode, TriggerTypeSchema, ReactionTypeSchema, ReactionType, TriggerType, IncludeExcludeEntry } from '../models/behaviors';
+import { BehaviorsSettingsModel, Behavior, Trigger, Reaction, ConstraintMode, MatchMode, SpeechType, OrgasmType, RoomPresenceEvent, ReactionMode, TriggerTypeSchema, ReactionTypeSchema, ReactionType, TriggerType, IncludeExcludeEntry, SpeechTypeSchema, MatchModeSchema, OrgasmTypeSchema, RoomPresenceEventSchema, ReactionModeSchema, ConstraintModeSchema, IncludeExcludeEntrySchema } from '../models/behaviors';
 import { BehaviorsModule } from '../modules/behaviors';
 import { assertNever } from '../utilities/other';
 import { activitySelectorModal, bodyPartSelectorModal, idSelectorModal } from '@/utilities/selectorModals';
 import { triggerHasConstraints } from '@/utilities/triggers';
+import { createDropdownField, createInputField, createNumberInputField } from '@/utilities/fields';
 
 type TabType = 'behaviors' | 'triggers' | 'reactions';
 // #endregion !SECTION Imports & Types
@@ -25,12 +26,10 @@ const selector = Object.freeze({
   contentList: 'rsp-behaviors-content-list',
   chip: 'rsp-behaviors-chip',
   chipRemove: 'rsp-behaviors-chip-remove',
+  listItemsContainer: 'rsp-behaviors-list-items',
   chipList: (id: string) => `rsp-chip-list-${id}`,
   contentListSection: (id: string) => `rsp-content-list-section-${id}`,
   listItem: (id: string) => `rsp-list-item-${id}`,
-  inputField: (id: string) => `rsp-input-field-${id}`,
-  dropdownField: (id: string) => `rsp-dropdown-field-${id}`,
-  numberInputField: (id: string) => `rsp-number-input-field-${id}`,
   constraintEntryList: (id: string) => `rsp-constraint-entry-list-${id}`,
 });
 // #endregion !SECTION Constants
@@ -266,28 +265,40 @@ export class GuiBehaviors extends BaseSubscreen {
     if (this.activeTab === 'behaviors') {
       Object.values(this.settings.behaviors)
         .filter(behavior => !query || behavior.name.toLowerCase().includes(query))
+        .reverse()
         .forEach(behavior => {
           children.push(this.buildBehaviorListItem(behavior));
         });
     } else if (this.activeTab === 'triggers') {
       Object.values(this.settings.triggers)
         .filter(trigger => !query || trigger.name.toLowerCase().includes(query))
+        .reverse()
         .forEach(trigger => {
           children.push(this.buildTriggerListItem(trigger));
         });
     } else if (this.activeTab === 'reactions') {
       Object.values(this.settings.reactions)
         .filter(reaction => !query || reaction.name.toLowerCase().includes(query))
+        .reverse()
         .forEach(reaction => {
           children.push(this.buildReactionListItem(reaction));
         });
     }
 
+    const thisElement = ElementWrap(selector.listItemsContainer);
+
     const scrollBox = ElementCreate({
       tag: 'div',
       classList: ['scroll-box', 'rsp-behaviors-list-items'],
+      attributes: {
+        id: selector.listItemsContainer,
+      },
       children: children
     });
+
+    if (thisElement) {
+      thisElement.replaceWith(scrollBox);
+    }
 
     return scrollBox;
   }
@@ -304,18 +315,21 @@ export class GuiBehaviors extends BaseSubscreen {
     if (this.activeTab === 'behaviors') {
       Object.values(this.settings.behaviors)
         .filter(behavior => !query || behavior.name.toLowerCase().includes(query))
+        .reverse()
         .forEach(behavior => {
           children.push(this.buildBehaviorListItem(behavior));
         });
     } else if (this.activeTab === 'triggers') {
       Object.values(this.settings.triggers)
         .filter(trigger => !query || trigger.name.toLowerCase().includes(query))
+        .reverse()
         .forEach(trigger => {
           children.push(this.buildTriggerListItem(trigger));
         });
     } else if (this.activeTab === 'reactions') {
       Object.values(this.settings.reactions)
         .filter(reaction => !query || reaction.name.toLowerCase().includes(query))
+        .reverse()
         .forEach(reaction => {
           children.push(this.buildReactionListItem(reaction));
         });
@@ -585,20 +599,18 @@ export class GuiBehaviors extends BaseSubscreen {
   buildBehaviorEditor(behavior: Behavior): HTMLElement[] {
     const elements: HTMLElement[] = [];
 
-    // Name
-    const nameField = this.createInputField(
-      `${behavior.id}-name`,
-      'behaviors.field.name',
-      behavior.name,
-      (val) => {
+    const nameField = createInputField({
+      id: `${behavior.id}-name`,
+      labelKey: 'behaviors.field.name',
+      value: behavior.name,
+      onChange: (val) => {
         behavior.name = val;
         this.buildBehaviorListItem(behavior);
       }
-    );
+    });
     elements.push(nameField);
 
-    // Enabled
-    elements.push(advElement.createCheckbox({
+    const enabledField = advElement.createCheckbox({
       id: `${behavior.id}-enabled`,
       label: getText('behaviors.field.enabled'),
       setElementValue: () => behavior.enabled,
@@ -611,31 +623,29 @@ export class GuiBehaviors extends BaseSubscreen {
           classList: ['rsp-behaviors-field'],
         }
       }
-    }));
+    });
+    elements.push(enabledField);
 
-    // Reaction Mode
-    const reactionModeField = this.createDropdownField(
-      `${behavior.id}-reaction-mode`,
-      'behaviors.field.reaction_mode',
-      behavior.reactionMode,
-      ['all', 'random'] as ReactionMode[],
-      (val) => behavior.reactionMode = val as ReactionMode,
-    );
+    const reactionModeField = createDropdownField({
+      id: `${behavior.id}-reaction-mode`,
+      labelKey: 'behaviors.field.reaction_mode',
+      value: behavior.reactionMode,
+      options: Object.values(ReactionModeSchema.options),
+      onChange: (val) => behavior.reactionMode = val as ReactionMode
+    });
     elements.push(reactionModeField);
 
-    // Cooldown
-    const cooldownField = this.createNumberInputField(
-      `${behavior.id}-cooldown`,
-      'behaviors.field.cooldown',
-      behavior.cooldownSec?.toString() || '',
-      (val) => behavior.cooldownSec = val ? parseFloat(val) : undefined,
-    );
+    const cooldownField = createNumberInputField({
+      id: `${behavior.id}-cooldown`,
+      labelKey: 'behaviors.field.cooldown',
+      value: behavior.cooldownSec?.toString() || '',
+      onChange: (val) => behavior.cooldownSec = val ? parseFloat(val) : undefined,
+      step: '0.1'
+    });
     elements.push(cooldownField);
 
-    // Triggers Section
     elements.push(this.buildTriggersSection(behavior));
 
-    // Reactions Section
     elements.push(this.buildReactionsSection(behavior));
 
     return elements;
@@ -644,40 +654,37 @@ export class GuiBehaviors extends BaseSubscreen {
   buildTriggerEditor(trigger: Trigger): HTMLElement[] {
     const elements: HTMLElement[] = [];
 
-    // Name
-    const nameField = this.createInputField(
-      `${trigger.id}-name`,
-      'behaviors.field.name',
-      trigger.name,
-      (val) => {
+    const nameField = createInputField({
+      id: `${trigger.id}-name`,
+      labelKey: 'behaviors.field.name',
+      value: trigger.name,
+      onChange: (val) => {
         trigger.name = val;
         this.buildTriggerListItem(trigger);
       }
-    );
+    });
     elements.push(nameField);
 
-    // Type
     const typeOptions = TriggerTypeSchema.options;
-    const typeField = this.createDropdownField(
-      `${trigger.id}-type`,
-      'behaviors.field.type',
-      trigger.type,
-      typeOptions,
-      (val) => {
+    const typeField = createDropdownField({
+      id: `${trigger.id}-type`,
+      labelKey: 'behaviors.field.type',
+      value: trigger.type,
+      options: typeOptions,
+      onChange: (val) => {
         const newTrigger = this.changeTriggerType(trigger, val as TriggerType);
         if (newTrigger) {
           this.settings.triggers[newTrigger.id] = newTrigger;
           this.selectedTriggerId = newTrigger.id;
-          this.render();
+          this.buildTriggerListItem(newTrigger);
+          this.buildEditorPanel();
         }
       }
-    );
+    });
     elements.push(typeField);
 
-    // Type-specific fields
     elements.push(...this.buildTriggerTypeFields(trigger));
 
-    // Advanced Options (Collapsible)
     elements.push(this.buildCollapsibleSection(
       'behaviors.section.advanced_options',
       this.buildTriggerContraintsOptions(trigger)
@@ -689,37 +696,35 @@ export class GuiBehaviors extends BaseSubscreen {
   buildReactionEditor(reaction: Reaction): HTMLElement[] {
     const elements: HTMLElement[] = [];
 
-    // Name
-    const nameField = this.createInputField(
-      `${reaction.id}-name`,
-      'behaviors.field.name',
-      reaction.name,
-      (val) => {
+    const nameField = createInputField({
+      id: `${reaction.id}-name`,
+      labelKey: 'behaviors.field.name',
+      value: reaction.name,
+      onChange: (val) => {
         reaction.name = val;
         this.buildReactionListItem(reaction);
       }
-    );
+    });
     elements.push(nameField);
 
-    // Type
     const typeOptions = ReactionTypeSchema.options;
-    const typeField = this.createDropdownField(
-      `${reaction.id}-type`,
-      'behaviors.field.type',
-      reaction.type,
-      typeOptions,
-      (val) => {
+    const typeField = createDropdownField({
+      id: `${reaction.id}-type`,
+      labelKey: 'behaviors.field.type',
+      value: reaction.type,
+      options: typeOptions,
+      onChange: (val) => {
         const newReaction = this.changeReactionType(reaction, val as ReactionType);
         if (newReaction) {
           this.settings.reactions[newReaction.id] = newReaction;
           this.selectedReactionId = newReaction.id;
-          this.render();
+          this.buildReactionListItem(newReaction);
+          this.buildEditorPanel();
         }
       }
-    );
+    });
     elements.push(typeField);
 
-    // Type-specific fields
     if (reaction.type === 'speech' || reaction.type === 'emote' || reaction.type === 'action') {
       const renderContent = () => this.buildContentArrayField(
         `${reaction.id}-content`,
@@ -798,13 +803,13 @@ export class GuiBehaviors extends BaseSubscreen {
 
     switch (trigger.type) {
       case 'speech': {
-        const speechTypeField = this.createDropdownField(
-          `${trigger.id}-speech-type`,
-          'behaviors.field.speech_type',
-          trigger.speechType,
-          ['any', 'normal', 'whisper'] as SpeechType[],
-          (val) => trigger.speechType = val as SpeechType
-        );
+        const speechTypeField = createDropdownField({
+          id: `${trigger.id}-speech-type`,
+          labelKey: 'behaviors.field.speech_type',
+          value: trigger.speechType,
+          options: Object.values(SpeechTypeSchema.options),
+          onChange: (val) => trigger.speechType = val as SpeechType
+        });
         elements.push(speechTypeField);
         const renderContent = () => this.buildContentArrayField(
           `${trigger.id}-content`,
@@ -817,13 +822,13 @@ export class GuiBehaviors extends BaseSubscreen {
         );
         const contentSection = renderContent();
         elements.push(contentSection);
-        const matchModeField1 = this.createDropdownField(
-          `${trigger.id}-match-mode`,
-          'behaviors.field.match_mode',
-          trigger.matchMode,
-          ['startsWith', 'contains', 'endsWith', 'exact', 'regex'] as MatchMode[],
-          (val) => trigger.matchMode = val as MatchMode
-        );
+        const matchModeField1 = createDropdownField({
+          id: `${trigger.id}-match-mode`,
+          labelKey: 'behaviors.field.match_mode',
+          value: trigger.matchMode,
+          options: Object.values(MatchModeSchema.options),
+          onChange: (val) => trigger.matchMode = val as MatchMode
+        });
         elements.push(matchModeField1);
         break;
       }
@@ -840,13 +845,14 @@ export class GuiBehaviors extends BaseSubscreen {
         );
         const contentSection = renderContent();
         elements.push(contentSection);
-        const matchModeField2 = this.createDropdownField(
-          `${trigger.id}-match-mode`,
-          'behaviors.field.match_mode',
-          trigger.matchMode,
-          ['startsWith', 'contains', 'endsWith', 'exact', 'regex'] as MatchMode[],
-          (val) => trigger.matchMode = val as MatchMode
-        );
+        
+        const matchModeField2 = createDropdownField({
+          id: `${trigger.id}-match-mode`,
+          labelKey: 'behaviors.field.match_mode',
+          value: trigger.matchMode,
+          options: Object.values(MatchModeSchema.options),
+          onChange: (val) => trigger.matchMode = val as MatchMode
+        });
         elements.push(matchModeField2);
         break;
       }
@@ -911,29 +917,27 @@ export class GuiBehaviors extends BaseSubscreen {
         break;
       }
       case 'orgasm': {
-        const orgasmTypeField = this.createDropdownField(
-          `${trigger.id}-orgasm-type`,
-          'behaviors.field.orgasm_type',
-          trigger.orgasmType,
-          ['any', 'normal', 'resisted', 'ruinedResisted', 'ruinedTimeout', 'ruinedSurrendered'] as OrgasmType[],
-          (val) => trigger.orgasmType = val as OrgasmType
-        );
+        const orgasmTypeField = createDropdownField({
+          id: `${trigger.id}-orgasm-type`,
+          labelKey: 'behaviors.field.orgasm_type',
+          value: trigger.orgasmType,
+          options: Object.values(OrgasmTypeSchema.options),
+          onChange: (val) => trigger.orgasmType = val as OrgasmType
+        });
         elements.push(orgasmTypeField);
         break;
       }
       case 'roomPresence': {
-        const roomPresenceField = this.createDropdownField(
-          `${trigger.id}-room-presence-event`,
-          'behaviors.field.room_presence_event',
-          trigger.event,
-          ['leave', 'join', 'leashed'] as RoomPresenceEvent[],
-          (val) => trigger.event = val as RoomPresenceEvent
-        );
+        const roomPresenceField = createDropdownField({
+          id: `${trigger.id}-room-presence-event`,
+          labelKey: 'behaviors.field.room_presence_event',
+          value: trigger.event,
+          options: Object.values(RoomPresenceEventSchema.options),
+          onChange: (val) => trigger.event = val as RoomPresenceEvent
+        });
         elements.push(roomPresenceField);
         break;
       }
-      default:
-        assertNever(trigger);
     }
 
     return elements;
@@ -942,20 +946,17 @@ export class GuiBehaviors extends BaseSubscreen {
   buildTriggerContraintsOptions(trigger: Trigger): HTMLElement[] {
     const elements: HTMLElement[] = [];
 
-    // Constraint Mode
-    const constraintModeField = this.createDropdownField(
-      `${trigger.id}-constraint-mode`,
-      'behaviors.field.constraint_mode',
-      trigger.constraintMode || 'all',
-      ['any', 'all'] as ConstraintMode[],
-      (val) => trigger.constraintMode = val as ConstraintMode
-    );
+    const constraintModeField = createDropdownField({
+      id: `${trigger.id}-constraint-mode`,
+      labelKey: 'behaviors.field.constraint_mode',
+      value: trigger.constraintMode || 'all',
+      options: Object.values(ConstraintModeSchema.options),
+      onChange: (val) => trigger.constraintMode = val as ConstraintMode
+    });
     elements.push(constraintModeField);
 
-    // Constraints
     trigger.constraints ??= {};
 
-    // Source
     const renderSource = () => this.buildIncludeExcludeField(
       `${trigger.id}-constraint-source`,
       'behaviors.field.constraint_source',
@@ -969,7 +970,6 @@ export class GuiBehaviors extends BaseSubscreen {
     const sourceSection = renderSource();
     elements.push(sourceSection);
 
-    // Target
     const renderTarget = () => this.buildIncludeExcludeField(
       `${trigger.id}-constraint-target`,
       'behaviors.field.constraint_target',
@@ -983,24 +983,34 @@ export class GuiBehaviors extends BaseSubscreen {
     const targetSection = renderTarget();
     elements.push(targetSection);
 
-    // Arousal Min/Max
-    const arousalMinField = this.createNumberInputField(
-      `${trigger.id}-arousal-min`,
-      'behaviors.field.arousal_min',
-      trigger.constraints.arousalMin?.toString() || '',
-      (val) => trigger.constraints!.arousalMin = val ? parseFloat(val) : undefined
-    );
+    const renderArousalMin = () => createNumberInputField({
+      id: `${trigger.id}-arousal-min`,
+      labelKey: 'behaviors.field.arousal_min',
+      value: trigger.constraints?.arousalMin?.toString() ?? '',
+      onChange: (val) => {
+        trigger.constraints!.arousalMin = val ? parseFloat(val) : undefined;
+        this.buildTriggerListItem(trigger);
+      },
+      min: '0',
+      max: '100'
+    });
+    const arousalMinField = renderArousalMin();
     elements.push(arousalMinField);
 
-    const arousalMaxField = this.createNumberInputField(
-      `${trigger.id}-arousal-max`,
-      'behaviors.field.arousal_max',
-      trigger.constraints.arousalMax?.toString() || '',
-      (val) => trigger.constraints!.arousalMax = val ? parseFloat(val) : undefined
-    );
+    const renderArousalMax = () => createNumberInputField({
+      id: `${trigger.id}-arousal-max`,
+      labelKey: 'behaviors.field.arousal_max',
+      value: trigger.constraints?.arousalMax?.toString() ?? '',
+      onChange: (val) => {
+        trigger.constraints!.arousalMax = val ? parseFloat(val) : undefined;
+        this.buildTriggerListItem(trigger);
+      },
+      min: '0',
+      max: '100'
+    });
+    const arousalMaxField = renderArousalMax();
     elements.push(arousalMaxField);
 
-    // In Room With Members
     const renderInRoomWithMembers = () => this.buildIncludeExcludeField(
       `${trigger.id}-in-room-with-members`,
       'behaviors.field.in_room_with_members',
@@ -1014,7 +1024,6 @@ export class GuiBehaviors extends BaseSubscreen {
     const inRoomWithMembersSection = renderInRoomWithMembers();
     elements.push(inRoomWithMembersSection);
 
-    // In Room Named
     const renderInRoomNamed = () => this.buildIncludeExcludeField(
       `${trigger.id}-in-room-named`,
       'behaviors.field.in_room_named',
@@ -1028,15 +1037,6 @@ export class GuiBehaviors extends BaseSubscreen {
     const inRoomNamedSection = renderInRoomNamed();
     elements.push(inRoomNamedSection);
 
-    // Cooldown
-    const cooldownField = this.createNumberInputField(
-      `${trigger.id}-cooldown`,
-      'behaviors.field.cooldown',
-      trigger.cooldownSec?.toString() || '',
-      (val) => trigger.cooldownSec = val ? parseFloat(val) : undefined
-    );
-    elements.push(cooldownField);
-
     return elements;
   }
 
@@ -1046,7 +1046,7 @@ export class GuiBehaviors extends BaseSubscreen {
 
     const content = this.buildChipList(
       thisElement ? CommonGenerateUniqueID() : `${behavior.id}-triggers`,
-      behavior.triggers.map(id => this.settings.triggers[id]).filter(Boolean) as Trigger[],
+      behavior.triggers.map(id => this.settings.triggers[id]).filter(Boolean).reverse() as Trigger[],
       async (trigger) => {
         const index = behavior.triggers.indexOf(trigger.id);
         if (index > -1) {
@@ -1085,7 +1085,7 @@ export class GuiBehaviors extends BaseSubscreen {
 
     const content = this.buildChipList(
       thisElement ? CommonGenerateUniqueID() : `${behavior.id}-reactions`,
-      behavior.reactions.map(id => this.settings.reactions[id]).filter(Boolean) as Reaction[],
+      behavior.reactions.map(id => this.settings.reactions[id]).filter(Boolean).reverse() as Reaction[],
       async (reaction) => {
         const index = behavior.reactions.indexOf(reaction.id);
         if (index > -1) {
@@ -1131,7 +1131,7 @@ export class GuiBehaviors extends BaseSubscreen {
       attributes: {
         id: chipListId,
       },
-      children: items.map(item => {
+      children: items.slice().reverse().map(item => {
         const chipClassList = item.type
           ? [selector.chip, `type-${item.type}`]
           : [selector.chip];
@@ -1172,7 +1172,7 @@ export class GuiBehaviors extends BaseSubscreen {
   buildContentArrayField(id: string, labelKey: string, values: string[], onChange: (values: string[]) => void): HTMLElement {
     const content = this.buildContentList(values, onChange);
     const onAdd = () => {
-      Modal.prompt(getText('behaviors.prompt.add_content'), { modalId: 'rsp-modal' }).then((response) => {
+      Modal.prompt(getText('behaviors.prompt.add_content'), { modalClassList: ['rsp-modal'] }).then((response) => {
         if (response === null) return;
         values.push(response);
         onChange(values);
@@ -1202,7 +1202,8 @@ export class GuiBehaviors extends BaseSubscreen {
       tag: 'div',
       classList: [selector.contentList, 'scroll-box'],
       children: [
-        ...values.map((value, index) => {
+        ...values.slice().reverse().map((value, index) => {
+          const originalIndex = values.length - 1 - index;
           return advElement.createButton({
             id: `rsp-content-${index}-${CommonGenerateUniqueID()}`,
             options: {
@@ -1223,22 +1224,28 @@ export class GuiBehaviors extends BaseSubscreen {
                 classList: ['truncated-text']
               }
             },
-            onClick: async () => {
-              if (this.deleteMode) {
-                const confirmed = await this.confirmationModal(getText('behaviors.prompt.delete_content'));
+            onClick: async function () {
+              if (GuiBehaviors.instance.deleteMode) {
+                const confirmed = await GuiBehaviors.instance.confirmationModal(getText('behaviors.prompt.delete_content'));
                 if (!confirmed) return;
 
-                values.splice(index, 1);
+                values.splice(originalIndex, 1);
                 onChange(values);
-                this.render();
+                const label = this.querySelector('.button-label');
+                if (label?.textContent) {
+                  label.textContent = value === '' ? getText('behaviors.text.empty_content') : value;
+                }
               } else {
-                Modal.prompt(getText('behaviors.prompt.edit_content'), { defaultValue: value, modalId: 'rsp-modal' }).then((newValue) => {
+                Modal.prompt(getText('behaviors.prompt.edit_content'), { defaultValue: value, modalClassList: ['rsp-modal'] }).then((newValue) => {
                   if (newValue === value) return;
                   else if (newValue === null) return;
                   else {
-                    values[index] = newValue;
+                    values[originalIndex] = newValue;
                     onChange(values);
-                    this.render();
+                    const label = this.querySelector('.button-label');
+                    if (label?.textContent) {
+                      label.textContent = value === '' ? getText('behaviors.text.empty_content') : value;
+                    }
                   }
                 });
               }
@@ -1306,7 +1313,7 @@ export class GuiBehaviors extends BaseSubscreen {
   buildIncludeExcludeField(id: string, labelKey: string, rule: { entries: Array<{ value: string; mode: 'include' | 'exclude' }> } | undefined, onChange: (rule: { entries: Array<{ value: string; mode: 'include' | 'exclude' }> } | undefined) => void): HTMLElement {
     const entries = rule?.entries || [];
     const onAdd = () => {
-      Modal.prompt(getText('behaviors.prompt.add_content'), { modalId: 'rsp-modal' }).then((response) => {
+      Modal.prompt(getText('behaviors.prompt.add_content'), { modalClassList: ['rsp-modal'] }).then((response) => {
         if (response === null) return;
         entries.push({ value: response, mode: 'include' });
         if (!rule) {
@@ -1363,24 +1370,25 @@ export class GuiBehaviors extends BaseSubscreen {
       },
       classList: [selector.contentList, 'scroll-box'],
       children: [
-        ...entries.map((entry, index) => {
-          const modeField = this.createDropdownField(
-            `${id}-entry-${index}-mode`,
-            '',
-            entry.mode,
-            ['include', 'exclude'],
-            (val) => {
-              entries[index].mode = val as 'include' | 'exclude';
+        ...entries.slice().reverse().map((entry, index) => {
+          const originalIndex = entries.length - 1 - index;
+          const modeField = createDropdownField({
+            id: `${id}-entry-${originalIndex}-mode`,
+            labelKey: '',
+            value: entry.mode,
+            options: Object.values(IncludeExcludeEntrySchema.shape.mode.options),
+            onChange: (val) => {
+              entries[originalIndex].mode = val as 'include' | 'exclude';
               onChange(entries);
             }
-          );
+          });
           const entryContainer = ElementCreate({
             tag: 'div',
             classList: ['rsp-constraint-entry'],
             children: [
               modeField,
               advElement.createButton({
-                id: `rsp-constraint-entry-${index}-${CommonGenerateUniqueID()}`,
+                id: `rsp-constraint-entry-${originalIndex}-${CommonGenerateUniqueID()}`,
                 options: {
                   label: entry.value === '' ? getText('behaviors.text.empty_content') : entry.value,
                   tooltip: tooltip,
@@ -1404,14 +1412,14 @@ export class GuiBehaviors extends BaseSubscreen {
                     const confirmed = await this.confirmationModal(getText('behaviors.prompt.delete_content'));
                     if (!confirmed) return;
 
-                    entries.splice(index, 1);
+                    entries.splice(originalIndex, 1);
                     onChange(entries);
                   } else {
-                    Modal.prompt(getText('behaviors.prompt.edit_content'), { defaultValue: entry.value, modalId: 'rsp-modal' }).then((newValue) => {
+                    Modal.prompt(getText('behaviors.prompt.edit_content'), { defaultValue: entry.value, modalClassList: ['rsp-modal'] }).then((newValue) => {
                       if (newValue === entry.value) return;
                       else if (newValue === null) return;
                       else {
-                        entries[index].value = newValue;
+                        entries[originalIndex].value = newValue;
                         onChange(entries);
                       }
                     });
@@ -1464,101 +1472,6 @@ export class GuiBehaviors extends BaseSubscreen {
     return section;
   }
 
-  createInputField(id: string, labelKey: string, value: string, onChange: (value: string) => void): HTMLElement {
-    const elementId = selector.inputField(id);
-    const thisElement = ElementWrap(elementId);
-    if (thisElement) {
-      thisElement.replaceChildren();
-    }
-
-    const element = advElement.createInput({
-      id: elementId,
-      type: 'text',
-      label: getText(labelKey),
-      setElementValue: () => value,
-      setSettingValue: onChange,
-      htmlOptions: {
-        container: {
-          classList: ['rsp-behaviors-field', 'rsp-behaviors-text-field'],
-        }
-      }
-    });
-    if (thisElement) {
-      thisElement.replaceWith(element);
-    }
-
-    return element;
-  }
-
-  createNumberInputField(id: string, labelKey: string, value: string, onChange: (value: string) => void): HTMLElement {
-    const elementId = selector.inputField(id);
-    const thisElement = ElementWrap(elementId);
-    if (thisElement) {
-      thisElement.replaceChildren();
-    }
-
-    const element = advElement.createInput({
-      id: elementId,
-      type: 'number',
-      label: getText(labelKey),
-      setElementValue: () => value,
-      setSettingValue: onChange,
-      htmlOptions: {
-        container: {
-          classList: ['rsp-behaviors-field', 'rsp-behaviors-number-field'],
-        },
-        input: {
-          attributes: {
-            step: '0.1'
-          }
-        }
-      }
-    });
-    if (thisElement) {
-      thisElement.replaceWith(element);
-    }
-
-    return element;
-  }
-
-  createDropdownField(id: string, labelKey: string, value: string, options: string[], onChange: (value: string) => void): HTMLElement {
-    const elementId = selector.dropdownField(id);
-    const thisElement = ElementWrap(elementId);
-    if (thisElement) {
-      thisElement.replaceChildren();
-    }
-
-    const element = advElement.createDropdown({
-      id: elementId,
-      label: getText(labelKey),
-      optionsList: options.map(opt => {
-        const label = getText('behaviors.option.' + opt);
-        return {
-          tag: 'option',
-          attributes: {
-            value: opt,
-            label: label,
-            selected: opt === value
-          },
-        };
-      }),
-      htmlOptions: {
-        container: {
-          classList: ['rsp-behaviors-field', 'rsp-behaviors-dropdown-field'],
-        }
-      },
-      setElementValue: () => value,
-      setSettingValue: onChange
-    });
-
-    if (thisElement) {
-      thisElement.replaceWith(element);
-    }
-
-    return element;
-  }
-  // #endregion !SECTION Field Builders
-
   // #region SECTION Selection Methods
   selectBehavior(id: string) {
     let oldBehavior: Behavior | undefined;
@@ -1607,7 +1520,7 @@ export class GuiBehaviors extends BaseSubscreen {
   }
 
   handleAddBehavior() {
-    Modal.prompt(getText('behaviors.prompt.behavior_name'), { modalId: 'rsp-modal' }).then((name) => {
+    Modal.prompt(getText('behaviors.prompt.behavior_name'), { modalClassList: ['rsp-modal'] }).then((name) => {
       if (name === null) return;
 
       const behavior = BehaviorsModule.createBehavior({
@@ -1618,13 +1531,14 @@ export class GuiBehaviors extends BaseSubscreen {
       if (behavior) {
         this.settings.behaviors[behavior.id] = behavior;
         this.selectedBehaviorId = behavior.id;
-        this.render();
+        this.buildListItems();
+        this.buildEditorPanel();
       }
     });
   }
 
   handleAddTrigger() {
-    Modal.prompt(getText('behaviors.prompt.trigger_name'), { modalId: 'rsp-modal' }).then((name) => {
+    Modal.prompt(getText('behaviors.prompt.trigger_name'), { modalClassList: ['rsp-modal'] }).then((name) => {
       if (name === null) return;
 
       const trigger = BehaviorsModule.createTrigger({
@@ -1638,13 +1552,14 @@ export class GuiBehaviors extends BaseSubscreen {
       if (trigger) {
         this.settings.triggers[trigger.id] = trigger;
         this.selectedTriggerId = trigger.id;
-        this.render();
+        this.buildListItems();
+        this.buildEditorPanel();
       }
     });
   }
 
   handleAddReaction() {
-    Modal.prompt(getText('behaviors.prompt.reaction_name'), { modalId: 'rsp-modal' }).then((name) => {
+    Modal.prompt(getText('behaviors.prompt.reaction_name'), { modalClassList: ['rsp-modal'] }).then((name) => {
       if (name === null) return;
 
       const reaction = BehaviorsModule.createReaction({
@@ -1656,7 +1571,8 @@ export class GuiBehaviors extends BaseSubscreen {
       if (reaction) {
         this.settings.reactions[reaction.id] = reaction;
         this.selectedReactionId = reaction.id;
-        this.render();
+        this.buildListItems();
+        this.buildEditorPanel();
       }
     });
   }
@@ -1703,7 +1619,7 @@ export class GuiBehaviors extends BaseSubscreen {
     const availableTriggers = Object.values(this.settings.triggers).filter(t => !behavior.triggers.includes(t.id));
 
     if (availableTriggers.length === 0) {
-      Modal.alert(getText('behaviors.text.no_triggers_available'), { modalId: 'rsp-modal' });
+      Modal.alert(getText('behaviors.text.no_triggers_available'), { modalClassList: ['rsp-modal'] });
       return;
     }
 
@@ -1726,7 +1642,7 @@ export class GuiBehaviors extends BaseSubscreen {
     const availableReactions = Object.values(this.settings.reactions).filter(r => !behavior.reactions.includes(r.id));
 
     if (availableReactions.length === 0) {
-      Modal.alert(getText('behaviors.text.no_reactions_available'), { modalId: 'rsp-modal' });
+      Modal.alert(getText('behaviors.text.no_reactions_available'), { modalClassList: ['rsp-modal'] });
       return;
     }
 

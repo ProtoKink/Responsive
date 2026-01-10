@@ -31,7 +31,7 @@ export async function idSelectorModal(buttons: { label: string, value: string }[
       classList: ['rsp-selector-buttons-container'],
       children: buttonElements
     }
-  ], { modalId: 'rsp-modal' }).then((result) => {
+  ], { modalClassList: ['rsp-modal'] }).then((result) => {
     if (!result) {
       return [];
     }
@@ -127,7 +127,7 @@ export async function bodyPartSelectorModal(options?: { selectedParts?: AssetGro
         }
         selectedParts.add(partName);
         element.setAttribute('data-selected', '');
-        
+
         const mirrored = ActivityGetAllMirrorGroups('Female3DCG', partName);
         mirrored.forEach(group => {
           const elements = bodyPartGrid.querySelectorAll(`[name='${group.Name}']`);
@@ -140,7 +140,7 @@ export async function bodyPartSelectorModal(options?: { selectedParts?: AssetGro
     },
     htmlOptions: {
       button: {
-        classList: ['rsp-body-part-select-all-button']
+        classList: ['rsp-select-all-button']
       }
     }
   });
@@ -167,7 +167,7 @@ export async function bodyPartSelectorModal(options?: { selectedParts?: AssetGro
     },
     htmlOptions: {
       button: {
-        classList: ['rsp-body-part-deselect-all-button']
+        classList: ['rsp-deselect-all-button']
       }
     }
   });
@@ -219,7 +219,7 @@ export async function activitySelectorModal(options?: { selectedActivities?: str
 
   const onClick: ((this: HTMLButtonElement, ev: MouseEvent | TouchEvent) => any) = function () {
     const wasSelected = this.hasAttribute('data-selected');
-    const activityGrid = document.getElementById('rsp-activity-selector-grid');
+    const activityGrid = ElementWrap('rsp-activity-selector-grid');
 
     if (wasSelected) {
       if (selectedActivities.has(this.name)) {
@@ -300,11 +300,11 @@ export async function activitySelectorModal(options?: { selectedActivities?: str
       }
     },
     options: {
-      label: getText('behaviors.prompt.select_all') || 'Select All'
+      label: getText('behaviors.prompt.select_all')
     },
     htmlOptions: {
       button: {
-        classList: ['rsp-activity-select-all-button']
+        classList: ['rsp-select-all-button']
       }
     }
   });
@@ -312,7 +312,7 @@ export async function activitySelectorModal(options?: { selectedActivities?: str
   const deselectAllButton = advElement.createButton({
     id: 'rsp-activity-deselect-all',
     onClick: function () {
-      const activityGrid = document.getElementById('rsp-activity-selector-grid');
+      const activityGrid = ElementWrap('rsp-activity-selector-grid');
 
       selectedActivities.clear();
 
@@ -324,11 +324,11 @@ export async function activitySelectorModal(options?: { selectedActivities?: str
       }
     },
     options: {
-      label: getText('behaviors.prompt.deselect_all') || 'Deselect All'
+      label: getText('behaviors.prompt.deselect_all')
     },
     htmlOptions: {
       button: {
-        classList: ['rsp-activity-deselect-all-button']
+        classList: ['rsp-deselect-all-button']
       }
     }
   });
@@ -381,6 +381,453 @@ export async function activitySelectorModal(options?: { selectedActivities?: str
     return Array.from(selectedActivities).filter(part => Boolean(part));
   });
 }
+type MemberRole = 'friend' | 'submissive' | 'lover' | 'owner' | 'same_room' | 'player' | 'custom';
+export interface MemberSelectorEntry {
+  memberNumber: number;
+  name: string;
+  context: MemberRole;
+}
+
+export async function memberNumberSelectorModal(options?: {
+  selectedMembers?: number[],
+  limit?: number,
+  includeFriends?: boolean,
+  includeSubs?: boolean,
+  includeLovers?: boolean,
+  includeOwner?: boolean,
+  includeInRoom?: boolean,
+  includePlayer?: boolean,
+}): Promise<number[]> {
+  options ??= {};
+  const limit = options.limit ?? Infinity;
+  if (limit < 1) {
+    return [];
+  }
+
+  const includeFriends = options.includeFriends ?? true;
+  const includeSubs = options.includeSubs ?? true;
+  const includeLovers = options.includeLovers ?? true;
+  const includeOwner = options.includeOwner ?? true;
+  const includeInRoom = options.includeInRoom ?? true;
+  const includePlayer = options.includePlayer ?? true;
+
+  const selectedMembers: Set<number> = new Set(options.selectedMembers ?? []);
+  const memberEntries: Map<number, MemberSelectorEntry> = new Map();
+
+  if (includePlayer && Player) {
+    memberEntries.set(Player.MemberNumber, {
+      memberNumber: Player.MemberNumber,
+      name: CharacterNickname(Player),
+      context: 'player'
+    });
+  }
+
+  owner: if (includeOwner && Player?.Ownership) {
+    const owner = Player.Ownership;
+    if (!owner?.MemberNumber || isNaN(owner.MemberNumber)) break owner;
+    memberEntries.set(owner.MemberNumber, {
+      memberNumber: owner.MemberNumber,
+      name: owner.Name,
+      context: 'owner'
+    });
+  }
+
+  if (includeLovers && Player.Lovership.length > 0) {
+    for (const lover of Player.Lovership) {
+      if (!lover?.MemberNumber || isNaN(lover.MemberNumber)) continue;
+      if (memberEntries.has(lover.MemberNumber)) continue;
+      memberEntries.set(lover.MemberNumber, {
+        memberNumber: lover.MemberNumber,
+        name: lover.Name,
+        context: 'lover'
+      });
+    }
+  }
+
+  if (includeSubs && Player.SubmissivesList.size > 0) {
+    for (const sub of Player.SubmissivesList) {
+      if (memberEntries.has(sub)) continue;
+      memberEntries.set(sub, {
+        memberNumber: sub,
+        name: Player.FriendNames.get(sub) ?? getText('behaviors.name.unknown'),
+        context: 'submissive'
+      });
+    }
+  }
+
+  if (includeFriends && Player.FriendNames.size > 0) {
+    for (const [friendNumber, friendName] of Player.FriendNames) {
+      if (!friendNumber || memberEntries.has(friendNumber)) continue;
+      memberEntries.set(friendNumber, {
+        memberNumber: friendNumber,
+        name: friendName,
+        context: 'friend'
+      });
+    }
+  }
+
+  if (includeInRoom && ChatRoomCharacter) {
+    for (const character of ChatRoomCharacter) {
+      if (!character.IsOnline()) continue;
+
+      if (!character.MemberNumber || isNaN(character.MemberNumber)) continue;
+      if (memberEntries.has(character.MemberNumber)) continue;
+      memberEntries.set(character.MemberNumber, {
+        memberNumber: character.MemberNumber,
+        name: CharacterNickname(character),
+        context: 'same_room'
+      });
+    }
+  }
+
+  if (selectedMembers.size > 0) {
+    for (const memberNumber of selectedMembers) {
+      if (memberEntries.has(memberNumber)) continue;
+      memberEntries.set(memberNumber, {
+        memberNumber: memberNumber,
+        name: getText('behaviors.name.unknown'),
+        context: 'custom'
+      });
+    }
+  }
+
+  const contextPriority: Record<MemberRole, number> = {
+    'friend': 1,
+    'submissive': 2,
+    'lover': 3,
+    'owner': 4,
+    'same_room': 5,
+    'custom': 6,
+    'player': 7
+  };
+
+  const sortedEntries = Array.from(memberEntries.values()).sort((a, b) => {
+    const aPriority = contextPriority[a.context] ?? 999;
+    const bPriority = contextPriority[b.context] ?? 999;
+
+    if (aPriority !== bPriority) {
+      return bPriority - aPriority;
+    }
+
+    return a.name.localeCompare(b.name);
+  });
+
+  if (sortedEntries.length === 0) {
+    return [];
+  }
+
+  const createGridRow = (entry: MemberSelectorEntry): HTMLElement => {
+    const rowId = `rsp-member-row-${entry.memberNumber}`;
+    const isSelected = selectedMembers.has(entry.memberNumber);
+
+    return ElementCreate({
+      tag: 'div',
+      attributes: {
+        id: rowId,
+        'data-member-number': entry.memberNumber.toString()
+      },
+      classList: isSelected ? ['rsp-member-grid-row', 'rsp-member-row-selected'] : ['rsp-member-grid-row'],
+      children: [
+        {
+          tag: 'div',
+          classList: ['rsp-member-grid-cell', 'rsp-member-grid-cell-checkbox'],
+          children: [
+            advElement.createCheckbox({
+              id: `rsp-member-select-${entry.memberNumber}`,
+              setElementValue: () => isSelected,
+              htmlOptions: {
+                checkbox: {
+                  eventListeners: {
+                    click: function (this: HTMLInputElement) {
+                      const memberNumber = parseInt(this.closest('.rsp-member-grid-row')?.getAttribute('data-member-number') || '0', 10);
+                      const row = ElementWrap(rowId);
+
+                      if (this.checked) {
+                        if (selectedMembers.size >= limit) {
+                          const firstSelected = Array.from(selectedMembers)[0];
+                          selectedMembers.delete(firstSelected);
+                          const firstRow = document.querySelector(`[data-member-number="${firstSelected}"]`);
+                          if (firstRow) {
+                            const checkbox = firstRow.querySelector('input[type="checkbox"]') as HTMLInputElement;
+                            if (checkbox) checkbox.checked = false;
+                            firstRow.classList.remove('rsp-member-row-selected');
+                          }
+                        }
+                        selectedMembers.add(memberNumber);
+                        if (row) row.classList.add('rsp-member-row-selected');
+                      } else {
+                        selectedMembers.delete(memberNumber);
+                        if (row) row.classList.remove('rsp-member-row-selected');
+                      }
+                    }
+                  }
+                }
+              }
+            }),
+          ]
+        },
+        {
+          tag: 'div',
+          classList: ['rsp-member-grid-cell', 'rsp-member-grid-cell-name'],
+          children: [
+            entry.name
+          ]
+        },
+        {
+          tag: 'div',
+          classList: ['rsp-member-grid-cell', 'rsp-member-grid-cell-number'],
+          children: [
+            entry.memberNumber.toString()
+          ]
+        },
+        {
+          tag: 'div',
+          classList: ['rsp-member-grid-cell', 'rsp-member-grid-cell-context'],
+          children: [
+            getText(`behaviors.member_role.${entry.context}`)
+          ]
+        }
+      ]
+    }) as HTMLElement;
+  };
+
+  const gridContainer = ElementCreate({
+    tag: 'div',
+    classList: ['rsp-member-selector-grid'],
+    children: [
+      {
+        tag: 'div',
+        classList: ['rsp-member-grid-header'],
+        children: [
+          {
+            tag: 'div',
+            classList: ['rsp-member-grid-cell', 'rsp-member-grid-header-cell'],
+          },
+          {
+            tag: 'div',
+            classList: ['rsp-member-grid-cell', 'rsp-member-grid-header-cell'],
+            children: [getText('behaviors.member_selector.name')]
+          },
+          {
+            tag: 'div',
+            classList: ['rsp-member-grid-cell', 'rsp-member-grid-header-cell'],
+            children: [getText('behaviors.member_selector.number')]
+          },
+          {
+            tag: 'div',
+            classList: ['rsp-member-grid-cell', 'rsp-member-grid-header-cell'],
+            children: [getText('behaviors.member_selector.context')]
+          }
+        ]
+      },
+      {
+        tag: 'div',
+        classList: ['rsp-member-grid-content', 'scroll-box'],
+        attributes: {
+          id: 'rsp-member-selector-content'
+        },
+        children: sortedEntries.map(entry => createGridRow(entry))
+      }
+    ]
+  });
+
+  const selectAllButton = advElement.createButton({
+    id: 'rsp-member-select-all',
+    onClick: function () {
+      const checkboxes = gridContainer.querySelectorAll('.rsp-member-grid-content input[type="checkbox"]') as NodeListOf<HTMLInputElement>;
+      for (const checkbox of Array.from(checkboxes).reverse()) {
+        if (checkbox.checked) continue;
+        checkbox.click();
+      }
+    },
+    options: {
+      label: getText('behaviors.prompt.select_all')
+    },
+    htmlOptions: {
+      button: {
+        classList: ['rsp-select-all-button']
+      }
+    }
+  });
+
+  const deselectAllButton = advElement.createButton({
+    id: 'rsp-member-deselect-all',
+    onClick: function () {
+      const checkboxes = gridContainer.querySelectorAll('.rsp-member-grid-content input[type="checkbox"]') as NodeListOf<HTMLInputElement>;
+      for (const checkbox of Array.from(checkboxes).reverse()) {
+        if (!checkbox.checked) continue;
+        checkbox.click();
+      }
+    },
+    options: {
+      label: getText('behaviors.prompt.deselect_all')
+    },
+    htmlOptions: {
+      button: {
+        classList: ['rsp-deselect-all-button']
+      }
+    }
+  });
+
+  const searchInput = advElement.createInput({
+    id: 'rsp-member-search',
+    type: 'text',
+    setSettingValue(val) {
+      const searchTerm = val.toLowerCase().trim();
+      const rows = gridContainer.querySelectorAll('.rsp-member-grid-row') as NodeListOf<HTMLElement>;
+      rows.forEach(row => {
+        const nameCell = row.querySelector('.rsp-member-grid-cell-name');
+        const numberCell = row.querySelector('.rsp-member-grid-cell-number');
+        const contextCell = row.querySelector('.rsp-member-grid-cell-context');
+
+        const name = nameCell?.textContent?.toLowerCase() || '';
+        const number = numberCell?.textContent?.toLowerCase() || '';
+        const context = contextCell?.textContent?.toLowerCase() || '';
+
+        const matches = name.includes(searchTerm) || number.includes(searchTerm) || context.includes(searchTerm);
+        row.style.display = matches ? '' : 'none';
+      });
+    },
+    htmlOptions: {
+      input: {
+        attributes: {
+          placeholder: getText('behaviors.member_selector.search_placeholder')
+        }
+      }
+    }
+  });
+
+  const addCustomEntries = (memberNumbers: number[]): void => {
+    const contentContainer = ElementWrap('rsp-member-selector-content');
+    if (!contentContainer) return;
+
+    let addedAny = false;
+    const newEntries: MemberSelectorEntry[] = [];
+
+    for (const memberNumber of memberNumbers) {
+      if (isNaN(memberNumber) || memberNumber <= 0) continue;
+      if (memberEntries.has(memberNumber)) {
+        selectedMembers.add(memberNumber);
+        const existingRow = ElementWrap(`rsp-member-row-${memberNumber}`);
+        if (!existingRow) continue;
+        existingRow.classList.add('rsp-member-row-selected');
+        const checkbox = existingRow.querySelector('input[type="checkbox"]') as HTMLInputElement;
+        if (checkbox) checkbox.checked = true;
+        continue;
+      }
+
+      const newEntry: MemberSelectorEntry = {
+        memberNumber: memberNumber,
+        name: getText('behaviors.name.unknown'),
+        context: 'custom'
+      };
+
+      memberEntries.set(memberNumber, newEntry);
+      selectedMembers.add(memberNumber);
+      newEntries.push(newEntry);
+      addedAny = true;
+    }
+
+    if (!addedAny) return;
+
+    const allEntries = Array.from(memberEntries.values()).sort((a, b) => {
+      const aPriority = contextPriority[a.context] ?? 999;
+      const bPriority = contextPriority[b.context] ?? 999;
+
+      if (aPriority !== bPriority) {
+        return bPriority - aPriority;
+      }
+
+      return a.name.localeCompare(b.name);
+    });
+
+    contentContainer.replaceChildren();
+    allEntries.forEach(entry => {
+      const row = createGridRow(entry);
+      contentContainer.appendChild(row);
+    });
+  };
+
+  const customInput = advElement.createInput({
+    id: 'rsp-member-custom-input',
+    type: 'text',
+    htmlOptions: {
+      input: {
+        attributes: {
+          placeholder: getText('behaviors.member_selector.custom_input_placeholder'),
+          pattern: '[0-9,\\s]+'
+        }
+      }
+    }
+  });
+
+  const addCustomButton = advElement.createButton({
+    id: 'rsp-member-add-custom',
+    onClick: function () {
+      const input = ElementWrap('rsp-member-custom-input') as HTMLInputElement;
+      if (!input) return;
+
+      const value = input.value.trim();
+      if (!value) return;
+
+      const memberNumbers = value.split(',')
+        .map(num => parseInt(num.trim(), 10))
+        .filter(num => !isNaN(num) && num > 0);
+
+      if (memberNumbers.length === 0) return;
+
+      addCustomEntries(memberNumbers);
+
+      input.value = '';
+    },
+    options: {
+      image: `${PUBLIC_URL}/images/plus.svg`
+    },
+    htmlOptions: {
+      button: {
+        classList: ['rsp-member-add-custom-button']
+      }
+    }
+  });
+
+  const customInputContainer = ElementCreate({
+    tag: 'div',
+    classList: ['rsp-member-custom-container'],
+    children: [
+      customInput,
+      addCustomButton
+    ]
+  });
+
+  return await Modal.confirm([
+    getText('behaviors.prompt.select_item'),
+    searchInput,
+    customInputContainer,
+    gridContainer
+  ], {
+    modalClassList: ['rsp-modal', 'rsp-member-selector-modal'],
+    onShow() {
+      const buttonContainer = this.querySelector('.deeplib-modal-button-container');
+      if (buttonContainer) {
+        const controlsContainer = ElementCreate({
+          tag: 'div',
+          classList: ['rsp-selector-controls'],
+          children: [
+            selectAllButton,
+            deselectAllButton
+          ]
+        });
+        buttonContainer.insertBefore(controlsContainer, buttonContainer.firstChild);
+      }
+    },
+  }).then((result) => {
+    if (!result) {
+      return [];
+    }
+    return Array.from(selectedMembers);
+  });
+}
 
 exportToGlobal('activitySelectorModal', activitySelectorModal);
 exportToGlobal('bodyPartSelectorModal', bodyPartSelectorModal);
+exportToGlobal('memberNumberSelectorModal', memberNumberSelectorModal);

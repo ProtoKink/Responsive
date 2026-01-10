@@ -12,3 +12,18 @@ behaviors.prompt.select_item = Select an item
 behaviors.prompt.search_activities = Search activities...
 behaviors.prompt.select_all = Select All
 behaviors.prompt.deselect_all = Deselect All
+
+behaviors.member_role.friend = Friend
+behaviors.member_role.submissive = Submissive
+behaviors.member_role.lover = Lover
+behaviors.member_role.owner = Owner
+behaviors.member_role.same_room = In Same Room
+behaviors.member_role.player = You (Player)
+behaviors.member_role.custom = Custom
+behaviors.name.unknown = Unknown
+
+behaviors.member_selector.name = Name
+behaviors.member_selector.number = Number
+behaviors.member_selector.context = Context
+behaviors.member_selector.search_placeholder = Search by name, number, or context...
+behaviors.member_selector.custom_input_placeholder = Enter member number(s), comma-separated...
