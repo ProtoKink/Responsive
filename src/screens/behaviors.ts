@@ -1776,18 +1776,11 @@ export class GuiBehaviors extends BaseSubscreen {
   // #region SECTION Utility Methods
   toggleDeleteMode() {
     this.deleteMode = !this.deleteMode;
-    this.updateDeleteModeToggle();
+    ElementWrap(selector.deleteModeToggle)?.toggleAttribute('data-delete-mode', this.deleteMode);
     const deletableItems = document.querySelectorAll('[data-deletable]');
     deletableItems.forEach(item => {
       item.toggleAttribute('data-delete-mode', this.deleteMode);
     });
-  }
-
-  updateDeleteModeToggle() {
-    const button = ElementWrap(selector.deleteModeToggle);
-    if (button) {
-      button.toggleAttribute('data-delete-mode', this.deleteMode);
-    }
   }
 
   async confirmationModal(message: string): Promise<boolean> {
