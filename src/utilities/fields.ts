@@ -4,6 +4,10 @@ const selector = Object.freeze({
   inputField: (id: string) => `rsp-input-field-${id}`,
   numberInputField: (id: string) => `rsp-number-input-field-${id}`,
   dropdownField: (id: string) => `rsp-dropdown-field-${id}`,
+  contentListSection: (id: string) => `rsp-content-list-section-${id}`,
+  collapsibleHeader: 'rsp-behaviors-collapsible-header',
+  collapsibleContent: 'rsp-behaviors-collapsible-content',
+  collapsibleSection: 'rsp-behaviors-collapsible',
 });
 
 interface InputFieldOptions {
@@ -128,4 +132,98 @@ export function createDropdownField({ id, labelKey, value = '', options, onChang
 
   return element;
 }
-// #endregion !SECTION Field Builders
+
+interface ContentListSectionOptions {
+  id: string;
+  labelKey: string;
+  onAdd: () => void;
+  addLabel: string;
+  content: HTMLElement;
+}
+export function buildContentListSection({ id, labelKey, onAdd, addLabel, content }: ContentListSectionOptions): HTMLElement {
+  const sectionId = selector.contentListSection(id);
+  const thisElement = ElementWrap(sectionId);
+  if (thisElement) {
+    thisElement.replaceChildren();
+  }
+
+  const addButton = advElement.createButton({
+    id: `rsp-content-add-${CommonGenerateUniqueID()}`,
+    onClick: onAdd,
+    options: {
+      image: `${PUBLIC_URL}/images/plus.svg`,
+      label: getText(addLabel)
+    },
+    htmlOptions: {
+      button: {
+        classList: ['rsp-content-add']
+      }
+    }
+  });
+
+  const header = ElementCreate({
+    tag: 'div',
+    classList: ['rsp-behaviors-content-list-header'],
+    children: [
+      advElement.createLabel({
+        id: `rsp-label-${CommonGenerateUniqueID()}`,
+        label: getText(labelKey)
+      }),
+      addButton
+    ]
+  });
+
+  const container = ElementCreate({
+    tag: 'div',
+    attributes: {
+      id: sectionId,
+    },
+    classList: ['rsp-behaviors-section'],
+    children: [
+      header,
+      content
+    ]
+  });
+
+  if (thisElement) {
+    thisElement.replaceWith(container);
+  }
+
+  return container;
+}
+
+interface CollapsibleSectionOptions {
+  headerKey: string;
+  content: HTMLElement[];
+}
+export function buildCollapsibleSection({ headerKey, content }: CollapsibleSectionOptions): HTMLElement {
+
+  const header = ElementCreate({
+    tag: 'div',
+    classList: [selector.collapsibleHeader],
+    attributes: {
+      'data-expanded': 'false'
+    },
+    children: [getText(headerKey)],
+    eventListeners: {
+      click: () => {
+        const isExpanded = header.getAttribute('data-expanded') === 'true';
+        header.setAttribute('data-expanded', (!isExpanded).toString());
+      }
+    }
+  });
+
+  const contentDiv = ElementCreate({
+    tag: 'div',
+    classList: [selector.collapsibleContent],
+    children: content
+  });
+
+  const section = ElementCreate({
+    tag: 'div',
+    classList: [selector.collapsibleSection],
+    children: [header, contentDiv]
+  });
+
+  return section;
+}

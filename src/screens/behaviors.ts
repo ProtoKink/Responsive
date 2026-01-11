@@ -5,7 +5,7 @@ import { BehaviorsModule } from '../modules/behaviors';
 import { assertNever } from '../utilities/other';
 import { activitySelectorModal, bodyPartSelectorModal, idSelectorModal, textReactionSelectorModal } from '@/utilities/selectorModals';
 import { triggerHasConstraints } from '@/utilities/triggers';
-import { createDropdownField, createInputField, createNumberInputField } from '@/utilities/fields';
+import { buildCollapsibleSection, buildContentListSection, createDropdownField, createInputField, createNumberInputField } from '@/utilities/fields';
 
 type TabType = 'behaviors' | 'triggers' | 'reactions';
 // #endregion !SECTION Imports & Types
@@ -685,10 +685,10 @@ export class GuiBehaviors extends BaseSubscreen {
 
     elements.push(...this.buildTriggerTypeFields(trigger));
 
-    elements.push(this.buildCollapsibleSection(
-      'behaviors.section.advanced_options',
-      this.buildTriggerContraintsOptions(trigger)
-    ));
+    elements.push(buildCollapsibleSection({
+      headerKey: 'behaviors.section.advanced_options',
+      content: this.buildTriggerContraintsOptions(trigger)
+    }));
 
     return elements;
   }
@@ -738,10 +738,10 @@ export class GuiBehaviors extends BaseSubscreen {
       const contentSection = renderContent();
       elements.push(contentSection);
     } else if (reaction.type === 'activity') {
-      const renderActivityNames = () => this.buildContentListSection(
-        `${reaction.id}-activity-names`,
-        'behaviors.field.activity_names',
-        async () => {
+      const renderActivityNames = () => buildContentListSection({
+        id: `${reaction.id}-activity-names`,
+        labelKey: 'behaviors.field.activity_names',
+        onAdd: async () => {
           const result = await activitySelectorModal({ selectedActivities: [reaction.activityName], limit: 1 });
           if (!result) return;
 
@@ -756,8 +756,8 @@ export class GuiBehaviors extends BaseSubscreen {
             renderActivityNames();
           }
         },
-        'behaviors.button.select_activity',
-        this.buildChipList(
+        addLabel: 'behaviors.button.select_activity',
+        content: this.buildChipList(
           `${reaction.id}-activity-names`,
           reaction.activityName ? [{ id: reaction.activityName, name: ActivityDictionaryText(`Activity${reaction.activityName}`) }] : [],
           function () {
@@ -765,14 +765,14 @@ export class GuiBehaviors extends BaseSubscreen {
             this.remove();
           }
         )
-      );
+      });
       const activityNamesSection = renderActivityNames();
       elements.push(activityNamesSection);
 
-      const rerenderGroupNames = () => this.buildContentListSection(
-        `${reaction.id}-group-names`,
-        'behaviors.field.group_names',
-        async () => {
+      const rerenderGroupNames = () => buildContentListSection({
+        id: `${reaction.id}-group-names`,
+        labelKey: 'behaviors.field.group_names',
+        onAdd: async () => {
           const result = await bodyPartSelectorModal({ selectedParts: [reaction.groupName] as AssetGroupItemName[], limit: 1 });
           if (!result) return;
 
@@ -787,8 +787,8 @@ export class GuiBehaviors extends BaseSubscreen {
             rerenderGroupNames();
           }
         },
-        'behaviors.button.select_body_part',
-        this.buildChipList(
+        addLabel:'behaviors.button.select_body_part',
+        content: this.buildChipList(
           `${reaction.id}-group-names`,
           reaction.groupName ? [{ id: reaction.groupName, name: TextGetInScope('Screens/Character/Preference/Text_Preference.csv', `ArousalZone${reaction.groupName}`) }] : [],
           function () {
@@ -796,7 +796,7 @@ export class GuiBehaviors extends BaseSubscreen {
             this.remove();
           }
         )
-      );
+      });
       const groupNamesSection = rerenderGroupNames();
       elements.push(groupNamesSection);
     }
@@ -863,18 +863,18 @@ export class GuiBehaviors extends BaseSubscreen {
         break;
       }
       case 'activity': {
-        const renderActivityNames = () => this.buildContentListSection(
-          `${trigger.id}-activity-names`,
-          'behaviors.field.activity_names',
-          async () => {
+        const renderActivityNames = () => buildContentListSection({
+          id: `${trigger.id}-activity-names`,
+          labelKey: 'behaviors.field.activity_names',
+          onAdd: async () => {
             const result = await activitySelectorModal({ selectedActivities: trigger.activityName });
             if (!result) return;
 
             trigger.activityName = result;
             renderActivityNames();
           },
-          'behaviors.button.select_activities',
-          this.buildChipList(
+          addLabel: 'behaviors.button.select_activities',
+          content: this.buildChipList(
             `${trigger.id}-activity-names`,
             trigger.activityName.map(activity => ({ id: activity, name: ActivityDictionaryText(`Activity${activity}`) })),
             function (item) {
@@ -882,22 +882,22 @@ export class GuiBehaviors extends BaseSubscreen {
               this.remove();
             }
           )
-        );
+        });
         const activityNamesSection = renderActivityNames();
         elements.push(activityNamesSection);
 
-        const rerenderGroupNames = () => this.buildContentListSection(
-          `${trigger.id}-group-names`,
-          'behaviors.field.group_names',
-          async () => {
+        const rerenderGroupNames = () => buildContentListSection({
+          id: `${trigger.id}-group-names`,
+          labelKey: 'behaviors.field.group_names',
+          onAdd: async () => {
             const result = await bodyPartSelectorModal({ selectedParts: trigger.groupName as AssetGroupItemName[] });
             if (!result) return;
 
             trigger.groupName = result;
             rerenderGroupNames();
           },
-          'behaviors.button.select_body_parts',
-          this.buildChipList(
+          addLabel: 'behaviors.button.select_body_parts',
+          content: this.buildChipList(
             `${trigger.id}-group-names`,
             trigger.groupName.map(name => ({ id: name, name: TextGetInScope('Screens/Character/Preference/Text_Preference.csv', `ArousalZone${name}`) })),
             function (item) {
@@ -905,7 +905,7 @@ export class GuiBehaviors extends BaseSubscreen {
               this.remove();
             }
           )
-        );
+        });
         const groupNamesSection = rerenderGroupNames();
         elements.push(groupNamesSection);
         break;
@@ -1051,17 +1051,17 @@ export class GuiBehaviors extends BaseSubscreen {
       }
     );
 
-    const section = this.buildContentListSection(
-      thisElement ? CommonGenerateUniqueID() : `${behavior.id}-triggers`,
-      'behaviors.section.triggers',
-      async () => {
+    const section = buildContentListSection({
+      id: thisElement ? CommonGenerateUniqueID() : `${behavior.id}-triggers`,
+      labelKey: 'behaviors.section.triggers',
+      onAdd: async () => {
         await this.showTriggerSelector(behavior);
         this.buildTriggersSection(behavior);
         this.buildBehaviorListItem(behavior);
       },
-      'behaviors.button.add_trigger',
-      content
-    );
+      addLabel: 'behaviors.button.add_trigger',
+      content: content
+    });
 
     if (thisElement) {
       thisElement.replaceWith(section);
@@ -1090,17 +1090,17 @@ export class GuiBehaviors extends BaseSubscreen {
       }
     );
 
-    const section = this.buildContentListSection(
-      thisElement ? CommonGenerateUniqueID() : `${behavior.id}-reactions`,
-      'behaviors.section.reactions',
-      async () => {
+    const section = buildContentListSection({
+      id: thisElement ? CommonGenerateUniqueID() : `${behavior.id}-reactions`,
+      labelKey: 'behaviors.section.reactions',
+      onAdd: async () => {
         await this.showReactionSelector(behavior);
         this.buildReactionsSection(behavior);
         this.buildBehaviorListItem(behavior);
       },
-      'behaviors.button.add_reaction',
-      content
-    );
+      addLabel: 'behaviors.button.add_reaction',
+      content: content
+    });
 
     if (thisElement) {
       thisElement.replaceWith(section);
@@ -1178,7 +1178,7 @@ export class GuiBehaviors extends BaseSubscreen {
       thisElement.replaceChildren();
     }
 
-    const section = this.buildContentListSection(id, labelKey, onAdd, 'behaviors.button.add_content', content);
+    const section = buildContentListSection({ id, labelKey, onAdd, addLabel: 'behaviors.button.add_content', content });
 
     if (thisElement) {
       thisElement.replaceWith(section);
@@ -1252,58 +1252,6 @@ export class GuiBehaviors extends BaseSubscreen {
     return container;
   }
 
-  buildContentListSection(id: string, labelKey: string, onAdd: () => void, addLabel: string, content: HTMLElement): HTMLElement {
-    const sectionId = selector.contentListSection(id);
-    const thisElement = ElementWrap(sectionId);
-    if (thisElement) {
-      thisElement.replaceChildren();
-    }
-
-    const addButton = advElement.createButton({
-      id: `rsp-content-add-${CommonGenerateUniqueID()}`,
-      onClick: onAdd,
-      options: {
-        image: `${PUBLIC_URL}/images/plus.svg`,
-        label: getText(addLabel)
-      },
-      htmlOptions: {
-        button: {
-          classList: ['rsp-content-add']
-        }
-      }
-    });
-
-    const header = ElementCreate({
-      tag: 'div',
-      classList: ['rsp-behaviors-content-list-header'],
-      children: [
-        advElement.createLabel({
-          id: `rsp-label-${CommonGenerateUniqueID()}`,
-          label: getText(labelKey)
-        }),
-        addButton
-      ]
-    });
-
-    const container = ElementCreate({
-      tag: 'div',
-      attributes: {
-        id: sectionId,
-      },
-      classList: ['rsp-behaviors-section'],
-      children: [
-        header,
-        content
-      ]
-    });
-
-    if (thisElement) {
-      thisElement.replaceWith(container);
-    }
-
-    return container;
-  }
-
   buildIncludeExcludeField(id: string, labelKey: string, rule: { entries: Array<{ value: string; mode: 'include' | 'exclude' }> } | undefined, onChange: (rule: { entries: Array<{ value: string; mode: 'include' | 'exclude' }> } | undefined) => void): HTMLElement {
     const entries = rule?.entries || [];
     const onAdd = () => {
@@ -1337,7 +1285,7 @@ export class GuiBehaviors extends BaseSubscreen {
       thisElement.replaceChildren();
     }
 
-    const section = this.buildContentListSection(id, labelKey, onAdd, 'behaviors.button.add_content', list);
+    const section = buildContentListSection({ id, labelKey, onAdd, addLabel: 'behaviors.button.add_content', content: list });
 
 
     if (thisElement) {
@@ -1433,37 +1381,6 @@ export class GuiBehaviors extends BaseSubscreen {
     }
 
     return container;
-  }
-
-  buildCollapsibleSection(headerKey: string, content: HTMLElement[]): HTMLElement {
-    const header = ElementCreate({
-      tag: 'div',
-      classList: [selector.collapsibleHeader],
-      attributes: {
-        'data-expanded': 'false'
-      },
-      children: [getText(headerKey)],
-      eventListeners: {
-        click: () => {
-          const isExpanded = header.getAttribute('data-expanded') === 'true';
-          header.setAttribute('data-expanded', (!isExpanded).toString());
-        }
-      }
-    });
-
-    const contentDiv = ElementCreate({
-      tag: 'div',
-      classList: [selector.collapsibleContent],
-      children: content
-    });
-
-    const section = ElementCreate({
-      tag: 'div',
-      classList: [selector.collapsibleSection],
-      children: [header, contentDiv]
-    });
-
-    return section;
   }
 
   // #region SECTION Selection Methods
