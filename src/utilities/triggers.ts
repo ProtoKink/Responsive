@@ -2,6 +2,7 @@ import { modLogger } from 'bc-deeplib/deeplib';
 import { TriggerConstraint, MessageData, ConstraintMode, TriggerType, Behavior, TriggerTypeSchema, MessageDataSchema, TriggerConstraintSchema, ConstraintModeSchema, Trigger, TriggerSpeech, TriggerEmote, TriggerAction } from '../models/behaviors';
 import { BehaviorsModule } from '../modules/behaviors';
 import { assertNever } from './other';
+import { replaceTemplate } from './chat_messages';
 
 type TriggerConstraintHandlers = {
   [K in keyof TriggerConstraint]: (
@@ -33,12 +34,13 @@ const messageContentPredicate: TriggerPredicate = (trigger, data) => {
   if (!data.message) return false;
 
   return typedTrigger.content.some(c => {
+    const templatedMessage = replaceTemplate(c, data.target, data.source);
     switch (typedTrigger.matchMode) {
-      case 'startsWith': return data.message!.startsWith(c);
-      case 'endsWith': return data.message!.endsWith(c);
-      case 'contains': return data.message!.includes(c);
-      case 'exact': return c === data.message;
-      case 'regex': return new RegExp(c, 'i').test(data.message!);
+      case 'startsWith': return data.message!.startsWith(templatedMessage);
+      case 'endsWith': return data.message!.endsWith(templatedMessage);
+      case 'contains': return data.message!.includes(templatedMessage);
+      case 'exact': return templatedMessage === data.message;
+      case 'regex': return new RegExp(templatedMessage, 'i').test(data.message!);
       default:
         assertNever(typedTrigger.matchMode);
     }

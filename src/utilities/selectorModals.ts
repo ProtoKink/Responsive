@@ -39,7 +39,7 @@ export async function idSelectorModal(buttons: { label: string, value: string }[
   });
 }
 
-export async function bodyPartSelectorModal(options?: { selectedParts?: AssetGroupItemName[], limit?: number }): Promise<AssetGroupItemName[]> {
+export async function bodyPartSelectorModal(options?: { selectedParts?: AssetGroupItemName[], limit?: number }): Promise<AssetGroupItemName[] | null> {
   options ??= {};
   const limit = options.limit ?? Infinity;
   if (limit < 1) {
@@ -200,13 +200,13 @@ export async function bodyPartSelectorModal(options?: { selectedParts?: AssetGro
     },
   }).then((result) => {
     if (!result) {
-      return [];
+      return null;
     }
     return Array.from(selectedParts).filter(part => Boolean(part));
   });
 }
 
-export async function activitySelectorModal(options?: { selectedActivities?: string[], limit?: number }): Promise<string[]> {
+export async function activitySelectorModal(options?: { selectedActivities?: string[], limit?: number }): Promise<string[] | null> {
   options ??= {};
   const limit = options.limit ?? Infinity;
   if (limit < 1) {
@@ -376,7 +376,7 @@ export async function activitySelectorModal(options?: { selectedActivities?: str
     },
   }).then((result) => {
     if (!result) {
-      return [];
+      return null;
     }
     return Array.from(selectedActivities).filter(part => Boolean(part));
   });
@@ -397,7 +397,7 @@ export async function memberNumberSelectorModal(options?: {
   includeOwner?: boolean,
   includeInRoom?: boolean,
   includePlayer?: boolean,
-}): Promise<number[]> {
+}): Promise<number[] | null> {
   options ??= {};
   const limit = options.limit ?? Infinity;
   if (limit < 1) {
@@ -822,7 +822,7 @@ export async function memberNumberSelectorModal(options?: {
     },
   }).then((result) => {
     if (!result) {
-      return [];
+      return null;
     }
     return Array.from(selectedMembers);
   });

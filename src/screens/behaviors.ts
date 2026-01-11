@@ -742,8 +742,11 @@ export class GuiBehaviors extends BaseSubscreen {
         `${reaction.id}-activity-names`,
         'behaviors.field.activity_names',
         async () => {
-          const selectedActivity = (await activitySelectorModal({ selectedActivities: [reaction.activityName], limit: 1 }))[0];
+          const result = await activitySelectorModal({ selectedActivities: [reaction.activityName], limit: 1 });
+          if (!result) return;
+
           let updated = false;
+          const selectedActivity = result[0];
 
           if (reaction.activityName !== selectedActivity) {
             reaction.activityName = selectedActivity;
@@ -770,7 +773,10 @@ export class GuiBehaviors extends BaseSubscreen {
         `${reaction.id}-group-names`,
         'behaviors.field.group_names',
         async () => {
-          const selectedPart = (await bodyPartSelectorModal({ selectedParts: [reaction.groupName] as AssetGroupItemName[], limit: 1 }))[0];
+          const result = await bodyPartSelectorModal({ selectedParts: [reaction.groupName] as AssetGroupItemName[], limit: 1 });
+          if (!result) return;
+
+          const selectedPart = result[0];
           let updated = false;
 
           if (reaction.groupName !== selectedPart) {
@@ -861,21 +867,15 @@ export class GuiBehaviors extends BaseSubscreen {
           `${trigger.id}-activity-names`,
           'behaviors.field.activity_names',
           async () => {
-            const selectedActivities = await activitySelectorModal({ selectedActivities: trigger.activityName });
-            let updated = false;
-            selectedActivities.forEach(activity => {
-              if (!trigger.activityName.includes(activity)) {
-                trigger.activityName.push(activity);
-                updated = true;
-              }
-            });
-            if (updated) {
-              renderActivityNames();
-            }
+            const result = await activitySelectorModal({ selectedActivities: trigger.activityName });
+            if (!result) return;
+
+            trigger.activityName = result;
+            renderActivityNames();
           },
           'behaviors.button.add_activity_name',
           this.buildChipList(
-            trigger.id,
+            `${trigger.id}-activity-names`,
             trigger.activityName.map(activity => ({ id: activity, name: ActivityDictionaryText(`Activity${activity}`) })),
             function (item) {
               trigger.activityName.splice(trigger.activityName.indexOf(item.id), 1);
@@ -890,24 +890,18 @@ export class GuiBehaviors extends BaseSubscreen {
           `${trigger.id}-group-names`,
           'behaviors.field.group_names',
           async () => {
-            const selectedParts = await bodyPartSelectorModal({ selectedParts: trigger.groupName as AssetGroupItemName[] });
-            let updated = false;
-            selectedParts.forEach(part => {
-              if (!trigger.groupName.includes(part)) {
-                trigger.groupName.push(part);
-                updated = true;
-              }
-            });
-            if (updated) {
-              rerenderGroupNames();
-            }
+            const result = await bodyPartSelectorModal({ selectedParts: trigger.groupName as AssetGroupItemName[] });
+            if (!result) return;
+
+            trigger.groupName = result;
+            rerenderGroupNames();
           },
           'behaviors.button.add_group_name',
           this.buildChipList(
-            trigger.id,
-            trigger.groupName.map(name => ({ id: name, name: name })),
+            `${trigger.id}-group-names`,
+            trigger.groupName.map(name => ({ id: name, name: TextGetInScope('Screens/Character/Preference/Text_Preference.csv', `ArousalZone${name}`) })),
             function (item) {
-              trigger.groupName.splice(trigger.groupName.indexOf(item.name), 1);
+              trigger.groupName.splice(trigger.groupName.indexOf(item.id), 1);
               this.remove();
             }
           )
