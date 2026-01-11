@@ -16,6 +16,10 @@ behaviors.button.add_reaction = Add Reaction
 behaviors.button.add_content = Add Content
 behaviors.button.add_trigger_to_behavior = Add Trigger
 behaviors.button.add_reaction_to_behavior = Add Reaction
+behaviors.button.select_activity = Select Activity
+behaviors.button.select_body_part = Select Body Part
+behaviors.button.select_activities = Select Activities
+behaviors.button.select_body_parts = Select Body Parts
 
 # Text
 behaviors.text.select_item_to_edit = Select an item from the list to edit
@@ -94,11 +98,6 @@ behaviors.option.join = Join
 behaviors.option.leashed = Leashed
 behaviors.option.include = Include
 behaviors.option.exclude = Exclude
-
-behaviors.option.speech = Speech
-behaviors.option.emote = Emote
-behaviors.option.action = Action
-behaviors.option.activity = Activity
 
 behaviors.option.speech = Speech
 behaviors.option.emote = Emote

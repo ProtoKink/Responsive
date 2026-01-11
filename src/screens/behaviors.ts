@@ -756,7 +756,7 @@ export class GuiBehaviors extends BaseSubscreen {
             renderActivityNames();
           }
         },
-        'behaviors.button.add_activity_name',
+        'behaviors.button.select_activity',
         this.buildChipList(
           `${reaction.id}-activity-names`,
           reaction.activityName ? [{ id: reaction.activityName, name: ActivityDictionaryText(`Activity${reaction.activityName}`) }] : [],
@@ -787,10 +787,10 @@ export class GuiBehaviors extends BaseSubscreen {
             rerenderGroupNames();
           }
         },
-        'behaviors.button.add_group_name',
+        'behaviors.button.select_body_part',
         this.buildChipList(
           `${reaction.id}-group-names`,
-          reaction.groupName ? [{ id: reaction.groupName, name: reaction.groupName }] : [],
+          reaction.groupName ? [{ id: reaction.groupName, name: TextGetInScope('Screens/Character/Preference/Text_Preference.csv', `ArousalZone${reaction.groupName}`) }] : [],
           function () {
             reaction.groupName = '';
             this.remove();
@@ -873,7 +873,7 @@ export class GuiBehaviors extends BaseSubscreen {
             trigger.activityName = result;
             renderActivityNames();
           },
-          'behaviors.button.add_activity_name',
+          'behaviors.button.select_activities',
           this.buildChipList(
             `${trigger.id}-activity-names`,
             trigger.activityName.map(activity => ({ id: activity, name: ActivityDictionaryText(`Activity${activity}`) })),
@@ -896,7 +896,7 @@ export class GuiBehaviors extends BaseSubscreen {
             trigger.groupName = result;
             rerenderGroupNames();
           },
-          'behaviors.button.add_group_name',
+          'behaviors.button.select_body_parts',
           this.buildChipList(
             `${trigger.id}-group-names`,
             trigger.groupName.map(name => ({ id: name, name: TextGetInScope('Screens/Character/Preference/Text_Preference.csv', `ArousalZone${name}`) })),

@@ -172,8 +172,10 @@ export async function bodyPartSelectorModal(options?: { selectedParts?: AssetGro
     }
   });
 
+  const label = limit > 1 ? getText('behaviors.prompt.select_multiple_items') : getText('behaviors.prompt.select_item');
+
   return await Modal.confirm([
-    advElement.createLabel({ id: null, label: getText('behaviors.prompt.select_item') }),
+    advElement.createLabel({ id: null, label }),
     ElementCreate({ tag: 'br' }),
     {
       tag: 'div',
@@ -355,8 +357,10 @@ export async function activitySelectorModal(options?: { selectedActivities?: str
     }
   });
 
+  const label = limit > 1 ? getText('behaviors.prompt.select_multiple_items') : getText('behaviors.prompt.select_item');
+
   return await Modal.confirm([
-    advElement.createLabel({ id: null, label: getText('behaviors.prompt.select_item') }),
+    advElement.createLabel({ id: null, label }),
     searchInput,
     activityGrid
   ], {
