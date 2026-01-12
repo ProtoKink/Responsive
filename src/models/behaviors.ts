@@ -48,7 +48,11 @@ export const TriggerConstraintSchema = z.object({
   arousalMin: z.number().optional(),
   arousalMax: z.number().optional(),
   inRoomWithMembers: IncludeExcludeRuleSchema.optional(),
-  inRoomNamed: IncludeExcludeRuleSchema.optional()
+  inRoomNamed: IncludeExcludeRuleSchema.optional(),
+  restrained: z.boolean().optional(),
+  gagged: z.boolean().optional(),
+  blinded: z.boolean().optional(),
+  deafened: z.boolean().optional(),
 });
 export type TriggerConstraint = z.infer<typeof TriggerConstraintSchema>;
 

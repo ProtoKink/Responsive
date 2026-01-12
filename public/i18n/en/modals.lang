@@ -16,6 +16,7 @@ behaviors.prompt.select_multiple_items = Select multiple items
 behaviors.prompt.search_activities = Search activities...
 behaviors.prompt.select_all = Select All
 behaviors.prompt.deselect_all = Deselect All
+behaviors.prompt.select_constraint_type = Select a constraint type to add
 
 behaviors.member_role.friend = Friend
 behaviors.member_role.submissive = Submissive

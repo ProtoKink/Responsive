@@ -20,6 +20,8 @@ behaviors.button.select_activity = Select Activity
 behaviors.button.select_body_part = Select Body Part
 behaviors.button.select_activities = Select Activities
 behaviors.button.select_body_parts = Select Body Parts
+behaviors.button.add_constraint = Add Constraint
+behaviors.button.remove_constraint = Remove Constraint
 
 # Text
 behaviors.text.select_item_to_edit = Select an item from the list to edit
@@ -36,6 +38,8 @@ behaviors.text.has_constraints = Has Constraints
 behaviors.text.no_triggers_available = No triggers available. Create a trigger first.
 behaviors.text.no_reactions_available = No reactions available. Create a reaction first.
 behaviors.text.do_not_show_this_again_until_leaving_this_screen = Do not show this again until leaving this screen
+behaviors.text.no_constraints = No constraints added
+behaviors.text.select_constraint_type = Select Constraint Type
 
 
 # Fields

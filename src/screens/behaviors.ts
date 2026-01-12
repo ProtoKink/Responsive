@@ -1,10 +1,10 @@
 // #region SECTION Imports & Types
 import { advElement, BaseSubscreen, exportToGlobal, getText, layout, Modal, SettingElement, SubscreenOptions } from 'bc-deeplib/deeplib';
-import { BehaviorsSettingsModel, Behavior, Trigger, Reaction, ConstraintMode, MatchMode, SpeechType, OrgasmType, RoomPresenceEvent, ReactionMode, TriggerTypeSchema, ReactionTypeSchema, ReactionType, TriggerType, IncludeExcludeEntry, SpeechTypeSchema, MatchModeSchema, OrgasmTypeSchema, RoomPresenceEventSchema, ReactionModeSchema, ConstraintModeSchema, IncludeExcludeEntrySchema } from '../models/behaviors';
+import { BehaviorsSettingsModel, Behavior, Trigger, Reaction, ConstraintMode, MatchMode, SpeechType, OrgasmType, RoomPresenceEvent, ReactionMode, TriggerTypeSchema, ReactionTypeSchema, ReactionType, TriggerType, IncludeExcludeEntry, SpeechTypeSchema, MatchModeSchema, OrgasmTypeSchema, RoomPresenceEventSchema, ReactionModeSchema, ConstraintModeSchema, IncludeExcludeEntrySchema, TriggerConstraint } from '../models/behaviors';
 import { BehaviorsModule } from '../modules/behaviors';
 import { assertNever } from '../utilities/other';
-import { activitySelectorModal, bodyPartSelectorModal, idSelectorModal, textReactionSelectorModal } from '@/utilities/selectorModals';
-import { triggerHasConstraints } from '@/utilities/triggers';
+import { activitySelectorModal, bodyPartSelectorModal, idSelectorModal, memberNumberSelectorModal, textReactionSelectorModal } from '@/utilities/selectorModals';
+import { triggerHasAnyConstraints, triggerHasConstraint } from '@/utilities/triggers';
 import { buildCollapsibleSection, buildContentListSection, createDropdownField, createInputField, createNumberInputField } from '@/utilities/fields';
 
 type TabType = 'behaviors' | 'triggers' | 'reactions';
@@ -31,6 +31,7 @@ const selector = Object.freeze({
   contentListSection: (id: string) => `rsp-content-list-section-${id}`,
   listItem: (id: string) => `rsp-list-item-${id}`,
   constraintEntryList: (id: string) => `rsp-constraint-entry-list-${id}`,
+  constraintsSection: (id: string) => `rsp-constraints-section-${id}`,
 });
 // #endregion !SECTION Constants
 
@@ -414,9 +415,9 @@ export class GuiBehaviors extends BaseSubscreen {
     }
 
     const isSelected = this.selectedTriggerId === trigger.id;
-    const hasConstraints = triggerHasConstraints(trigger);
+    const hasConstraints = triggerHasAnyConstraints(trigger);
 
-    const badges: HTMLOptions<keyof HTMLElementTagNameMap>[] = [
+    const badges: HTMLOptions<'span'>[] = [
       {
         tag: 'span' as const,
         classList: ['rsp-behaviors-item-badge', `type-${trigger.type}`],
@@ -686,6 +687,7 @@ export class GuiBehaviors extends BaseSubscreen {
     elements.push(...this.buildTriggerTypeFields(trigger));
 
     elements.push(buildCollapsibleSection({
+      id: selector.constraintsSection(trigger.id),
       headerKey: 'behaviors.section.advanced_options',
       content: this.buildTriggerContraintsOptions(trigger)
     }));
@@ -940,106 +942,418 @@ export class GuiBehaviors extends BaseSubscreen {
   buildTriggerContraintsOptions(trigger: Trigger): HTMLElement[] {
     const elements: HTMLElement[] = [];
 
+    const onChange = () => {
+      buildCollapsibleSection({
+        id: selector.constraintsSection(trigger.id),
+        headerKey: 'behaviors.section.advanced_options',
+        content: () => this.buildTriggerContraintsOptions(trigger),
+        expanded: true
+      });
+    };
+
+    const hasConstraints = triggerHasAnyConstraints(trigger);
+
+    if (!hasConstraints) {
+      const addConstraintButton = advElement.createButton({
+        id: `rsp-add-constraint-${trigger.id}`,
+        onClick: () => {
+          this.showConstraintTypeSelector(trigger);
+        },
+        options: {
+          image: `${PUBLIC_URL}/images/plus.svg`,
+          label: getText('behaviors.button.add_constraint')
+        },
+        htmlOptions: {
+          button: {
+            classList: ['rsp-content-add']
+          }
+        }
+      });
+      const addConstraintLabel = advElement.createLabel({
+        id: `rsp-label-constraints-${CommonGenerateUniqueID()}`,
+        label: getText('behaviors.text.no_constraints')
+      });
+      elements.push(addConstraintLabel);
+      elements.push(addConstraintButton);
+      return elements;
+    }
+
     const constraintModeField = createDropdownField({
       id: `${trigger.id}-constraint-mode`,
       labelKey: 'behaviors.field.constraint_mode',
       value: trigger.constraintMode || 'all',
       options: Object.values(ConstraintModeSchema.options),
-      onChange: (val) => trigger.constraintMode = val as ConstraintMode
+      onChange: (val) => trigger.constraintMode = val as ConstraintMode,
+      replace: false
     });
     elements.push(constraintModeField);
 
     trigger.constraints ??= {};
 
-    const renderSource = () => this.buildIncludeExcludeField(
-      `${trigger.id}-constraint-source`,
-      'behaviors.field.constraint_source',
-      trigger.constraints?.source,
-      (val) => {
-        trigger.constraints!.source = val;
-        renderSource();
-        this.buildTriggerListItem(trigger);
-      }
-    );
-    const sourceSection = renderSource();
-    elements.push(sourceSection);
+    if (triggerHasConstraint(trigger, 'source')) {
+      const renderSource = (replace?: boolean) => this.buildIncludeExcludeField(
+        `${trigger.id}-constraint-source`,
+        'behaviors.field.constraint_source',
+        () => {
+          let rule = trigger.constraints?.source;
+          const entries = rule?.entries || [];
+          memberNumberSelectorModal({ selectedMembers: entries.map(entry => parseInt(entry.value)) }).then((response) => {
+            if (response === null) return;
+            const newEntries = entries.filter(entry => response.includes(parseInt(entry.value)));
+            response.forEach(memberNumber => {
+              if (newEntries.some(entry => entry.value === memberNumber.toString())) return;
+              newEntries.push({ value: memberNumber.toString(), mode: 'include' });
+            });
+            if (!rule) {
+              rule = { entries: newEntries };
+            } else {
+              rule.entries = newEntries;
+            }
+            trigger.constraints ??= {};
+            trigger.constraints.source ??= { entries: [] };
+            trigger.constraints.source.entries = newEntries;
+            renderSource(true);
+            this.buildTriggerListItem(trigger);
+          });
+        },
+        trigger.constraints?.source,
+        (val) => {
+          trigger.constraints ??= {};
+          trigger.constraints.source ??= { entries: [] };
+          trigger.constraints.source.entries = val?.entries.filter(entry => CommonParseInt(entry.value)) ?? [];
+          renderSource(true);
+          this.buildTriggerListItem(trigger);
+        },
+        () => {
+          if (trigger.constraints) {
+            delete trigger.constraints.source;
+            if (Object.keys(trigger.constraints).length === 0) {
+              trigger.constraints = undefined;
+            }
+          }
+          onChange();
+          this.buildTriggerListItem(trigger);
+        },
+        replace
+      );
+      const sourceSection = renderSource(false);
+      elements.push(sourceSection);
+    }
 
-    const renderTarget = () => this.buildIncludeExcludeField(
-      `${trigger.id}-constraint-target`,
-      'behaviors.field.constraint_target',
-      trigger.constraints?.target,
-      (val) => {
-        trigger.constraints!.target = val;
-        renderTarget();
-        this.buildTriggerListItem(trigger);
-      }
-    );
-    const targetSection = renderTarget();
-    elements.push(targetSection);
+    if (triggerHasConstraint(trigger, 'target')) {
+      const renderTarget = (replace?: boolean) => this.buildIncludeExcludeField(
+        `${trigger.id}-constraint-target`,
+        'behaviors.field.constraint_target',
+        () => {
+          let rule = trigger.constraints?.target;
+          const entries = rule?.entries || [];
+          memberNumberSelectorModal({ selectedMembers: entries.map(entry => parseInt(entry.value)) }).then((response) => {
+            if (response === null) return;
+            const newEntries = entries.filter(entry => response.includes(parseInt(entry.value)));
+            response.forEach(memberNumber => {
+              if (newEntries.some(entry => entry.value === memberNumber.toString())) return;
+              newEntries.push({ value: memberNumber.toString(), mode: 'include' });
+            });
+            if (!rule) {
+              rule = { entries: newEntries };
+            } else {
+              rule.entries = newEntries;
+            }
+            trigger.constraints ??= {};
+            trigger.constraints.target ??= { entries: [] };
+            trigger.constraints.target.entries = newEntries;
+            renderTarget(true);
+            this.buildTriggerListItem(trigger);
+          });
+        },
+        trigger.constraints?.target,
+        (val) => {
+          trigger.constraints ??= {};
+          trigger.constraints.target ??= { entries: [] };
+          trigger.constraints.target.entries = val?.entries.filter(entry => CommonParseInt(entry.value)) ?? [];
+          renderTarget(true);
+          this.buildTriggerListItem(trigger);
+        },
+        () => {
+          if (trigger.constraints) {
+            delete trigger.constraints.target;
+            if (Object.keys(trigger.constraints).length === 0) {
+              trigger.constraints = undefined;
+            }
+          }
+          onChange();
+          this.buildTriggerListItem(trigger);
+        },
+        replace
+      );
+      const targetSection = renderTarget(false);
+      elements.push(targetSection);
+    }
 
-    const renderArousalMin = () => createNumberInputField({
-      id: `${trigger.id}-arousal-min`,
-      labelKey: 'behaviors.field.arousal_min',
-      value: trigger.constraints?.arousalMin?.toString() ?? '',
-      onChange: (val) => {
-        trigger.constraints!.arousalMin = val ? parseFloat(val) : undefined;
-        this.buildTriggerListItem(trigger);
+    if (triggerHasConstraint(trigger, 'arousalMin')) {
+      const renderArousalMin = (replace?: boolean) => {
+        const field = createNumberInputField({
+          id: `${trigger.id}-arousal-min`,
+          labelKey: 'behaviors.field.arousal_min',
+          value: trigger.constraints?.arousalMin?.toString() ?? '',
+          onChange: (val) => {
+            trigger.constraints!.arousalMin = val ? parseFloat(val) : undefined;
+            this.buildTriggerListItem(trigger);
+          },
+          min: '0',
+          max: '100'
+        });
+        const removeButton = advElement.createButton({
+          id: `rsp-remove-constraint-${trigger.id}-arousalMin`,
+          onClick: () => {
+            if (trigger.constraints) {
+              delete trigger.constraints.arousalMin;
+              if (Object.keys(trigger.constraints).length === 0) {
+                trigger.constraints = undefined;
+              }
+            }
+            onChange();
+            this.buildTriggerListItem(trigger);
+          },
+          options: {
+            image: `${PUBLIC_URL}/images/trash_bin.svg`,
+            tooltip: getText('behaviors.button.remove_constraint'),
+            tooltipPosition: 'left'
+          },
+          htmlOptions: {
+            button: {
+              classList: ['rsp-constraint-remove']
+            }
+          }
+        });
+        field.appendChild(removeButton);
+        return field;
+      };
+      const arousalMinField = renderArousalMin();
+      elements.push(arousalMinField);
+    }
+
+    if (triggerHasConstraint(trigger, 'arousalMax')) {
+      const renderArousalMax = () => {
+        const field = createNumberInputField({
+          id: `${trigger.id}-arousal-max`,
+          labelKey: 'behaviors.field.arousal_max',
+          value: trigger.constraints?.arousalMax?.toString() ?? '',
+          onChange: (val) => {
+            trigger.constraints!.arousalMax = val ? parseFloat(val) : undefined;
+            this.buildTriggerListItem(trigger);
+          },
+          min: '0',
+          max: '100'
+        });
+        const removeButton = advElement.createButton({
+          id: `rsp-remove-constraint-${trigger.id}-arousalMax`,
+          onClick: () => {
+            if (trigger.constraints) {
+              delete trigger.constraints.arousalMax;
+              if (Object.keys(trigger.constraints).length === 0) {
+                trigger.constraints = undefined;
+              }
+            }
+            onChange();
+            this.buildTriggerListItem(trigger);
+          },
+          options: {
+            image: `${PUBLIC_URL}/images/trash_bin.svg`,
+            tooltip: getText('behaviors.button.remove_constraint'),
+            tooltipPosition: 'left'
+          },
+          htmlOptions: {
+            button: {
+              classList: ['rsp-constraint-remove']
+            }
+          }
+        });
+        field.appendChild(removeButton);
+        return field;
+      };
+      const arousalMaxField = renderArousalMax();
+      elements.push(arousalMaxField);
+    }
+
+    if (triggerHasConstraint(trigger, 'inRoomWithMembers')) {
+      const renderInRoomWithMembers = (replace?: boolean) => this.buildIncludeExcludeField(
+        `${trigger.id}-in-room-with-members`,
+        'behaviors.field.in_room_with_members',
+        () => {
+          let rule = trigger.constraints?.inRoomWithMembers;
+          const entries = rule?.entries || [];
+          memberNumberSelectorModal({ selectedMembers: entries.map(entry => parseInt(entry.value)) }).then((response) => {
+            if (response === null) return;
+            const newEntries = entries.filter(entry => response.includes(parseInt(entry.value)));
+            response.forEach(memberNumber => {
+              if (newEntries.some(entry => entry.value === memberNumber.toString())) return;
+              newEntries.push({ value: memberNumber.toString(), mode: 'include' });
+            });
+            if (!rule) {
+              rule = { entries: newEntries };
+            } else {
+              rule.entries = newEntries;
+            }
+            trigger.constraints ??= {};
+            trigger.constraints.inRoomWithMembers ??= { entries: [] };
+            trigger.constraints.inRoomWithMembers.entries = newEntries;
+            renderInRoomWithMembers(true);
+            this.buildTriggerListItem(trigger);
+          });
+        },
+        trigger.constraints?.inRoomWithMembers,
+        (val) => {
+          trigger.constraints ??= {};
+          trigger.constraints.inRoomWithMembers ??= { entries: [] };
+          trigger.constraints.inRoomWithMembers.entries = val?.entries.filter(entry => CommonParseInt(entry.value)) ?? [];
+          renderInRoomWithMembers(true);
+          this.buildTriggerListItem(trigger);
+        },
+        () => {
+          if (trigger.constraints) {
+            delete trigger.constraints.inRoomWithMembers;
+            if (Object.keys(trigger.constraints).length === 0) {
+              trigger.constraints = undefined;
+            }
+          }
+          onChange();
+          this.buildTriggerListItem(trigger);
+        },
+        replace
+      );
+      const inRoomWithMembersSection = renderInRoomWithMembers(false);
+      elements.push(inRoomWithMembersSection);
+    }
+
+    if (triggerHasConstraint(trigger, 'inRoomNamed')) {
+      const renderInRoomNamed = (replace?: boolean) => this.buildIncludeExcludeField(
+        `${trigger.id}-in-room-named`,
+        'behaviors.field.in_room_named',
+        () => {
+          let rule = trigger.constraints?.inRoomNamed;
+          const entries = rule?.entries || [];
+          Modal.prompt(getText('behaviors.prompt.add_content'), { modalClassList: ['rsp-modal'] }).then((response) => {
+            if (response === null) return;
+            entries.push({ value: response, mode: 'include' });
+            if (!rule) {
+              rule = { entries: entries };
+            } else {
+              rule.entries = entries;
+            }
+            trigger.constraints!.inRoomNamed = rule;
+            renderInRoomNamed(true);
+            this.buildTriggerListItem(trigger);
+          });
+        },
+        trigger.constraints?.inRoomNamed,
+        (val) => {
+          trigger.constraints!.inRoomNamed = val;
+          renderInRoomNamed(true);
+          this.buildTriggerListItem(trigger);
+        },
+        () => {
+          if (trigger.constraints) {
+            delete trigger.constraints.inRoomNamed;
+            if (Object.keys(trigger.constraints).length === 0) {
+              trigger.constraints = undefined;
+            }
+          }
+          onChange();
+          this.buildTriggerListItem(trigger);
+        },
+        replace
+      );
+      const inRoomNamedSection = renderInRoomNamed(false);
+      elements.push(inRoomNamedSection);
+    }
+
+    const addConstraintButton = advElement.createButton({
+      id: `rsp-add-constraint-${trigger.id}`,
+      onClick: () => {
+        this.showConstraintTypeSelector(trigger);
       },
-      min: '0',
-      max: '100'
-    });
-    const arousalMinField = renderArousalMin();
-    elements.push(arousalMinField);
-
-    const renderArousalMax = () => createNumberInputField({
-      id: `${trigger.id}-arousal-max`,
-      labelKey: 'behaviors.field.arousal_max',
-      value: trigger.constraints?.arousalMax?.toString() ?? '',
-      onChange: (val) => {
-        trigger.constraints!.arousalMax = val ? parseFloat(val) : undefined;
-        this.buildTriggerListItem(trigger);
+      options: {
+        image: `${PUBLIC_URL}/images/plus.svg`,
+        label: getText('behaviors.button.add_constraint')
       },
-      min: '0',
-      max: '100'
+      htmlOptions: {
+        button: {
+          classList: ['rsp-content-add']
+        }
+      }
     });
-    const arousalMaxField = renderArousalMax();
-    elements.push(arousalMaxField);
-
-    const renderInRoomWithMembers = () => this.buildIncludeExcludeField(
-      `${trigger.id}-in-room-with-members`,
-      'behaviors.field.in_room_with_members',
-      trigger.constraints?.inRoomWithMembers,
-      (val) => {
-        trigger.constraints!.inRoomWithMembers = val;
-        renderInRoomWithMembers();
-        this.buildTriggerListItem(trigger);
-      }
-    );
-    const inRoomWithMembersSection = renderInRoomWithMembers();
-    elements.push(inRoomWithMembersSection);
-
-    const renderInRoomNamed = () => this.buildIncludeExcludeField(
-      `${trigger.id}-in-room-named`,
-      'behaviors.field.in_room_named',
-      trigger.constraints?.inRoomNamed,
-      (val) => {
-        trigger.constraints!.inRoomNamed = val;
-        renderInRoomNamed();
-        this.buildTriggerListItem(trigger);
-      }
-    );
-    const inRoomNamedSection = renderInRoomNamed();
-    elements.push(inRoomNamedSection);
+    elements.push(addConstraintButton);
 
     return elements;
   }
 
+  showConstraintTypeSelector(trigger: Trigger): void {
+    type ConstraintKey = keyof TriggerConstraint;
+    const allConstraints: Record<ConstraintKey, string> = {
+      source: getText('behaviors.field.constraint_source'),
+      target: getText('behaviors.field.constraint_target'),
+      arousalMin: getText('behaviors.field.arousal_min'),
+      arousalMax: getText('behaviors.field.arousal_max'),
+      inRoomWithMembers: getText('behaviors.field.in_room_with_members'),
+      inRoomNamed: getText('behaviors.field.in_room_named'),
+      restrained: getText('behaviors.field.restrained'),
+      gagged: getText('behaviors.field.gagged'),
+      blinded: getText('behaviors.field.blinded'),
+      deafened: getText('behaviors.field.deafened')
+    };
+    const availableConstraints = Object.entries(allConstraints).filter(([constraint]) => !triggerHasConstraint(trigger, constraint as ConstraintKey));
+
+    if (availableConstraints.length === 0) {
+      return;
+    }
+
+    idSelectorModal({ buttons: availableConstraints.map(([constraint, label]) => ({ label, value: constraint })) }).then((selected) => {
+      if (selected === null || selected.length === 0) return;
+
+      selected.forEach((constraint) => {
+        const selectedConstraint = constraint as ConstraintKey;
+        trigger.constraints ??= {};
+
+        switch (selectedConstraint) {
+          case 'source':
+          case 'target':
+          case 'inRoomWithMembers':
+          case 'inRoomNamed':
+            trigger.constraints[selectedConstraint] = { entries: [] };
+            break;
+          case 'arousalMin':
+          case 'arousalMax':
+            trigger.constraints[selectedConstraint] = 0;
+            break;
+          case 'restrained':
+          case 'gagged':
+          case 'blinded':
+          case 'deafened':
+            trigger.constraints[selectedConstraint] = false;
+            break;
+          default:
+            return assertNever(selectedConstraint);
+        }
+      });
+
+      buildCollapsibleSection({
+        id: selector.constraintsSection(trigger.id),
+        headerKey: 'behaviors.section.advanced_options',
+        content: () => this.buildTriggerContraintsOptions(trigger),
+        expanded: true
+      });
+      this.buildTriggerListItem(trigger);
+    });
+  }
+
   buildTriggersSection(behavior: Behavior): HTMLElement {
-    const thisElement = ElementWrap(selector.contentListSection(`${behavior.id}-triggers`));
+    const sectionId = `${behavior.id}-triggers`;
+    const thisElement = ElementWrap(selector.contentListSection(sectionId));
     if (thisElement) thisElement.replaceChildren();
 
     const content = this.buildChipList(
-      thisElement ? CommonGenerateUniqueID() : `${behavior.id}-triggers`,
+      thisElement ? CommonGenerateUniqueID() : sectionId,
       behavior.triggers.map(id => this.settings.triggers[id]).filter(Boolean).reverse() as Trigger[],
       async (trigger) => {
         const index = behavior.triggers.indexOf(trigger.id);
@@ -1052,7 +1366,7 @@ export class GuiBehaviors extends BaseSubscreen {
     );
 
     const section = buildContentListSection({
-      id: thisElement ? CommonGenerateUniqueID() : `${behavior.id}-triggers`,
+      id: thisElement ? CommonGenerateUniqueID() : sectionId,
       labelKey: 'behaviors.section.triggers',
       onAdd: async () => {
         await this.showTriggerSelector(behavior);
@@ -1065,20 +1379,21 @@ export class GuiBehaviors extends BaseSubscreen {
 
     if (thisElement) {
       thisElement.replaceWith(section);
-      section.id = selector.contentListSection(`${behavior.id}-triggers`);
+      section.id = selector.contentListSection(sectionId);
     }
 
     return section;
   }
 
   buildReactionsSection(behavior: Behavior): HTMLElement {
-    const thisElement = ElementWrap(selector.contentListSection(`${behavior.id}-reactions`));
+    const sectionId = `${behavior.id}-reactions`;
+    const thisElement = ElementWrap(selector.contentListSection(sectionId));
     if (thisElement) {
       thisElement.replaceChildren();
     }
 
     const content = this.buildChipList(
-      thisElement ? CommonGenerateUniqueID() : `${behavior.id}-reactions`,
+      thisElement ? CommonGenerateUniqueID() : sectionId,
       behavior.reactions.map(id => this.settings.reactions[id]).filter(Boolean).reverse() as Reaction[],
       async (reaction) => {
         const index = behavior.reactions.indexOf(reaction.id);
@@ -1091,7 +1406,7 @@ export class GuiBehaviors extends BaseSubscreen {
     );
 
     const section = buildContentListSection({
-      id: thisElement ? CommonGenerateUniqueID() : `${behavior.id}-reactions`,
+      id: thisElement ? CommonGenerateUniqueID() : sectionId,
       labelKey: 'behaviors.section.reactions',
       onAdd: async () => {
         await this.showReactionSelector(behavior);
@@ -1104,7 +1419,7 @@ export class GuiBehaviors extends BaseSubscreen {
 
     if (thisElement) {
       thisElement.replaceWith(section);
-      section.id = selector.contentListSection(`${behavior.id}-reactions`);
+      section.id = selector.contentListSection(sectionId);
     }
 
     return section;
@@ -1252,20 +1567,16 @@ export class GuiBehaviors extends BaseSubscreen {
     return container;
   }
 
-  buildIncludeExcludeField(id: string, labelKey: string, rule: { entries: Array<{ value: string; mode: 'include' | 'exclude' }> } | undefined, onChange: (rule: { entries: Array<{ value: string; mode: 'include' | 'exclude' }> } | undefined) => void): HTMLElement {
+  buildIncludeExcludeField(
+    id: string, 
+    labelKey: string, 
+    onAdd: () => void, 
+    rule: { entries: Array<{ value: string; mode: 'include' | 'exclude' }> } | undefined, 
+    onChange: (rule: { entries: Array<{ value: string; mode: 'include' | 'exclude' }> } | undefined) => void, 
+    onRemove?: () => void,
+    replace?: boolean
+  ): HTMLElement {
     const entries = rule?.entries || [];
-    const onAdd = () => {
-      Modal.prompt(getText('behaviors.prompt.add_content'), { modalClassList: ['rsp-modal'] }).then((response) => {
-        if (response === null) return;
-        entries.push({ value: response, mode: 'include' });
-        if (!rule) {
-          rule = { entries: entries };
-        } else {
-          rule.entries = entries;
-        }
-        onChange(rule);
-      });
-    };
 
     const list = this.buildConstraintEntryList(
       id,
@@ -1281,14 +1592,34 @@ export class GuiBehaviors extends BaseSubscreen {
     );
 
     const thisElement = ElementWrap(selector.contentListSection(id));
-    if (thisElement) {
+    if (thisElement && replace) {
       thisElement.replaceChildren();
     }
 
     const section = buildContentListSection({ id, labelKey, onAdd, addLabel: 'behaviors.button.add_content', content: list });
 
+    if (onRemove) {
+      const header = section.querySelector('.rsp-behaviors-content-list-header');
+      if (header) {
+        const removeButton = advElement.createButton({
+          id: `rsp-remove-constraint-${id}`,
+          onClick: onRemove,
+          options: {
+            image: `${PUBLIC_URL}/images/trash_bin.svg`,
+            tooltip: getText('behaviors.button.remove_constraint'),
+            tooltipPosition: 'top'
+          },
+          htmlOptions: {
+            button: {
+              classList: ['rsp-constraint-remove']
+            }
+          }
+        });
+        header.appendChild(removeButton);
+      }
+    }
 
-    if (thisElement) {
+    if (thisElement && replace) {
       thisElement.replaceWith(section);
     }
 
@@ -1539,8 +1870,8 @@ export class GuiBehaviors extends BaseSubscreen {
       value: t.id
     }));
 
-    const selectedIds = await idSelectorModal(options);
-    if (selectedIds.length === 0) return;
+    const selectedIds = await idSelectorModal({ buttons: options });
+    if (selectedIds === null || selectedIds.length === 0) return;
 
     selectedIds.forEach((id: string) => {
       behavior.triggers.push(id);
@@ -1562,12 +1893,10 @@ export class GuiBehaviors extends BaseSubscreen {
       value: r.id
     }));
 
-    const selectedIds = await idSelectorModal(options);
-    if (selectedIds.length === 0) return;
+    const selectedIds = await idSelectorModal({ buttons: options });
+    if (selectedIds === null || selectedIds.length === 0) return;
 
-    selectedIds.forEach((id: string) => {
-      behavior.reactions.push(id);
-    });
+    selectedIds.forEach((id) => behavior.reactions.push(id));
     this.buildBehaviorListItem(behavior);
     this.buildReactionsSection(behavior);
   }

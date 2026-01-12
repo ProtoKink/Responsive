@@ -443,6 +443,10 @@
       border-top-right-radius: var(--deeplib-border-radius);
       border-top-left-radius: var(--deeplib-border-radius);
 
+      * {
+        user-select: none;
+      }
+
       &[data-expanded='false'] {
         border-bottom-right-radius: var(--deeplib-border-radius);
         border-bottom-left-radius: var(--deeplib-border-radius);
@@ -480,6 +484,12 @@
       }
     }
   }
+}
+
+.rsp-behaviors-editor-panel .rsp-behaviors-collapsible .rsp-behaviors-collapsible-content button.deeplib-button.rsp-constraint-remove {
+  flex: 0 1 auto;
+  width: min(5dvh, 2.5dvw);
+  height: min(5dvh, 2.5dvw);
 }
 
 // #endregion !SECTION Editor Panel

@@ -5,6 +5,7 @@ const selector = Object.freeze({
   numberInputField: (id: string) => `rsp-number-input-field-${id}`,
   dropdownField: (id: string) => `rsp-dropdown-field-${id}`,
   contentListSection: (id: string) => `rsp-content-list-section-${id}`,
+  collapsibleSectionId: (id: string) => `rsp-collapsible-section-${id}`,
   collapsibleHeader: 'rsp-behaviors-collapsible-header',
   collapsibleContent: 'rsp-behaviors-collapsible-content',
   collapsibleSection: 'rsp-behaviors-collapsible',
@@ -24,7 +25,7 @@ export function createInputField({ id, labelKey, value = '', onChange }: InputFi
   }
 
   const element = advElement.createInput({
-    id: elementId,
+    id: thisElement ? CommonGenerateUniqueID() : elementId,
     type: 'text',
     label: getText(labelKey),
     setElementValue: () => value,
@@ -35,8 +36,10 @@ export function createInputField({ id, labelKey, value = '', onChange }: InputFi
       }
     }
   });
+
   if (thisElement) {
     thisElement.replaceWith(element);
+    element.id = elementId;
   }
 
   return element;
@@ -62,7 +65,7 @@ export function createNumberInputField({ id, labelKey, value = '', onChange, ste
   }
 
   const element = advElement.createInput({
-    id: elementId,
+    id: thisElement ? CommonGenerateUniqueID() : elementId,
     type: 'number',
     label: getText(labelKey),
     setElementValue: () => value,
@@ -83,6 +86,7 @@ export function createNumberInputField({ id, labelKey, value = '', onChange, ste
 
   if (thisElement) {
     thisElement.replaceWith(element);
+    element.id = elementId;
   }
 
   return element;
@@ -94,17 +98,18 @@ interface DropdownFieldOptions {
   value?: string;
   options: string[];
   onChange: (value: string) => void;
+  replace?: boolean;
 }
-export function createDropdownField({ id, labelKey, value = '', options, onChange }: DropdownFieldOptions): HTMLElement {
+export function createDropdownField({ id, labelKey, value = '', options, onChange, replace = true }: DropdownFieldOptions): HTMLElement {
   value = value || options[0];
   const elementId = selector.dropdownField(id);
   const thisElement = ElementWrap(elementId);
-  if (thisElement) {
+  if (thisElement && replace) {
     thisElement.replaceChildren();
   }
 
   const element = advElement.createDropdown({
-    id: elementId,
+    id: thisElement ? CommonGenerateUniqueID() : elementId,
     label: getText(labelKey),
     optionsList: options.map(opt => {
       const label = getText('behaviors.option.' + opt);
@@ -126,8 +131,9 @@ export function createDropdownField({ id, labelKey, value = '', options, onChang
     setSettingValue: onChange
   });
 
-  if (thisElement) {
+  if (thisElement && replace) {
     thisElement.replaceWith(element);
+    element.id = elementId;
   }
 
   return element;
@@ -139,11 +145,12 @@ interface ContentListSectionOptions {
   onAdd: () => void;
   addLabel: string;
   content: HTMLElement;
+  replace?: boolean;
 }
-export function buildContentListSection({ id, labelKey, onAdd, addLabel, content }: ContentListSectionOptions): HTMLElement {
+export function buildContentListSection({ id, labelKey, onAdd, addLabel, content, replace = true }: ContentListSectionOptions): HTMLElement {
   const sectionId = selector.contentListSection(id);
   const thisElement = ElementWrap(sectionId);
-  if (thisElement) {
+  if (thisElement && replace) {
     thisElement.replaceChildren();
   }
 
@@ -176,7 +183,7 @@ export function buildContentListSection({ id, labelKey, onAdd, addLabel, content
   const container = ElementCreate({
     tag: 'div',
     attributes: {
-      id: sectionId,
+      id: thisElement ? CommonGenerateUniqueID() : sectionId,
     },
     classList: ['rsp-behaviors-section'],
     children: [
@@ -185,24 +192,33 @@ export function buildContentListSection({ id, labelKey, onAdd, addLabel, content
     ]
   });
 
-  if (thisElement) {
+  if (thisElement && replace) {
     thisElement.replaceWith(container);
+    container.id = sectionId;
   }
 
   return container;
 }
 
 interface CollapsibleSectionOptions {
+  id?: string;
   headerKey: string;
-  content: HTMLElement[];
+  content: Thunk<HTMLElement[]>;
+  expanded?: boolean;
 }
-export function buildCollapsibleSection({ headerKey, content }: CollapsibleSectionOptions): HTMLElement {
+export function buildCollapsibleSection({ id, headerKey, content, expanded = false }: CollapsibleSectionOptions): HTMLElement {
+  id ??= CommonGenerateUniqueID();
+  const sectionId = selector.collapsibleSectionId(id);
+  const thisElement = ElementWrap(sectionId);
+  if (thisElement) {
+    thisElement.replaceChildren();
+  }
 
   const header = ElementCreate({
     tag: 'div',
     classList: [selector.collapsibleHeader],
     attributes: {
-      'data-expanded': 'false'
+      'data-expanded': expanded ? 'true' : 'false'
     },
     children: [getText(headerKey)],
     eventListeners: {
@@ -216,14 +232,22 @@ export function buildCollapsibleSection({ headerKey, content }: CollapsibleSecti
   const contentDiv = ElementCreate({
     tag: 'div',
     classList: [selector.collapsibleContent],
-    children: content
+    children: CommonUnwrapThunk(content)
   });
 
   const section = ElementCreate({
     tag: 'div',
+    attributes: {
+      id: thisElement ? CommonGenerateUniqueID() : sectionId,
+    },
     classList: [selector.collapsibleSection],
     children: [header, contentDiv]
   });
+
+  if (thisElement) {
+    thisElement.replaceWith(section);
+    section.id = sectionId;
+  }
 
   return section;
 }

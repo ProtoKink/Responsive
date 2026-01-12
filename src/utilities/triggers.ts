@@ -207,20 +207,49 @@ export function processTriggerConstraint(triggerConstraint: TriggerConstraint, m
   return true;
 }
 
-export function triggerHasConstraints(trigger: Trigger): boolean {
-  const contraints = Object.values(trigger.constraints ?? {});
-  if (contraints.length === 0) return false;
+export function triggerHasAnyConstraints(trigger: Trigger): boolean {
+  if (!trigger.constraints) return false;
 
-  return contraints.some(c => {
-    switch (typeof c) {
-      case 'number':
-        return true;
-      case 'object':
-        return c.entries.length > 0;
-      case 'undefined':
-        return false;
+  for (const key in trigger.constraints) {
+    const typedKey = key as keyof TriggerConstraint;
+    let hasConstraint = false;
+    switch (typedKey) {
+      case 'source':
+      case 'target':
+      case 'arousalMin':
+      case 'arousalMax':
+      case 'inRoomWithMembers':
+      case 'inRoomNamed':
+      case 'restrained':
+      case 'gagged':
+      case 'blinded':
+      case 'deafened':
+        hasConstraint = triggerHasConstraint(trigger, typedKey);
+        break;
       default:
-        return assertNever(c);
+        assertNever(typedKey);
     }
-  });
+    if (hasConstraint) return true;
+  }
+  return false;
+}
+
+export function triggerHasConstraint<K extends keyof TriggerConstraint>(trigger: Trigger, key: K): boolean {
+  if (!trigger.constraints) return false;
+  const value = trigger.constraints[key] as TriggerConstraint[K];
+  if (value === null || value === undefined) return false;
+
+  switch (typeof value) {
+    case 'number':
+      return true;
+    case 'object':
+      if ('entries' in value) {
+        return !!value.entries;
+      }
+      return false;
+    case 'boolean':
+      return true;
+    default:
+      return assertNever(value);
+  }
 }

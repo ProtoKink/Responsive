@@ -1,27 +1,40 @@
 import { advElement, exportToGlobal, getText, Modal } from 'bc-deeplib/deeplib';
 
-export async function idSelectorModal(buttons: { label: string, value: string }[]): Promise<string[]> {
-  const selectedIds: Set<string> = new Set();
+export async function idSelectorModal(options: { buttons?: { label: string, value: string, selected?: boolean }[], limit?: number }): Promise<string[] | null> {
+  options ??= {};
+  const buttons = options.buttons ?? [];
+  const limit = options.limit ?? Infinity;
+  if (buttons.length === 0 || limit < 1) {
+    return [];
+  }
 
-  const buttonElements = buttons.map(button => advElement.createButton({
-    id: `rsp-selector-${button.value}`,
-    onClick: function () {
-      const state = this.toggleAttribute('data-selected');
-      if (state) {
-        selectedIds.add(button.value);
-      } else {
-        selectedIds.delete(button.value);
+  const selectedIds: Set<string> = new Set(buttons.filter(button => button.selected).map(button => button.value));
+
+  const buttonElements = buttons.map(button => {
+    const isSelected = button.selected ?? false;
+    return advElement.createButton({
+      id: `rsp-selector-${button.value}`,
+      onClick: function () {
+        const state = this.toggleAttribute('data-selected');
+        if (state) {
+          selectedIds.add(button.value);
+        } else {
+          selectedIds.delete(button.value);
+        }
+      },
+      options: {
+        label: button.label
+      },
+      htmlOptions: {
+        button: {
+          classList: ['rsp-selector-button'],
+          attributes: {
+            selected: isSelected ? '' : undefined
+          }
+        }
       }
-    },
-    options: {
-      label: button.label
-    },
-    htmlOptions: {
-      button: {
-        classList: ['rsp-selector-button'],
-      }
-    }
-  }));
+    });
+  });
 
   return await Modal.confirm([
     advElement.createLabel({ id: null, label: getText('behaviors.prompt.select_item') }),
@@ -33,7 +46,7 @@ export async function idSelectorModal(buttons: { label: string, value: string }[
     }
   ], { modalClassList: ['rsp-modal'] }).then((result) => {
     if (!result) {
-      return [];
+      return null;
     }
     return Array.from(selectedIds);
   });
