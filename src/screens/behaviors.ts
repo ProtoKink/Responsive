@@ -696,7 +696,7 @@ export class GuiBehaviors extends BaseSubscreen {
 
     elements.push(buildCollapsibleSection({
       id: selector.constraintsSection(trigger.id),
-      headerKey: 'behaviors.section.advanced_options',
+      headerKey: 'behaviors.section.constraints',
       content: this.buildTriggerContraintsOptions(trigger)
     }));
 
@@ -952,7 +952,7 @@ export class GuiBehaviors extends BaseSubscreen {
     const onChange = () => {
       buildCollapsibleSection({
         id: selector.constraintsSection(trigger.id),
-        headerKey: 'behaviors.section.advanced_options',
+        headerKey: 'behaviors.section.constraints',
         content: () => this.buildTriggerContraintsOptions(trigger),
         expanded: true
       });
@@ -980,8 +980,12 @@ export class GuiBehaviors extends BaseSubscreen {
         id: `rsp-label-constraints-${CommonGenerateUniqueID()}`,
         label: getText('behaviors.text.no_constraints')
       });
-      elements.push(addConstraintLabel);
-      elements.push(addConstraintButton);
+      const container = ElementCreate({
+        tag: 'div',
+        classList: ['rsp-no-constraints-container'],
+        children: [addConstraintLabel, addConstraintButton]
+      });
+      elements.push(container);
       return elements;
     }
 
@@ -1346,7 +1350,7 @@ export class GuiBehaviors extends BaseSubscreen {
 
       buildCollapsibleSection({
         id: selector.constraintsSection(trigger.id),
-        headerKey: 'behaviors.section.advanced_options',
+        headerKey: 'behaviors.section.constraints',
         content: () => this.buildTriggerContraintsOptions(trigger),
         expanded: true
       });

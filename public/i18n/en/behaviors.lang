@@ -66,7 +66,7 @@ behaviors.field.in_room_named = In Room Named
 # Sections
 behaviors.section.triggers = Triggers
 behaviors.section.reactions = Reactions
-behaviors.section.advanced_options = Advanced Options
+behaviors.section.constraints = Constraints
 
 # Trigger Types
 behaviors.trigger_type.speech = Speech

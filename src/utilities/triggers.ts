@@ -1,5 +1,5 @@
 import { modLogger } from 'bc-deeplib/deeplib';
-import { TriggerConstraint, MessageData, ConstraintMode, TriggerType, Behavior, TriggerTypeSchema, MessageDataSchema, TriggerConstraintSchema, ConstraintModeSchema, Trigger, TriggerSpeech, TriggerEmote, TriggerAction, MatchMode } from '../models/behaviors';
+import { TriggerConstraint, MessageData, ConstraintMode, TriggerType, Behavior, TriggerTypeSchema, MessageDataSchema, TriggerConstraintSchema, ConstraintModeSchema, Trigger, TriggerSpeech, MatchMode } from '../models/behaviors';
 import { BehaviorsModule } from '../modules/behaviors';
 import { assertNever } from './other';
 import { replaceTemplate } from './chat_messages';
