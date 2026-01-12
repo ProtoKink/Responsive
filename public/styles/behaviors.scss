@@ -105,6 +105,7 @@
       padding: minv(1, 0.5);
       transition: background-color 0.2s;
       height: unset;
+      position: relative !important;
 
       &:hover {
         background-color: var(--tmd-accent-hover, #e0e0e0);
@@ -130,6 +131,14 @@
         .rsp-behaviors-item-name {
           color: white;
         }
+      }
+
+      .rsp-behaviors-item-timeout-icon {
+        position: absolute !important;
+        inset: minv(0.5, 0.25) minv(0.5, 0.25) auto auto !important;
+        width: minv(4, 2) !important;
+        height: minv(4, 2) !important;
+        z-index: 1 !important;
       }
 
       .rsp-behaviors-item-name {

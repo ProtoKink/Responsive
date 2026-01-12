@@ -343,6 +343,8 @@ export class GuiBehaviors extends BaseSubscreen {
 
   buildBehaviorListItem(behavior: Behavior): HTMLElement {
     const isSelected = this.selectedBehaviorId === behavior.id;
+    const hasTimeout = behavior.cooldownSec && behavior.cooldownSec > 0;
+    const image = hasTimeout ? `${PUBLIC_URL}/images/clock.svg` : undefined;
 
     const thisElement = ElementWrap(selector.listItem(behavior.id));
     if (thisElement) {
@@ -385,6 +387,9 @@ export class GuiBehaviors extends BaseSubscreen {
           this.selectBehavior(behavior.id);
         }
       },
+      options: {
+        image: image
+      },
       htmlOptions: {
         button: {
           classList: [selector.listItemC],
@@ -397,6 +402,9 @@ export class GuiBehaviors extends BaseSubscreen {
             mainDiv
           ]
         },
+        img: {
+          classList: ['rsp-behaviors-item-timeout-icon']
+        }
       }
     });
 
