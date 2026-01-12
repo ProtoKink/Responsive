@@ -37,6 +37,12 @@ export const IncludeExcludeEntrySchema = z.object({
 });
 export type IncludeExcludeEntry = z.infer<typeof IncludeExcludeEntrySchema>;
 
+export const MatchContentEntrySchema = z.object({
+  value: z.coerce.string<string>(),
+  matchMode: MatchModeSchema.default('contains')
+});
+export type MatchContentEntry = z.infer<typeof MatchContentEntrySchema>;
+
 export const IncludeExcludeRuleSchema = z.object({
   entries: z.array(IncludeExcludeEntrySchema)
 });
@@ -139,22 +145,19 @@ export type BaseTrigger = z.infer<typeof BaseTriggerSchema>;
 export const TriggerSpeechSchema = BaseTriggerSchema.extend({
   type: z.literal('speech'),
   speechType: SpeechTypeSchema,
-  content: z.array(z.string()),
-  matchMode: MatchModeSchema
+  content: z.array(MatchContentEntrySchema)
 });
 export type TriggerSpeech = z.infer<typeof TriggerSpeechSchema>;
 
 export const TriggerEmoteSchema = BaseTriggerSchema.extend({
   type: z.literal('emote'),
-  content: z.array(z.string()),
-  matchMode: MatchModeSchema
+  content: z.array(MatchContentEntrySchema)
 });
 export type TriggerEmote = z.infer<typeof TriggerEmoteSchema>;
 
 export const TriggerActionSchema = BaseTriggerSchema.extend({
   type: z.literal('action'),
-  content: z.array(z.string()),
-  matchMode: MatchModeSchema
+  content: z.array(MatchContentEntrySchema)
 });
 export type TriggerAction = z.infer<typeof TriggerActionSchema>;
 

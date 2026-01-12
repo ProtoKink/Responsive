@@ -2,6 +2,7 @@ import { vi } from 'vitest';
 
 export const Player = {
   MemberNumber: 1,
+  Name: 'Test Character',
   ArousalSettings: {
     Progress: 50,
   },
@@ -41,8 +42,6 @@ export function ChatRoomGetCharacter(spec: string | number): any {
   return ChatRoomCharacter.find((c: any) => c.MemberNumber === memberNumber);
 }
 
-export const ChatRoomSendEmote = vi.fn();
-
 export function AssetGetActivity(_asset: string, activityName: string): any {
   return {
     Name: activityName,
@@ -74,6 +73,7 @@ export const ElementValue = vi.fn((_id: string, value?: string) => {
 });
 
 export const ChatRoomSendChat = vi.fn();
+export const ChatRoomSendEmote = vi.fn();
 
 export const ChatRoomSendChatMessage = vi.fn();
 
@@ -84,4 +84,8 @@ export function CommonKeys(obj: any): string[] {
 export function CommonGenerateUniqueID(): string {
   return 'unique-id-' + Math.random().toString(36).slice(2, 11);
 }
+
+export function ActivityCanBeDone(): boolean {
+  return true;
+} 
 

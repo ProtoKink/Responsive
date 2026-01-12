@@ -5,27 +5,75 @@ import { BehaviorsModule } from '@/modules/behaviors';
 import * as gg from '../mocks/game-globals';
 import { setMockTime, advanceMockTime } from '../mocks/game-globals';
 
-vi.mock('@/modules/behaviors', () => {
+vi.mock('@/modules/behaviors', async () => {
+  const actual = await vi.importActual<typeof import('@/modules/behaviors')>('@/modules/behaviors');
+  const MockedBehaviorsModule = actual.BehaviorsModule;
+  
+  const mockInstance = {
+    settings: {
+      behaviors: {},
+      triggers: {},
+      reactions: {},
+    },
+    behaviorExecutionMap: new Map(),
+    getTrigger: vi.fn(),
+    getReaction: vi.fn(),
+  };
+  
+  // Override the instance property
+  Object.defineProperty(MockedBehaviorsModule, 'instance', {
+    get: () => mockInstance,
+    configurable: true,
+  });
+  
   return {
-    BehaviorsModule: {
-      instance: {
-        settings: {
-          behaviors: {},
-          triggers: {},
-          reactions: {},
+    ...actual,
+    BehaviorsModule: MockedBehaviorsModule,
+  };
+});
+
+vi.mock('bc-deeplib/deeplib', async () => {
+  const actual = await vi.importActual('bc-deeplib/deeplib');
+  return {
+    ...actual,
+    modLogger: {
+      error: vi.fn(),
+    },
+    sendActionMessage: vi.fn(),
+    ModStorage: class {
+      playerStorage = {
+        GlobalModule: {
+          modEnabled: true,
+          responsesEnabled: true,
+          doPreventMessageIfBcxBlock: false,
+          doMessageInterruption: false,
         },
-        getTrigger: vi.fn(),
-        getReaction: vi.fn(),
-      },
+        BehaviorsModule: {},
+        ProfilesModule: [],
+      };
+      save = vi.fn();
+      constructor(_name: string) {}
     },
   };
 });
 
-vi.mock('bc-deeplib/deeplib', () => ({
-  modLogger: {
-    error: vi.fn(),
-  },
+vi.mock('@/utilities/reactions', () => ({
+  processReactions: vi.fn(() => true),
 }));
+
+vi.mock('@/utilities/chat_messages', () => ({
+  chatRoomAutoInterceptMessage: vi.fn(),
+  randomResponse: vi.fn((arr: string[]) => arr[0] || ''),
+  replaceTemplate: vi.fn((msg: string) => msg),
+}));
+
+vi.mock('@/utilities/handlers', () => ({
+  doesBcxAllowsTalking: vi.fn(() => true),
+  areBehaviorsEnabled: vi.fn(() => true),
+}));
+
+global.AssetGetActivity = vi.fn(() => ({ Name: 'TestActivity', Group: 'TestGroup' } as any));
+global.AssetGroupGet = vi.fn(() => ({ Name: 'TestGroup' } as any));
 
 describe('processTrigger', () => {
   let mockBehaviors: Record<string, Behavior>;
@@ -37,6 +85,7 @@ describe('processTrigger', () => {
     (BehaviorsModule.instance.getTrigger as any).mockImplementation((id: string) => mockTriggers[id]);
     BehaviorsModule.instance.settings.behaviors = mockBehaviors;
     BehaviorsModule.instance.settings.triggers = mockTriggers;
+    BehaviorsModule.instance.behaviorExecutionMap.clear();
     setMockTime(1000000);
   });
 
@@ -47,8 +96,7 @@ describe('processTrigger', () => {
         name: 'Test Trigger',
         type: 'speech',
         speechType: 'any',
-        content: ['hello'],
-        matchMode: 'contains',
+        content: [{ value: 'hello', matchMode: 'contains' }],
       };
 
       const behavior: Behavior = {
@@ -78,8 +126,7 @@ describe('processTrigger', () => {
         name: 'Test Trigger',
         type: 'speech',
         speechType: 'any',
-        content: ['hello'],
-        matchMode: 'startsWith',
+        content: [{ value: 'hello', matchMode: 'startsWith' }],
       };
 
       const behavior: Behavior = {
@@ -109,8 +156,7 @@ describe('processTrigger', () => {
         name: 'Test Trigger',
         type: 'speech',
         speechType: 'any',
-        content: ['world'],
-        matchMode: 'endsWith',
+        content: [{ value: 'world', matchMode: 'endsWith' }],
       };
 
       const behavior: Behavior = {
@@ -140,8 +186,7 @@ describe('processTrigger', () => {
         name: 'Test Trigger',
         type: 'speech',
         speechType: 'any',
-        content: ['hello world'],
-        matchMode: 'exact',
+        content: [{ value: 'hello world', matchMode: 'exact' }],
       };
 
       const behavior: Behavior = {
@@ -171,8 +216,7 @@ describe('processTrigger', () => {
         name: 'Test Trigger',
         type: 'speech',
         speechType: 'any',
-        content: ['he.*o'],
-        matchMode: 'regex',
+        content: [{ value: 'he.*o', matchMode: 'regex' }],
       };
 
       const behavior: Behavior = {
@@ -202,8 +246,7 @@ describe('processTrigger', () => {
         name: 'Test Trigger',
         type: 'speech',
         speechType: 'any',
-        content: ['goodbye'],
-        matchMode: 'contains',
+        content: [{ value: 'goodbye', matchMode: 'contains' }],
       };
 
       const behavior: Behavior = {
@@ -234,8 +277,7 @@ describe('processTrigger', () => {
         id: 'trigger1',
         name: 'Test Trigger',
         type: 'emote',
-        content: ['smiles'],
-        matchMode: 'contains',
+        content: [{ value: 'smiles', matchMode: 'contains' }],
       };
 
       const behavior: Behavior = {
@@ -266,8 +308,7 @@ describe('processTrigger', () => {
         id: 'trigger1',
         name: 'Test Trigger',
         type: 'action',
-        content: ['hugs'],
-        matchMode: 'contains',
+        content: [{ value: 'hugs', matchMode: 'contains' }],
       };
 
       const behavior: Behavior = {
@@ -505,9 +546,7 @@ describe('processTrigger', () => {
         name: 'Test Trigger',
         type: 'speech',
         speechType: 'any',
-        content: ['hello'],
-        matchMode: 'contains',
-        cooldownSec: 5,
+        content: [{ value: 'hello', matchMode: 'contains' }],
       };
 
       const behavior: Behavior = {
@@ -517,6 +556,7 @@ describe('processTrigger', () => {
         triggers: ['trigger1'],
         reactions: [],
         reactionMode: 'random',
+        cooldownSec: 5,
       };
 
       mockTriggers['trigger1'] = trigger;
@@ -527,7 +567,7 @@ describe('processTrigger', () => {
         messageContent: 'hello world',
       };
 
-      const result1 = processTrigger('speech', messageData);
+      const result1 = BehaviorsModule.processBehavior('speech', messageData);
       expect(result1).toEqual(behavior);
 
       advanceMockTime(3000);
@@ -549,8 +589,7 @@ describe('processTrigger', () => {
         name: 'Test Trigger',
         type: 'speech',
         speechType: 'any',
-        content: ['hello'],
-        matchMode: 'contains',
+        content: [{ value: 'hello', matchMode: 'contains' }],
       };
 
       const behavior: Behavior = {

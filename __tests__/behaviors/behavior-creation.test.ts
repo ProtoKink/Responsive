@@ -113,8 +113,10 @@ describe('Trigger Creation', () => {
         type: 'speech',
         name: 'Test Speech Trigger',
         speechType: 'any',
-        content: ['hello', 'hi'],
-        matchMode: 'contains',
+        content: [
+          { value: 'hello', matchMode: 'contains' },
+          { value: 'hi', matchMode: 'contains' }
+        ],
       };
 
       const result = BehaviorsModule.createTrigger(input) as TriggerSpeech;
@@ -123,8 +125,10 @@ describe('Trigger Creation', () => {
       expect(result?.type).toBe('speech');
       expect(result?.name).toBe('Test Speech Trigger');
       expect(result?.speechType).toBe('any');
-      expect(result?.content).toEqual(['hello', 'hi']);
-      expect(result?.matchMode).toBe('contains');
+      expect(result?.content).toEqual([
+        { value: 'hello', matchMode: 'contains' },
+        { value: 'hi', matchMode: 'contains' }
+      ]);
       expect(result?.id).toBeDefined();
     });
 
@@ -132,8 +136,10 @@ describe('Trigger Creation', () => {
       const input: TriggerInput = {
         type: 'emote',
         name: 'Test Emote Trigger',
-        content: ['smiles', 'grins'],
-        matchMode: 'contains',
+        content: [
+          { value: 'smiles', matchMode: 'contains' },
+          { value: 'grins', matchMode: 'contains' }
+        ],
       };
 
       const result = BehaviorsModule.createTrigger(input) as TriggerEmote;
@@ -141,8 +147,10 @@ describe('Trigger Creation', () => {
       expect(result).toBeDefined();
       expect(result?.type).toBe('emote');
       expect(result?.name).toBe('Test Emote Trigger');
-      expect(result?.content).toEqual(['smiles', 'grins']);
-      expect(result?.matchMode).toBe('contains');
+      expect(result?.content).toEqual([
+        { value: 'smiles', matchMode: 'contains' },
+        { value: 'grins', matchMode: 'contains' }
+      ]);
       expect(result?.id).toBeDefined();
     });
 
@@ -150,8 +158,10 @@ describe('Trigger Creation', () => {
       const input: TriggerInput = {
         type: 'action',
         name: 'Test Action Trigger',
-        content: ['hugs', 'kisses'],
-        matchMode: 'startsWith',
+        content: [
+          { value: 'hugs', matchMode: 'startsWith' },
+          { value: 'kisses', matchMode: 'startsWith' }
+        ],
       };
 
       const result = BehaviorsModule.createTrigger(input) as TriggerAction;
@@ -159,8 +169,10 @@ describe('Trigger Creation', () => {
       expect(result).toBeDefined();
       expect(result?.type).toBe('action');
       expect(result?.name).toBe('Test Action Trigger');
-      expect(result?.content).toEqual(['hugs', 'kisses']);
-      expect(result?.matchMode).toBe('startsWith');
+      expect(result?.content).toEqual([
+        { value: 'hugs', matchMode: 'startsWith' },
+        { value: 'kisses', matchMode: 'startsWith' }
+      ]);
       expect(result?.id).toBeDefined();
     });
 
@@ -219,8 +231,9 @@ describe('Trigger Creation', () => {
         type: 'speech',
         name: 'Test Trigger',
         speechType: 'any',
-        content: ['hello'],
-        matchMode: 'contains',
+        content: [
+          { value: 'hello', matchMode: 'contains' }
+        ],
         constraints: {
           arousalMin: 30,
           arousalMax: 70,
@@ -231,7 +244,6 @@ describe('Trigger Creation', () => {
           },
         },
         constraintMode: 'all',
-        cooldownSec: 5,
       };
 
       const result = BehaviorsModule.createTrigger(input);
@@ -242,7 +254,6 @@ describe('Trigger Creation', () => {
       expect(result?.constraints?.arousalMax).toBe(70);
       expect(result?.constraints?.source).toBeDefined();
       expect(result?.constraintMode).toBe('all');
-      expect(result?.cooldownSec).toBe(5);
     });
   });
 
@@ -251,8 +262,9 @@ describe('Trigger Creation', () => {
       const input: TriggerInput = {
         type: 'speech',
         speechType: 'any',
-        content: ['hello'],
-        matchMode: 'contains',
+        content: [
+          { value: 'hello', matchMode: 'contains' }
+        ],
       };
 
       const result = BehaviorsModule.createTrigger(input);
@@ -410,14 +422,16 @@ describe('ID Generation', () => {
     const input1: TriggerInput = {
       type: 'speech',
       speechType: 'any',
-      content: ['hello'],
-      matchMode: 'contains',
+      content: [
+        { value: 'hello', matchMode: 'contains' }
+      ],
     };
     const input2: TriggerInput = {
       type: 'speech',
       speechType: 'any',
-      content: ['hi'],
-      matchMode: 'contains',
+      content: [
+        { value: 'hi', matchMode: 'contains' }
+      ],
     };
 
     const result1 = BehaviorsModule.createTrigger(input1);

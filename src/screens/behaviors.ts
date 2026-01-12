@@ -1,6 +1,6 @@
 // #region SECTION Imports & Types
 import { advElement, BaseSubscreen, exportToGlobal, getText, layout, Modal, SettingElement, SubscreenOptions } from 'bc-deeplib/deeplib';
-import { BehaviorsSettingsModel, Behavior, Trigger, Reaction, ConstraintMode, MatchMode, SpeechType, OrgasmType, RoomPresenceEvent, ReactionMode, TriggerTypeSchema, ReactionTypeSchema, ReactionType, TriggerType, IncludeExcludeEntry, SpeechTypeSchema, MatchModeSchema, OrgasmTypeSchema, RoomPresenceEventSchema, ReactionModeSchema, ConstraintModeSchema, IncludeExcludeEntrySchema, TriggerConstraint } from '../models/behaviors';
+import { BehaviorsSettingsModel, Behavior, Trigger, Reaction, ConstraintMode, MatchMode, SpeechType, OrgasmType, RoomPresenceEvent, ReactionMode, TriggerTypeSchema, ReactionTypeSchema, ReactionType, TriggerType, IncludeExcludeEntry, MatchContentEntry, SpeechTypeSchema, MatchModeSchema, OrgasmTypeSchema, RoomPresenceEventSchema, ReactionModeSchema, ConstraintModeSchema, IncludeExcludeEntrySchema, TriggerConstraint } from '../models/behaviors';
 import { BehaviorsModule } from '../modules/behaviors';
 import { assertNever } from '../utilities/other';
 import { activitySelectorModal, bodyPartSelectorModal, idSelectorModal, memberNumberSelectorModal, textReactionSelectorModal } from '@/utilities/selectorModals';
@@ -819,49 +819,48 @@ export class GuiBehaviors extends BaseSubscreen {
           onChange: (val) => trigger.speechType = val as SpeechType
         });
         elements.push(speechTypeField);
-        const renderContent = () => this.buildContentArrayField(
+        const renderContent = () => this.buildMatchContentField(
           `${trigger.id}-content`,
           'behaviors.field.content',
+          () => {
+            textReactionSelectorModal({ prompt: getText('behaviors.prompt.add_content')}).then((response) => {
+              if (response === null) return;
+              trigger.content.push({ value: response, matchMode: 'contains' });
+              renderContent();
+            });
+          },
           trigger.content,
-          (val) => {
-            trigger.content = val;
+          (entries) => {
+            trigger.content = entries;
             renderContent();
-          }
+          },
+          true
         );
         const contentSection = renderContent();
         elements.push(contentSection);
-        const matchModeField1 = createDropdownField({
-          id: `${trigger.id}-match-mode`,
-          labelKey: 'behaviors.field.match_mode',
-          value: trigger.matchMode,
-          options: Object.values(MatchModeSchema.options),
-          onChange: (val) => trigger.matchMode = val as MatchMode
-        });
-        elements.push(matchModeField1);
         break;
       }
       case 'emote':
       case 'action': {
-        const renderContent = () => this.buildContentArrayField(
+        const renderContent = () => this.buildMatchContentField(
           `${trigger.id}-content`,
           'behaviors.field.content',
+          () => {
+            textReactionSelectorModal({ prompt: getText('behaviors.prompt.add_content')}).then((response) => {
+              if (response === null) return;
+              trigger.content.push({ value: response, matchMode: 'contains' });
+              renderContent();
+            });
+          },
           trigger.content,
-          (val) => {
-            trigger.content = val;
+          (entries) => {
+            trigger.content = entries;
             renderContent();
-          }
+          },
+          true
         );
         const contentSection = renderContent();
         elements.push(contentSection);
-        
-        const matchModeField2 = createDropdownField({
-          id: `${trigger.id}-match-mode`,
-          labelKey: 'behaviors.field.match_mode',
-          value: trigger.matchMode,
-          options: Object.values(MatchModeSchema.options),
-          onChange: (val) => trigger.matchMode = val as MatchMode
-        });
-        elements.push(matchModeField2);
         break;
       }
       case 'activity': {
@@ -1091,7 +1090,7 @@ export class GuiBehaviors extends BaseSubscreen {
     }
 
     if (triggerHasConstraint(trigger, 'arousalMin')) {
-      const renderArousalMin = (replace?: boolean) => {
+      const renderArousalMin = (_replace?: boolean) => {
         const field = createNumberInputField({
           id: `${trigger.id}-arousal-min`,
           labelKey: 'behaviors.field.arousal_min',
@@ -1571,8 +1570,8 @@ export class GuiBehaviors extends BaseSubscreen {
     id: string, 
     labelKey: string, 
     onAdd: () => void, 
-    rule: { entries: Array<{ value: string; mode: 'include' | 'exclude' }> } | undefined, 
-    onChange: (rule: { entries: Array<{ value: string; mode: 'include' | 'exclude' }> } | undefined) => void, 
+    rule: { entries: IncludeExcludeEntry[] } | undefined, 
+    onChange: (rule: { entries: IncludeExcludeEntry[] } | undefined) => void, 
     onRemove?: () => void,
     replace?: boolean
   ): HTMLElement {
@@ -1618,6 +1617,126 @@ export class GuiBehaviors extends BaseSubscreen {
         header.appendChild(removeButton);
       }
     }
+
+    if (thisElement && replace) {
+      thisElement.replaceWith(section);
+    }
+
+    return section;
+  }
+
+  buildMatchContentEntryList(
+    id: string, 
+    entries: MatchContentEntry[], 
+    onChange: (entries: MatchContentEntry[]) => void
+  ): HTMLElement {
+    const tooltip = this.deleteMode
+      ? getText('behaviors.text.delete_mode')
+      : getText('behaviors.text.edit_mode');
+
+    const thisElement = ElementWrap(selector.constraintEntryList(id));
+    if (thisElement) {
+      thisElement.replaceChildren();
+    }
+
+    const container = ElementCreate({
+      tag: 'div',
+      attributes: {
+        id: selector.constraintEntryList(id),
+      },
+      classList: [selector.contentList, 'scroll-box'],
+      children: [
+        ...entries.slice().reverse().map((entry, index) => {
+          const originalIndex = entries.length - 1 - index;
+          const matchModeField = createDropdownField({
+            id: `${id}-entry-${originalIndex}-match-mode`,
+            labelKey: '',
+            value: entry.matchMode ?? 'contains',
+            options: Object.values(MatchModeSchema.options),
+            onChange: (val) => {
+              entries[originalIndex].matchMode = val as MatchMode;
+              onChange(entries);
+            }
+          });
+          const entryContainer = ElementCreate({
+            tag: 'div',
+            classList: ['rsp-constraint-entry'],
+            children: [
+              matchModeField,
+              advElement.createButton({
+                id: `rsp-constraint-entry-${originalIndex}-${CommonGenerateUniqueID()}`,
+                options: {
+                  label: entry.value === '' ? getText('behaviors.text.empty_content') : entry.value,
+                  tooltip: tooltip,
+                  tooltipPosition: 'top'
+                },
+                htmlOptions: {
+                  button: {
+                    classList: ['rsp-content-item'],
+                    dataAttributes: {
+                      deletable: 'true',
+                      deleteMode: this.deleteMode,
+                      emptyContent: (entry.value === '').toString()
+                    }
+                  },
+                  label: {
+                    classList: ['truncated-text']
+                  }
+                },
+                onClick: async () => {
+                  if (this.deleteMode) {
+                    const confirmed = await this.confirmationModal(getText('behaviors.prompt.delete_content'));
+                    if (!confirmed) return;
+
+                    entries.splice(originalIndex, 1);
+                    onChange(entries);
+                  } else {
+                    Modal.prompt(getText('behaviors.prompt.edit_content'), { defaultValue: entry.value, modalClassList: ['rsp-modal'] }).then((newValue) => {
+                      if (newValue === entry.value) return;
+                      else if (newValue === null) return;
+                      else {
+                        entries[originalIndex].value = newValue;
+                        onChange(entries);
+                      }
+                    });
+                  }
+                }
+              })
+            ]
+          });
+
+          return entryContainer;
+        })
+      ]
+    });
+
+    if (thisElement) {
+      thisElement.replaceWith(container);
+    }
+
+    return container;
+  }
+
+  buildMatchContentField(
+    id: string,
+    labelKey: string,
+    onAdd: () => void,
+    entries: MatchContentEntry[],
+    onChange: (entries: MatchContentEntry[]) => void,
+    replace?: boolean
+  ): HTMLElement {
+    const list = this.buildMatchContentEntryList(
+      id,
+      entries,
+      onChange
+    );
+
+    const thisElement = ElementWrap(selector.contentListSection(id));
+    if (thisElement && replace) {
+      thisElement.replaceChildren();
+    }
+
+    const section = buildContentListSection({ id, labelKey, onAdd, addLabel: 'behaviors.button.add_content', content: list });
 
     if (thisElement && replace) {
       thisElement.replaceWith(section);
@@ -1787,8 +1906,7 @@ export class GuiBehaviors extends BaseSubscreen {
         name: name || getText('behaviors.text.new_trigger'),
         type: 'speech',
         speechType: 'any',
-        content: [],
-        matchMode: 'contains'
+        content: []
       });
 
       if (trigger) {
@@ -1913,24 +2031,21 @@ export class GuiBehaviors extends BaseSubscreen {
           name: trigger.name || getText('behaviors.text.new_trigger'),
           type: 'speech',
           speechType: 'any',
-          content: [],
-          matchMode: 'contains'
+          content: []
         });
         break;
       case 'emote':
         newTrigger = BehaviorsModule.createTrigger({
           name: trigger.name || getText('behaviors.text.new_trigger'),
           type: 'emote',
-          content: [],
-          matchMode: 'contains'
+          content: []
         });
         break;
       case 'action':
         newTrigger = BehaviorsModule.createTrigger({
           name: trigger.name || getText('behaviors.text.new_trigger'),
           type: 'action',
-          content: [],
-          matchMode: 'contains'
+          content: []
         });
         break;
       case 'activity':

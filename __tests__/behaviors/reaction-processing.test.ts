@@ -51,13 +51,9 @@ vi.mock('@/utilities/other', () => ({
 
 import { processReactions } from '@/utilities/reactions';
 
-global.ChatRoomSendEmote = vi.fn();
 global.AssetGetActivity = vi.fn(() => ({ Name: 'TestActivity', Group: 'TestGroup' } as any));
 global.AssetGroupGet = vi.fn(() => ({ Name: 'TestGroup' } as any));
-global.ActivityRun = vi.fn();
-global.CharacterPronounDescription = vi.fn(() => 'She/Her');
 global.CharacterNickname = vi.fn(() => 'Test Character');
-global.Player = { MemberNumber: 1 } as any;
 
 describe('processReactions', () => {
   beforeEach(() => {

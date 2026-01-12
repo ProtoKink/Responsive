@@ -259,13 +259,13 @@ export class BehaviorsModule extends BaseModule {
     });
   }
 
-  static processBehavior(type: TriggerType, messageData: MessageData) {
+  static processBehavior(type: TriggerType, messageData: MessageData): Behavior | undefined {
     type = TriggerTypeSchema.parse(type);
     messageData = MessageDataSchema.parse(messageData) as MessageData;
 
     const behavior = processTrigger(type, messageData);
 
-    if (!behavior) return false;
+    if (!behavior) return undefined;
 
     const reactions = behavior.reactions
       .map(r => BehaviorsModule.instance.getReaction(r))
@@ -276,6 +276,8 @@ export class BehaviorsModule extends BaseModule {
     if (isReactionProcessed && behavior.cooldownSec) {
       BehaviorsModule.instance.behaviorExecutionMap.set(behavior.id, CommonTime());
     }
+
+    return behavior;
   }
 }
 

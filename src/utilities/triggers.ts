@@ -1,5 +1,5 @@
 import { modLogger } from 'bc-deeplib/deeplib';
-import { TriggerConstraint, MessageData, ConstraintMode, TriggerType, Behavior, TriggerTypeSchema, MessageDataSchema, TriggerConstraintSchema, ConstraintModeSchema, Trigger, TriggerSpeech, TriggerEmote, TriggerAction } from '../models/behaviors';
+import { TriggerConstraint, MessageData, ConstraintMode, TriggerType, Behavior, TriggerTypeSchema, MessageDataSchema, TriggerConstraintSchema, ConstraintModeSchema, Trigger, TriggerSpeech, TriggerEmote, TriggerAction, MatchMode } from '../models/behaviors';
 import { BehaviorsModule } from '../modules/behaviors';
 import { assertNever } from './other';
 import { replaceTemplate } from './chat_messages';
@@ -15,6 +15,18 @@ type TriggerPredicate = (trigger: Trigger, data: MessageData) => boolean;
 
 type TriggerPredicatesMap = Map<TriggerType, TriggerPredicate[]>;
 
+function matchText(text: string, pattern: string, matchMode: MatchMode): boolean {
+  switch (matchMode) {
+    case 'startsWith': return text.startsWith(pattern);
+    case 'endsWith': return text.endsWith(pattern);
+    case 'contains': return text.includes(pattern);
+    case 'exact': return pattern === text;
+    case 'regex': return new RegExp(pattern, 'i').test(text);
+    default:
+      assertNever(matchMode);
+  }
+}
+
 function registerPredicate(types: TriggerType[], predicate: TriggerPredicate): void {
   types.forEach(type => {
     if (!triggerPredicates.has(type)) {
@@ -29,21 +41,14 @@ const messageContentPredicate: TriggerPredicate = (trigger, data) => {
     return false;
   }
 
-  const typedTrigger = trigger as TriggerEmote | TriggerSpeech | TriggerAction;
+  const typedTrigger = trigger;
 
   if (!data.message) return false;
 
-  return typedTrigger.content.some(c => {
-    const templatedMessage = replaceTemplate(c, data.target, data.source);
-    switch (typedTrigger.matchMode) {
-      case 'startsWith': return data.message!.startsWith(templatedMessage);
-      case 'endsWith': return data.message!.endsWith(templatedMessage);
-      case 'contains': return data.message!.includes(templatedMessage);
-      case 'exact': return templatedMessage === data.message;
-      case 'regex': return new RegExp(templatedMessage, 'i').test(data.message!);
-      default:
-        assertNever(typedTrigger.matchMode);
-    }
+  return typedTrigger.content.some(entry => {
+    const templatedMessage = replaceTemplate(entry.value, data.target, data.source);
+    if (!data.message) return false;
+    return matchText(data.message, templatedMessage, entry.matchMode);
   });
 };
 
