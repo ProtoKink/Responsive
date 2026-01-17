@@ -6,9 +6,9 @@ const selector = Object.freeze({
   dropdownField: (id: string) => `rsp-dropdown-field-${id}`,
   contentListSection: (id: string) => `rsp-content-list-section-${id}`,
   collapsibleSectionId: (id: string) => `rsp-collapsible-section-${id}`,
-  collapsibleHeader: 'rsp-behaviors-collapsible-header',
-  collapsibleContent: 'rsp-behaviors-collapsible-content',
-  collapsibleSection: 'rsp-behaviors-collapsible',
+  collapsibleHeader: 'rsp-collapsible-header',
+  collapsibleContent: 'rsp-collapsible-content',
+  collapsibleSection: 'rsp-collapsible',
 });
 
 interface InputFieldOptions {
@@ -32,7 +32,7 @@ export function createInputField({ id, labelKey, value = '', onChange }: InputFi
     setSettingValue: onChange,
     htmlOptions: {
       container: {
-        classList: ['rsp-behaviors-field', 'rsp-behaviors-text-field'],
+        classList: ['rsp-field', 'rsp-text-field'],
       }
     }
   });
@@ -72,7 +72,7 @@ export function createNumberInputField({ id, labelKey, value = '', onChange, ste
     setSettingValue: onChange,
     htmlOptions: {
       container: {
-        classList: ['rsp-behaviors-field', 'rsp-behaviors-number-field'],
+        classList: ['rsp-field', 'rsp-number-field'],
       },
       input: {
         attributes: {
@@ -124,7 +124,7 @@ export function createDropdownField({ id, labelKey, value = '', options, onChang
     }),
     htmlOptions: {
       container: {
-        classList: ['rsp-behaviors-field', 'rsp-behaviors-dropdown-field'],
+        classList: ['rsp-field', 'rsp-dropdown-field'],
       }
     },
     setElementValue: () => value,
@@ -170,7 +170,7 @@ export function buildContentListSection({ id, labelKey, onAdd, addLabel, content
 
   const header = ElementCreate({
     tag: 'div',
-    classList: ['rsp-behaviors-content-list-header'],
+    classList: ['rsp-content-list-header'],
     children: [
       advElement.createLabel({
         id: `rsp-label-${CommonGenerateUniqueID()}`,
@@ -185,7 +185,7 @@ export function buildContentListSection({ id, labelKey, onAdd, addLabel, content
     attributes: {
       id: thisElement ? CommonGenerateUniqueID() : sectionId,
     },
-    classList: ['rsp-behaviors-section'],
+    classList: ['rsp-section'],
     children: [
       header,
       content

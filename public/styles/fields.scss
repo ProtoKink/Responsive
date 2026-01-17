@@ -1,0 +1,134 @@
+@use 'helpers' as *;
+@use 'variables' as *;
+
+.rsp-field {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--gap);
+  width: 100%;
+
+  // Direct label children (for manually created fields)
+  >label {
+    font-weight: bold;
+    font-size: 0.9em;
+    min-width: minv(15, 7.5);
+    flex-shrink: 0;
+    padding-top: minv(1, 0.5);
+  }
+
+  // All labels should be bold
+  label {
+    font-weight: bold;
+    font-size: 0.9em;
+  }
+
+  // Elements on the right side (excluding labels)
+  >*:not(label):not(input[type='checkbox']) {
+    flex: 1;
+    min-width: 0;
+  }
+
+  input[type='text'],
+  input[type='number'],
+  select {
+    padding: minv(1, 0.5);
+    font-size: 0.9em;
+  }
+
+  // Container for multiple elements (like include/exclude fields)
+  .rsp-field-elements {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+    flex: 1;
+  }
+}
+
+.rsp-section {
+  display: flex;
+  flex-direction: column;
+  padding: minv(1.5, 0.75);
+  background-color: var(--tmd-element-hover, white);
+  border-radius: var(--deeplib-border-radius);
+  gap: var(--gap);
+
+  .rsp-content-list-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: minv(1, 0.5);
+
+    label {
+      font-weight: bold;
+      font-size: 0.9em;
+      flex: 1 1 auto;
+    }
+
+    .rsp-content-add {
+      flex: 1 1 auto;
+      width: min-content;
+      padding: 0 minv(1, 0.5);
+    }
+  }
+}
+
+.rsp-collapsible {
+  display: flex;
+  flex-direction: column;
+  border: var(--deeplib-border-width) solid var(--deeplib-border-color, #ccc);
+  border-radius: var(--deeplib-border-radius);
+
+  .rsp-collapsible-header {
+    padding: minv(1.5, 0.75);
+    background-color: var(--tmd-element-hover, white);
+    color: var(--tmd-text, black);
+    cursor: pointer;
+    font-weight: bold;
+    user-select: none;
+    position: relative;
+    border-top-right-radius: var(--deeplib-border-radius);
+    border-top-left-radius: var(--deeplib-border-radius);
+
+    * {
+      user-select: none;
+    }
+
+    &[data-expanded='false'] {
+      border-bottom-right-radius: var(--deeplib-border-radius);
+      border-bottom-left-radius: var(--deeplib-border-radius);
+    }
+
+    &:hover {
+      background-color: var(--tmd-accent-hover, #e0e0e0);
+    }
+
+    &::after {
+      content: '▼';
+      position: absolute;
+      right: minv(1.5, 0.75);
+      transition: transform 0.2s;
+    }
+
+    &[data-expanded='true']::after {
+      transform: rotate(180deg);
+    }
+  }
+
+  .rsp-collapsible-content {
+    padding: minv(1.5, 0.75);
+    background-color: var(--tmd-element, lightgray);
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+    border-bottom-right-radius: var(--deeplib-border-radius);
+    border-bottom-left-radius: var(--deeplib-border-radius);
+  }
+
+  &:has(> [data-expanded='false']) {
+    .rsp-collapsible-content {
+      display: none;
+    }
+  }
+}

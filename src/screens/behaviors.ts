@@ -20,9 +20,6 @@ const selector = Object.freeze({
   listItemC: 'rsp-behaviors-list-item',
   addButton: 'rsp-behaviors-add-button',
   deleteModeToggle: 'rsp-delete-mode-toggle',
-  collapsibleSection: 'rsp-behaviors-collapsible',
-  collapsibleHeader: 'rsp-behaviors-collapsible-header',
-  collapsibleContent: 'rsp-behaviors-collapsible-content',
   contentList: 'rsp-behaviors-content-list',
   chip: 'rsp-behaviors-chip',
   chipRemove: 'rsp-behaviors-chip-remove',
@@ -30,7 +27,7 @@ const selector = Object.freeze({
   chipList: (id: string) => `rsp-chip-list-${id}`,
   contentListSection: (id: string) => `rsp-content-list-section-${id}`,
   listItem: (id: string) => `rsp-list-item-${id}`,
-  constraintEntryList: (id: string) => `rsp-constraint-entry-list-${id}`,
+  includeExcludeEntryList: (id: string) => `rsp-constraint-entry-list-${id}`,
   constraintsSection: (id: string) => `rsp-constraints-section-${id}`,
 });
 // #endregion !SECTION Constants
@@ -290,7 +287,7 @@ export class GuiBehaviors extends BaseSubscreen {
 
     const scrollBox = ElementCreate({
       tag: 'div',
-      classList: ['scroll-box', 'rsp-behaviors-list-items'],
+      classList: ['scroll-box', selector.listItemsContainer],
       attributes: {
         id: selector.listItemsContainer,
       },
@@ -305,7 +302,7 @@ export class GuiBehaviors extends BaseSubscreen {
   }
 
   updateListItems() {
-    const listItemsContainer = document.querySelector('.rsp-behaviors-list-items') as HTMLElement;
+    const listItemsContainer = document.querySelector(`.${selector.listItemsContainer}`) as HTMLElement;
     if (!listItemsContainer) return;
 
     const scrollPosition = listItemsContainer.scrollTop;
@@ -1636,7 +1633,7 @@ export class GuiBehaviors extends BaseSubscreen {
   ): HTMLElement {
     const entries = rule?.entries || [];
 
-    const list = this.buildConstraintEntryList(
+    const list = this.buildIncludeExcludeEntryList(
       id,
       entries,
       (updatedEntries) => {
@@ -1657,7 +1654,7 @@ export class GuiBehaviors extends BaseSubscreen {
     const section = buildContentListSection({ id, labelKey, onAdd, addLabel: 'behaviors.button.add_content', content: list });
 
     if (onRemove) {
-      const header = section.querySelector('.rsp-behaviors-content-list-header');
+      const header = section.querySelector('.rsp-content-list-header');
       if (header) {
         const removeButton = advElement.createButton({
           id: `rsp-remove-constraint-${id}`,
@@ -1693,7 +1690,7 @@ export class GuiBehaviors extends BaseSubscreen {
       ? getText('behaviors.text.delete_mode')
       : getText('behaviors.text.edit_mode');
 
-    const thisElement = ElementWrap(selector.constraintEntryList(id));
+    const thisElement = ElementWrap(selector.includeExcludeEntryList(id));
     if (thisElement) {
       thisElement.replaceChildren();
     }
@@ -1701,7 +1698,7 @@ export class GuiBehaviors extends BaseSubscreen {
     const container = ElementCreate({
       tag: 'div',
       attributes: {
-        id: selector.constraintEntryList(id),
+        id: selector.includeExcludeEntryList(id),
       },
       classList: [selector.contentList, 'scroll-box'],
       children: [
@@ -1719,11 +1716,11 @@ export class GuiBehaviors extends BaseSubscreen {
           });
           const entryContainer = ElementCreate({
             tag: 'div',
-            classList: ['rsp-constraint-entry'],
+            classList: ['rsp-include-exclude-entry'],
             children: [
               matchModeField,
               advElement.createButton({
-                id: `rsp-constraint-entry-${originalIndex}-${CommonGenerateUniqueID()}`,
+                id: null,
                 options: {
                   label: entry.value === '' ? getText('behaviors.text.empty_content') : entry.value,
                   tooltip: tooltip,
@@ -1804,12 +1801,12 @@ export class GuiBehaviors extends BaseSubscreen {
     return section;
   }
 
-  buildConstraintEntryList(id: string, entries: IncludeExcludeEntry[], onChange: (entries: IncludeExcludeEntry[]) => void): HTMLElement {
+  buildIncludeExcludeEntryList(id: string, entries: IncludeExcludeEntry[], onChange: (entries: IncludeExcludeEntry[]) => void): HTMLElement {
     const tooltip = this.deleteMode
       ? getText('behaviors.text.delete_mode')
       : getText('behaviors.text.edit_mode');
 
-    const thisElement = ElementWrap(selector.constraintEntryList(id));
+    const thisElement = ElementWrap(selector.includeExcludeEntryList(id));
     if (thisElement) {
       thisElement.replaceChildren();
     }
@@ -1817,7 +1814,7 @@ export class GuiBehaviors extends BaseSubscreen {
     const container = ElementCreate({
       tag: 'div',
       attributes: {
-        id: selector.constraintEntryList(id),
+        id: selector.includeExcludeEntryList(id),
       },
       classList: [selector.contentList, 'scroll-box'],
       children: [
@@ -1835,11 +1832,11 @@ export class GuiBehaviors extends BaseSubscreen {
           });
           const entryContainer = ElementCreate({
             tag: 'div',
-            classList: ['rsp-constraint-entry'],
+            classList: ['rsp-include-exclude-entry'],
             children: [
               modeField,
               advElement.createButton({
-                id: `rsp-constraint-entry-${originalIndex}-${CommonGenerateUniqueID()}`,
+                id: null,
                 options: {
                   label: entry.value === '' ? getText('behaviors.text.empty_content') : entry.value,
                   tooltip: tooltip,

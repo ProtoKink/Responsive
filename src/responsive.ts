@@ -16,6 +16,7 @@ initMod({
     Style.injectEmbed('bcr_style', `${PUBLIC_URL}/styles/main.css`);
     Style.injectEmbed('bcr_behaviors_style', `${PUBLIC_URL}/styles/behaviors.css`);
     Style.injectEmbed('bcr_modals_style', `${PUBLIC_URL}/styles/modals.css`);
+    Style.injectEmbed('bcr_field_style', `${PUBLIC_URL}/styles/fields.css`);
 
     ServerPlayerChatRoom.register({
       callback: () => CurrentModule === 'DeepLibMod' as keyof ModuleScreens && InformationSheetReturnScreen?.[1] === 'ChatRoom'

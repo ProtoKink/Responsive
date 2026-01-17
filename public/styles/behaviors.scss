@@ -219,6 +219,24 @@
   }
 }
 
+.rsp-collapsible-content .rsp-no-constraints-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap);
+
+  button {
+    width: 50%;
+  }
+}
+
+.rsp-constraint-remove {
+  flex: 0 1 auto;
+  width: min(5dvh, 2.5dvw);
+  height: min(5dvh, 2.5dvw);
+}
+
 // #endregion !SECTION List Panel
 
 // #region SECTION Editor Panel
@@ -240,136 +258,51 @@
     opacity: 0.6;
   }
 
-  // Form Fields
-  .rsp-behaviors-field {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: var(--gap);
-    width: 100%;
 
-    // Direct label children (for manually created fields)
-    >label {
-      font-weight: bold;
-      font-size: 0.9em;
-      min-width: minv(15, 7.5);
-      flex-shrink: 0;
-      padding-top: minv(1, 0.5);
-    }
-
-    // All labels should be bold
-    label {
-      font-weight: bold;
-      font-size: 0.9em;
-    }
-
-    // Elements on the right side (excluding labels)
-    >*:not(label):not(input[type='checkbox']) {
-      flex: 1;
-      min-width: 0;
-    }
-
-    input[type='text'],
-    input[type='number'],
-    select {
-      padding: minv(1, 0.5);
-      font-size: 0.9em;
-    }
-
-    // Container for multiple elements (like include/exclude fields)
-    .rsp-behaviors-field-elements {
-      display: flex;
-      flex-direction: column;
-      gap: var(--gap);
-      flex: 1;
-    }
-  }
-
-  // Sections
-  .rsp-behaviors-section {
+  // Content Lists
+  .rsp-behaviors-content-list {
     display: flex;
     flex-direction: column;
-    padding: minv(1.5, 0.75);
-    background-color: var(--tmd-element-hover, white);
-    border-radius: var(--deeplib-border-radius);
+    gap: minv(1, 0.5);
+    max-height: minv(30, 15);
 
-    &:not(:has(.rsp-behaviors-content-list:empty)) {
-      gap: minv(1, 0.5);
+    &:not(:empty) {
+      padding: 0 minv(1, 0.5);
+    }
 
-      .rsp-behaviors-content-list-header {
-        margin-bottom: minv(1, 0.5);
+    &:empty {
+      display: none;
+    }
+
+    .rsp-content-item {
+      width: 100%;
+      text-align: left;
+      padding: minv(1, 0.5);
+
+      &[data-deletable][data-delete-mode] {
+        background-color: $delete-color;
+        color: white;
+      }
+
+      &[data-empty-content='true'] .button-label {
+        color: var(--tmd-text-disabled, gray);
       }
     }
 
-    .rsp-behaviors-section-label {
-      font-weight: bold;
-      font-size: 1em;
-      margin-bottom: minv(0.5, 0.25);
-    }
-
-    .rsp-behaviors-content-list-header {
+    .rsp-include-exclude-entry {
       display: flex;
       flex-direction: row;
+      gap: minv(1, 0.5);
       align-items: center;
-      justify-content: space-between;
-      gap: minv(1, 0.5);
+      background-color: var(--tmd-element-hover, white);
+      border-radius: var(--deeplib-border-radius);
 
-      label {
-        font-weight: bold;
-        font-size: 0.9em;
-        flex: 1 1 auto;
-      }
-
-      .rsp-content-add {
-        flex: 1 1 auto;
-        width: min-content;
-        padding: 0 minv(1, 0.5);
-      }
-    }
-
-    // Content Lists
-    .rsp-behaviors-content-list {
-      display: flex;
-      flex-direction: column;
-      gap: minv(1, 0.5);
-      max-height: minv(30, 15);
-
-      &:not(:empty) {
-        padding: minv(1, 0.5);
+      .rsp-dropdown-field {
+        flex: 0 1;
       }
 
       .rsp-content-item {
-        width: 100%;
-        text-align: left;
-        padding: minv(1, 0.5);
-
-        &[data-deletable][data-delete-mode] {
-          background-color: $delete-color;
-          color: white;
-        }
-
-        &[data-empty-content='true'] .button-label {
-          color: var(--tmd-text-disabled, gray);
-        }
-      }
-
-      .rsp-constraint-entry {
-        display: flex;
-        flex-direction: row;
-        gap: minv(1, 0.5);
-        align-items: center;
-        padding: minv(1, 0.5);
-        margin-bottom: minv(0.5, 0.25);
-        background-color: var(--tmd-element-hover, white);
-        border-radius: var(--deeplib-border-radius);
-
-        .rsp-behaviors-dropdown-field {
-          flex: 0 1;
-        }
-
-        .rsp-content-item {
-          flex: 1;
-        }
+        flex: 1;
       }
     }
   }
@@ -433,81 +366,9 @@
       }
     }
   }
-
-  // Collapsible Sections
-  .rsp-behaviors-collapsible {
-    display: flex;
-    flex-direction: column;
-    border: var(--deeplib-border-width) solid var(--deeplib-border-color, #ccc);
-    border-radius: var(--deeplib-border-radius);
-
-    .rsp-behaviors-collapsible-header {
-      padding: minv(1.5, 0.75);
-      background-color: var(--tmd-element-hover, white);
-      color: var(--tmd-text, black);
-      cursor: pointer;
-      font-weight: bold;
-      user-select: none;
-      position: relative;
-      border-top-right-radius: var(--deeplib-border-radius);
-      border-top-left-radius: var(--deeplib-border-radius);
-
-      * {
-        user-select: none;
-      }
-
-      &[data-expanded='false'] {
-        border-bottom-right-radius: var(--deeplib-border-radius);
-        border-bottom-left-radius: var(--deeplib-border-radius);
-      }
-
-      &:hover {
-        background-color: var(--tmd-accent-hover, #e0e0e0);
-      }
-
-      &::after {
-        content: '▼';
-        position: absolute;
-        right: minv(1.5, 0.75);
-        transition: transform 0.2s;
-      }
-
-      &[data-expanded='true']::after {
-        transform: rotate(180deg);
-      }
-    }
-
-    .rsp-behaviors-collapsible-content {
-      padding: minv(1.5, 0.75);
-      background-color: var(--tmd-element, lightgray);
-      display: flex;
-      flex-direction: column;
-      gap: var(--gap);
-      border-bottom-right-radius: var(--deeplib-border-radius);
-      border-bottom-left-radius: var(--deeplib-border-radius);
-
-      .rsp-no-constraints-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: var(--gap);
-
-        button {
-          width: 50%;
-        }
-      }
-    }
-
-    &:has([data-expanded='false']) {
-      .rsp-behaviors-collapsible-content {
-        display: none;
-      }
-    }
-  }
 }
 
-.rsp-behaviors-editor-panel .rsp-behaviors-collapsible .rsp-behaviors-collapsible-content button.deeplib-button.rsp-constraint-remove {
+.rsp-behaviors-editor-panel .rsp-collapsible .rsp-collapsible-content button.deeplib-button.rsp-constraint-remove {
   flex: 0 1 auto;
   width: min(5dvh, 2.5dvw);
   height: min(5dvh, 2.5dvw);
