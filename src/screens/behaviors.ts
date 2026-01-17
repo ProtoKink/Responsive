@@ -1,10 +1,10 @@
 // #region SECTION Imports & Types
 import { advElement, BaseSubscreen, exportToGlobal, getText, layout, Modal, SettingElement, SubscreenOptions } from 'bc-deeplib/deeplib';
-import { BehaviorsSettingsModel, Behavior, Trigger, Reaction, ConstraintMode, MatchMode, SpeechType, OrgasmType, RoomPresenceEvent, ReactionMode, TriggerTypeSchema, ReactionTypeSchema, ReactionType, TriggerType, IncludeExcludeEntry, MatchContentEntry, SpeechTypeSchema, MatchModeSchema, OrgasmTypeSchema, RoomPresenceEventSchema, ReactionModeSchema, ConstraintModeSchema, IncludeExcludeEntrySchema, TriggerConstraint } from '../models/behaviors';
+import { BehaviorsSettingsModel, Behavior, Trigger, Reaction, ConstraintMode, MatchMode, SpeechType, OrgasmType, RoomPresenceEvent, ReactionMode, TriggerTypeSchema, ReactionTypeSchema, ReactionType, TriggerType, IncludeExcludeEntry, MatchContentEntry, SpeechTypeSchema, MatchModeSchema, OrgasmTypeSchema, RoomPresenceEventSchema, ReactionModeSchema, ConstraintModeSchema, IncludeExcludeEntrySchema } from '../models/behaviors';
 import { BehaviorsModule } from '../modules/behaviors';
 import { assertNever } from '../utilities/other';
 import { activitySelectorModal, bodyPartSelectorModal, idSelectorModal, memberNumberSelectorModal, textReactionSelectorModal } from '@/utilities/selectorModals';
-import { triggerHasAnyConstraints, triggerHasConstraint } from '@/utilities/triggers';
+import { triggerHasAnyConstraints } from '@/utilities/triggers';
 import { buildCollapsibleSection, buildContentListSection, createDropdownField, createInputField, createNumberInputField } from '@/utilities/fields';
 
 type TabType = 'behaviors' | 'triggers' | 'reactions';
@@ -964,7 +964,7 @@ export class GuiBehaviors extends BaseSubscreen {
       const addConstraintButton = advElement.createButton({
         id: `rsp-add-constraint-${trigger.id}`,
         onClick: () => {
-          this.showConstraintTypeSelector(trigger);
+          this.showEntitySelector(trigger);
         },
         options: {
           image: `${PUBLIC_URL}/images/plus.svg`,
@@ -1001,288 +1001,23 @@ export class GuiBehaviors extends BaseSubscreen {
 
     trigger.constraints ??= {};
 
-    if (triggerHasConstraint(trigger, 'source')) {
-      const renderSource = (replace?: boolean) => this.buildIncludeExcludeField(
-        `${trigger.id}-constraint-source`,
-        'behaviors.field.constraint_source',
-        () => {
-          let rule = trigger.constraints?.source;
-          const entries = rule?.entries || [];
-          memberNumberSelectorModal({ selectedMembers: entries.map(entry => parseInt(entry.value)) }).then((response) => {
-            if (response === null) return;
-            const newEntries = entries.filter(entry => response.includes(parseInt(entry.value)));
-            response.forEach(memberNumber => {
-              if (newEntries.some(entry => entry.value === memberNumber.toString())) return;
-              newEntries.push({ value: memberNumber.toString(), mode: 'include' });
-            });
-            if (!rule) {
-              rule = { entries: newEntries };
-            } else {
-              rule.entries = newEntries;
-            }
-            trigger.constraints ??= {};
-            trigger.constraints.source ??= { entries: [] };
-            trigger.constraints.source.entries = newEntries;
-            renderSource(true);
-            this.buildTriggerListItem(trigger);
-          });
-        },
-        trigger.constraints?.source,
-        (val) => {
-          trigger.constraints ??= {};
-          trigger.constraints.source ??= { entries: [] };
-          trigger.constraints.source.entries = val?.entries.filter(entry => CommonParseInt(entry.value)) ?? [];
-          renderSource(true);
-          this.buildTriggerListItem(trigger);
-        },
-        () => {
-          if (trigger.constraints) {
-            delete trigger.constraints.source;
-            if (Object.keys(trigger.constraints).length === 0) {
-              trigger.constraints = undefined;
-            }
-          }
-          onChange();
-          this.buildTriggerListItem(trigger);
-        },
-        replace
-      );
-      const sourceSection = renderSource(false);
-      elements.push(sourceSection);
+    if (trigger.constraints.source) {
+      elements.push(this.buildEntityConstraintSection(trigger, 'source', onChange));
     }
-
-    if (triggerHasConstraint(trigger, 'target')) {
-      const renderTarget = (replace?: boolean) => this.buildIncludeExcludeField(
-        `${trigger.id}-constraint-target`,
-        'behaviors.field.constraint_target',
-        () => {
-          let rule = trigger.constraints?.target;
-          const entries = rule?.entries || [];
-          memberNumberSelectorModal({ selectedMembers: entries.map(entry => parseInt(entry.value)) }).then((response) => {
-            if (response === null) return;
-            const newEntries = entries.filter(entry => response.includes(parseInt(entry.value)));
-            response.forEach(memberNumber => {
-              if (newEntries.some(entry => entry.value === memberNumber.toString())) return;
-              newEntries.push({ value: memberNumber.toString(), mode: 'include' });
-            });
-            if (!rule) {
-              rule = { entries: newEntries };
-            } else {
-              rule.entries = newEntries;
-            }
-            trigger.constraints ??= {};
-            trigger.constraints.target ??= { entries: [] };
-            trigger.constraints.target.entries = newEntries;
-            renderTarget(true);
-            this.buildTriggerListItem(trigger);
-          });
-        },
-        trigger.constraints?.target,
-        (val) => {
-          trigger.constraints ??= {};
-          trigger.constraints.target ??= { entries: [] };
-          trigger.constraints.target.entries = val?.entries.filter(entry => CommonParseInt(entry.value)) ?? [];
-          renderTarget(true);
-          this.buildTriggerListItem(trigger);
-        },
-        () => {
-          if (trigger.constraints) {
-            delete trigger.constraints.target;
-            if (Object.keys(trigger.constraints).length === 0) {
-              trigger.constraints = undefined;
-            }
-          }
-          onChange();
-          this.buildTriggerListItem(trigger);
-        },
-        replace
-      );
-      const targetSection = renderTarget(false);
-      elements.push(targetSection);
+    if (trigger.constraints.target) {
+      elements.push(this.buildEntityConstraintSection(trigger, 'target', onChange));
     }
-
-    if (triggerHasConstraint(trigger, 'arousalMin')) {
-      const renderArousalMin = (_replace?: boolean) => {
-        const field = createNumberInputField({
-          id: `${trigger.id}-arousal-min`,
-          labelKey: 'behaviors.field.arousal_min',
-          value: trigger.constraints?.arousalMin?.toString() ?? '',
-          onChange: (val) => {
-            trigger.constraints!.arousalMin = val ? parseFloat(val) : undefined;
-            this.buildTriggerListItem(trigger);
-          },
-          min: '0',
-          max: '100'
-        });
-        const removeButton = advElement.createButton({
-          id: `rsp-remove-constraint-${trigger.id}-arousalMin`,
-          onClick: () => {
-            if (trigger.constraints) {
-              delete trigger.constraints.arousalMin;
-              if (Object.keys(trigger.constraints).length === 0) {
-                trigger.constraints = undefined;
-              }
-            }
-            onChange();
-            this.buildTriggerListItem(trigger);
-          },
-          options: {
-            image: `${PUBLIC_URL}/images/trash_bin.svg`,
-            tooltip: getText('behaviors.button.remove_constraint'),
-            tooltipPosition: 'left'
-          },
-          htmlOptions: {
-            button: {
-              classList: ['rsp-constraint-remove']
-            }
-          }
-        });
-        field.appendChild(removeButton);
-        return field;
-      };
-      const arousalMinField = renderArousalMin();
-      elements.push(arousalMinField);
+    if (trigger.constraints.player) {
+      elements.push(this.buildEntityConstraintSection(trigger, 'player', onChange));
     }
-
-    if (triggerHasConstraint(trigger, 'arousalMax')) {
-      const renderArousalMax = () => {
-        const field = createNumberInputField({
-          id: `${trigger.id}-arousal-max`,
-          labelKey: 'behaviors.field.arousal_max',
-          value: trigger.constraints?.arousalMax?.toString() ?? '',
-          onChange: (val) => {
-            trigger.constraints!.arousalMax = val ? parseFloat(val) : undefined;
-            this.buildTriggerListItem(trigger);
-          },
-          min: '0',
-          max: '100'
-        });
-        const removeButton = advElement.createButton({
-          id: `rsp-remove-constraint-${trigger.id}-arousalMax`,
-          onClick: () => {
-            if (trigger.constraints) {
-              delete trigger.constraints.arousalMax;
-              if (Object.keys(trigger.constraints).length === 0) {
-                trigger.constraints = undefined;
-              }
-            }
-            onChange();
-            this.buildTriggerListItem(trigger);
-          },
-          options: {
-            image: `${PUBLIC_URL}/images/trash_bin.svg`,
-            tooltip: getText('behaviors.button.remove_constraint'),
-            tooltipPosition: 'left'
-          },
-          htmlOptions: {
-            button: {
-              classList: ['rsp-constraint-remove']
-            }
-          }
-        });
-        field.appendChild(removeButton);
-        return field;
-      };
-      const arousalMaxField = renderArousalMax();
-      elements.push(arousalMaxField);
-    }
-
-    if (triggerHasConstraint(trigger, 'inRoomWithMembers')) {
-      const renderInRoomWithMembers = (replace?: boolean) => this.buildIncludeExcludeField(
-        `${trigger.id}-in-room-with-members`,
-        'behaviors.field.in_room_with_members',
-        () => {
-          let rule = trigger.constraints?.inRoomWithMembers;
-          const entries = rule?.entries || [];
-          memberNumberSelectorModal({ selectedMembers: entries.map(entry => parseInt(entry.value)) }).then((response) => {
-            if (response === null) return;
-            const newEntries = entries.filter(entry => response.includes(parseInt(entry.value)));
-            response.forEach(memberNumber => {
-              if (newEntries.some(entry => entry.value === memberNumber.toString())) return;
-              newEntries.push({ value: memberNumber.toString(), mode: 'include' });
-            });
-            if (!rule) {
-              rule = { entries: newEntries };
-            } else {
-              rule.entries = newEntries;
-            }
-            trigger.constraints ??= {};
-            trigger.constraints.inRoomWithMembers ??= { entries: [] };
-            trigger.constraints.inRoomWithMembers.entries = newEntries;
-            renderInRoomWithMembers(true);
-            this.buildTriggerListItem(trigger);
-          });
-        },
-        trigger.constraints?.inRoomWithMembers,
-        (val) => {
-          trigger.constraints ??= {};
-          trigger.constraints.inRoomWithMembers ??= { entries: [] };
-          trigger.constraints.inRoomWithMembers.entries = val?.entries.filter(entry => CommonParseInt(entry.value)) ?? [];
-          renderInRoomWithMembers(true);
-          this.buildTriggerListItem(trigger);
-        },
-        () => {
-          if (trigger.constraints) {
-            delete trigger.constraints.inRoomWithMembers;
-            if (Object.keys(trigger.constraints).length === 0) {
-              trigger.constraints = undefined;
-            }
-          }
-          onChange();
-          this.buildTriggerListItem(trigger);
-        },
-        replace
-      );
-      const inRoomWithMembersSection = renderInRoomWithMembers(false);
-      elements.push(inRoomWithMembersSection);
-    }
-
-    if (triggerHasConstraint(trigger, 'inRoomNamed')) {
-      const renderInRoomNamed = (replace?: boolean) => this.buildIncludeExcludeField(
-        `${trigger.id}-in-room-named`,
-        'behaviors.field.in_room_named',
-        () => {
-          let rule = trigger.constraints?.inRoomNamed;
-          const entries = rule?.entries || [];
-          Modal.prompt(getText('behaviors.prompt.add_content'), { modalClassList: ['rsp-modal'] }).then((response) => {
-            if (response === null) return;
-            entries.push({ value: response, mode: 'include' });
-            if (!rule) {
-              rule = { entries: entries };
-            } else {
-              rule.entries = entries;
-            }
-            trigger.constraints!.inRoomNamed = rule;
-            renderInRoomNamed(true);
-            this.buildTriggerListItem(trigger);
-          });
-        },
-        trigger.constraints?.inRoomNamed,
-        (val) => {
-          trigger.constraints!.inRoomNamed = val;
-          renderInRoomNamed(true);
-          this.buildTriggerListItem(trigger);
-        },
-        () => {
-          if (trigger.constraints) {
-            delete trigger.constraints.inRoomNamed;
-            if (Object.keys(trigger.constraints).length === 0) {
-              trigger.constraints = undefined;
-            }
-          }
-          onChange();
-          this.buildTriggerListItem(trigger);
-        },
-        replace
-      );
-      const inRoomNamedSection = renderInRoomNamed(false);
-      elements.push(inRoomNamedSection);
+    if (trigger.constraints.room) {
+      elements.push(this.buildEntityConstraintSection(trigger, 'room', onChange));
     }
 
     const addConstraintButton = advElement.createButton({
       id: `rsp-add-constraint-${trigger.id}`,
       onClick: () => {
-        this.showConstraintTypeSelector(trigger);
+        this.showEntitySelector(trigger);
       },
       options: {
         image: `${PUBLIC_URL}/images/plus.svg`,
@@ -1299,63 +1034,372 @@ export class GuiBehaviors extends BaseSubscreen {
     return elements;
   }
 
-  showConstraintTypeSelector(trigger: Trigger): void {
-    type ConstraintKey = keyof TriggerConstraint;
-    const allConstraints: Record<ConstraintKey, string> = {
-      source: getText('behaviors.field.constraint_source'),
-      target: getText('behaviors.field.constraint_target'),
-      arousalMin: getText('behaviors.field.arousal_min'),
-      arousalMax: getText('behaviors.field.arousal_max'),
-      inRoomWithMembers: getText('behaviors.field.in_room_with_members'),
-      inRoomNamed: getText('behaviors.field.in_room_named'),
-      restrained: getText('behaviors.field.restrained'),
-      gagged: getText('behaviors.field.gagged'),
-      blinded: getText('behaviors.field.blinded'),
-      deafened: getText('behaviors.field.deafened')
+  async showEntitySelector(trigger: Trigger): Promise<void> {
+    const entities = [
+      { value: 'source', label: getText('behaviors.entity.source') },
+      { value: 'target', label: getText('behaviors.entity.target') },
+      { value: 'player', label: getText('behaviors.entity.player') },
+      { value: 'room', label: getText('behaviors.entity.room') }
+    ];
+
+    const selected = await idSelectorModal({ buttons: entities.map(e => ({ label: e.label, value: e.value })) });
+    if (selected === null || selected.length === 0) return;
+    for (const entity of selected) {
+      await this.showConstraintTypeSelector(trigger, entity as 'source' | 'target' | 'player' | 'room');
+    }
+  }
+
+  buildEntityConstraintSection(trigger: Trigger, entity: 'source' | 'target' | 'player' | 'room', onChange: () => void): HTMLElement {
+    const entityConstraints = trigger.constraints?.[entity];
+    if (!entityConstraints) {
+      return ElementCreate({ tag: 'div' });
+    }
+
+    const entityLabels: Record<typeof entity, string> = {
+      source: getText('behaviors.entity.source'),
+      target: getText('behaviors.entity.target'),
+      player: getText('behaviors.entity.player'),
+      room: getText('behaviors.entity.room')
     };
-    const availableConstraints = Object.entries(allConstraints).filter(([constraint]) => !triggerHasConstraint(trigger, constraint as ConstraintKey));
+
+    const constraintElements: HTMLElement[] = [];
+
+    if ((entity === 'source' || entity === 'target') && 'memberNumber' in entityConstraints && entityConstraints.memberNumber) {
+      const renderMemberNumber = (replace?: boolean) => this.buildIncludeExcludeField(
+        `${trigger.id}-${entity}-memberNumber`,
+        'behaviors.field.constraint_member_number',
+        () => {
+          const rule = entityConstraints.memberNumber;
+          const entries = rule?.entries || [];
+          memberNumberSelectorModal({ selectedMembers: entries.map(entry => parseInt(entry.value)) }).then((response) => {
+            if (response === null) return;
+            const newEntries = entries.filter(entry => response.includes(parseInt(entry.value)));
+            response.forEach(memberNumber => {
+              if (newEntries.some(entry => entry.value === memberNumber.toString())) return;
+              newEntries.push({ value: memberNumber.toString(), mode: 'include' });
+            });
+            trigger.constraints ??= {};
+            (trigger.constraints[entity] as any).memberNumber = { entries: newEntries };
+            renderMemberNumber(true);
+            this.buildTriggerListItem(trigger);
+          });
+        },
+        entityConstraints.memberNumber,
+        (val) => {
+          trigger.constraints ??= {};
+          (trigger.constraints[entity] as any).memberNumber = val;
+          renderMemberNumber(true);
+          this.buildTriggerListItem(trigger);
+        },
+        () => {
+          if (trigger.constraints && trigger.constraints[entity]) {
+            delete (trigger.constraints[entity] as any).memberNumber;
+            if (Object.keys(trigger.constraints[entity] as any).length === 0) {
+              delete trigger.constraints[entity];
+              if (Object.keys(trigger.constraints).length === 0) {
+                trigger.constraints = undefined;
+              }
+            }
+          }
+          onChange();
+          this.buildTriggerListItem(trigger);
+        },
+        replace
+      );
+      constraintElements.push(renderMemberNumber(false));
+    }
+
+    const booleanConstraints = ['restrained', 'gagged', 'blinded', 'deafened'] as const;
+    for (const constraintKey of booleanConstraints) {
+      if (constraintKey in entityConstraints && entityConstraints[constraintKey as keyof typeof entityConstraints] !== undefined) {
+        const value = (entityConstraints as any)[constraintKey] as boolean;
+        const field = createDropdownField({
+          id: `${trigger.id}-${entity}-${constraintKey}`,
+          labelKey: `behaviors.field.constraint_${constraintKey}`,
+          value: value.toString(),
+          options: ['true', 'false'],
+          onChange: (val) => {
+            trigger.constraints ??= {};
+            (trigger.constraints[entity] as any)[constraintKey] = val === 'true';
+            this.buildTriggerListItem(trigger);
+          }
+        });
+        const removeButton = advElement.createButton({
+          id: `rsp-remove-constraint-${trigger.id}-${entity}-${constraintKey}`,
+          onClick: () => {
+            if (trigger.constraints && trigger.constraints[entity]) {
+              delete (trigger.constraints[entity] as any)[constraintKey];
+              if (Object.keys(trigger.constraints[entity] as any).length === 0) {
+                delete trigger.constraints[entity];
+                if (Object.keys(trigger.constraints).length === 0) {
+                  trigger.constraints = undefined;
+                }
+              }
+            }
+            onChange();
+            this.buildTriggerListItem(trigger);
+          },
+          options: {
+            image: `${PUBLIC_URL}/images/trash_bin.svg`,
+            tooltip: getText('behaviors.button.remove_constraint'),
+            tooltipPosition: 'left'
+          },
+          htmlOptions: {
+            button: {
+              classList: ['rsp-constraint-remove']
+            }
+          }
+        });
+        field.appendChild(removeButton);
+        constraintElements.push(field);
+      }
+    }
+
+    const numericConstraints = ['arousalMin', 'arousalMax'] as const;
+    for (const constraintKey of numericConstraints) {
+      if (constraintKey in entityConstraints && entityConstraints[constraintKey as keyof typeof entityConstraints] !== undefined) {
+        const value = (entityConstraints as any)[constraintKey] as number;
+        const field = createNumberInputField({
+          id: `${trigger.id}-${entity}-${constraintKey}`,
+          labelKey: `behaviors.field.constraint_${constraintKey}`,
+          value: value?.toString() ?? '',
+          onChange: (val) => {
+            trigger.constraints ??= {};
+            (trigger.constraints[entity] as any)[constraintKey] = val ? parseFloat(val) : undefined;
+            this.buildTriggerListItem(trigger);
+          },
+          min: '0',
+          max: '100'
+        });
+        const removeButton = advElement.createButton({
+          id: `rsp-remove-constraint-${trigger.id}-${entity}-${constraintKey}`,
+          onClick: () => {
+            if (trigger.constraints && trigger.constraints[entity]) {
+              delete (trigger.constraints[entity] as any)[constraintKey];
+              if (Object.keys(trigger.constraints[entity] as any).length === 0) {
+                delete trigger.constraints[entity];
+                if (Object.keys(trigger.constraints).length === 0) {
+                  trigger.constraints = undefined;
+                }
+              }
+            }
+            onChange();
+            this.buildTriggerListItem(trigger);
+          },
+          options: {
+            image: `${PUBLIC_URL}/images/trash_bin.svg`,
+            tooltip: getText('behaviors.button.remove_constraint'),
+            tooltipPosition: 'left'
+          },
+          htmlOptions: {
+            button: {
+              classList: ['rsp-constraint-remove']
+            }
+          }
+        });
+        field.appendChild(removeButton);
+        constraintElements.push(field);
+      }
+    }
+
+    if (entity === 'room') {
+      if ('inRoomWithMembers' in entityConstraints && entityConstraints.inRoomWithMembers) {
+        const renderInRoomWithMembers = (replace?: boolean) => this.buildIncludeExcludeField(
+          `${trigger.id}-room-inRoomWithMembers`,
+          'behaviors.field.constraint_in_room_with_members',
+          () => {
+            const rule = entityConstraints.inRoomWithMembers;
+            const entries = rule?.entries || [];
+            memberNumberSelectorModal({ selectedMembers: entries.map(entry => parseInt(entry.value)) }).then((response) => {
+              if (response === null) return;
+              const newEntries = entries.filter(entry => response.includes(parseInt(entry.value)));
+              response.forEach(memberNumber => {
+                if (newEntries.some(entry => entry.value === memberNumber.toString())) return;
+                newEntries.push({ value: memberNumber.toString(), mode: 'include' });
+              });
+              trigger.constraints ??= {};
+              (trigger.constraints.room as any).inRoomWithMembers = { entries: newEntries };
+              renderInRoomWithMembers(true);
+              this.buildTriggerListItem(trigger);
+            });
+          },
+          entityConstraints.inRoomWithMembers,
+          (val) => {
+            trigger.constraints ??= {};
+            (trigger.constraints.room as any).inRoomWithMembers = val;
+            renderInRoomWithMembers(true);
+            this.buildTriggerListItem(trigger);
+          },
+          () => {
+            if (trigger.constraints && trigger.constraints.room) {
+              delete (trigger.constraints.room as any).inRoomWithMembers;
+              if (Object.keys(trigger.constraints.room as any).length === 0) {
+                delete trigger.constraints.room;
+                if (Object.keys(trigger.constraints).length === 0) {
+                  trigger.constraints = undefined;
+                }
+              }
+            }
+            onChange();
+            this.buildTriggerListItem(trigger);
+          },
+          replace
+        );
+        constraintElements.push(renderInRoomWithMembers(false));
+      }
+
+      if ('inRoomNamed' in entityConstraints && entityConstraints.inRoomNamed) {
+        const renderInRoomNamed = (replace?: boolean) => this.buildIncludeExcludeField(
+          `${trigger.id}-room-inRoomNamed`,
+          'behaviors.field.constraint_in_room_named',
+          () => {
+            const rule = entityConstraints.inRoomNamed;
+            const entries = rule?.entries || [];
+            Modal.prompt(getText('behaviors.prompt.add_content'), { modalClassList: ['rsp-modal'] }).then((response) => {
+              if (response === null) return;
+              entries.push({ value: response, mode: 'include' });
+              trigger.constraints ??= {};
+              (trigger.constraints.room as any).inRoomNamed = { entries: entries };
+              renderInRoomNamed(true);
+              this.buildTriggerListItem(trigger);
+            });
+          },
+          entityConstraints.inRoomNamed,
+          (val) => {
+            trigger.constraints ??= {};
+            (trigger.constraints.room as any).inRoomNamed = val;
+            renderInRoomNamed(true);
+            this.buildTriggerListItem(trigger);
+          },
+          () => {
+            if (trigger.constraints && trigger.constraints.room) {
+              delete (trigger.constraints.room as any).inRoomNamed;
+              if (Object.keys(trigger.constraints.room as any).length === 0) {
+                delete trigger.constraints.room;
+                if (Object.keys(trigger.constraints).length === 0) {
+                  trigger.constraints = undefined;
+                }
+              }
+            }
+            onChange();
+            this.buildTriggerListItem(trigger);
+          },
+          replace
+        );
+        constraintElements.push(renderInRoomNamed(false));
+      }
+    }
+
+    const addConstraintButton = advElement.createButton({
+      id: `rsp-add-constraint-${trigger.id}-${entity}`,
+      onClick: () => {
+        this.showConstraintTypeSelector(trigger, entity);
+      },
+      options: {
+        image: `${PUBLIC_URL}/images/plus.svg`,
+        label: getText('behaviors.button.add_constraint')
+      },
+      htmlOptions: {
+        button: {
+          classList: ['rsp-content-add']
+        }
+      }
+    }); 
+
+    return buildCollapsibleSection({
+      id: `${trigger.id}-entity-${entity}`,
+      headerKey: entityLabels[entity],
+      content: () => [...constraintElements, addConstraintButton],
+      expanded: true
+    });
+  }
+
+  async showConstraintTypeSelector(trigger: Trigger, entity: 'source' | 'target' | 'player' | 'room'): Promise<void> {
+    trigger.constraints ??= {};
+    const entityConstraints = (trigger.constraints[entity] ?? {}) as any;
+
+    const availableConstraints: Array<{ key: string; label: string }> = [];
+
+    if (entity === 'source' || entity === 'target') {
+      if (!('memberNumber' in entityConstraints && entityConstraints.memberNumber)) {
+        availableConstraints.push({ key: 'memberNumber', label: getText('behaviors.field.constraint_member_number') });
+      }
+    }
+
+    if (entity === 'source' || entity === 'target' || entity === 'player') {
+      if (!('restrained' in entityConstraints && entityConstraints.restrained !== undefined)) {
+        availableConstraints.push({ key: 'restrained', label: getText('behaviors.field.constraint_restrained') });
+      }
+      if (!('gagged' in entityConstraints && entityConstraints.gagged !== undefined)) {
+        availableConstraints.push({ key: 'gagged', label: getText('behaviors.field.constraint_gagged') });
+      }
+      if (!('blinded' in entityConstraints && entityConstraints.blinded !== undefined)) {
+        availableConstraints.push({ key: 'blinded', label: getText('behaviors.field.constraint_blinded') });
+      }
+      if (!('deafened' in entityConstraints && entityConstraints.deafened !== undefined)) {
+        availableConstraints.push({ key: 'deafened', label: getText('behaviors.field.constraint_deafened') });
+      }
+      if (!('arousalMin' in entityConstraints && entityConstraints.arousalMin !== undefined)) {
+        availableConstraints.push({ key: 'arousalMin', label: getText('behaviors.field.constraint_arousalMin') });
+      }
+      if (!('arousalMax' in entityConstraints && entityConstraints.arousalMax !== undefined)) {
+        availableConstraints.push({ key: 'arousalMax', label: getText('behaviors.field.constraint_arousalMax') });
+      }
+    }
+
+    if (entity === 'room') {
+      if (!('inRoomWithMembers' in entityConstraints && entityConstraints.inRoomWithMembers)) {
+        availableConstraints.push({ key: 'inRoomWithMembers', label: getText('behaviors.field.constraint_in_room_with_members') });
+      }
+      if (!('inRoomNamed' in entityConstraints && entityConstraints.inRoomNamed)) {
+        availableConstraints.push({ key: 'inRoomNamed', label: getText('behaviors.field.constraint_in_room_named') });
+      }
+    }
 
     if (availableConstraints.length === 0) {
       return;
     }
 
-    idSelectorModal({ buttons: availableConstraints.map(([constraint, label]) => ({ label, value: constraint })) }).then((selected) => {
-      if (selected === null || selected.length === 0) return;
+    const selected = await idSelectorModal({ buttons: availableConstraints.map(c => ({ label: c.label, value: c.key })) });
+    if (selected === null || selected.length === 0) return;
 
-      selected.forEach((constraint) => {
-        const selectedConstraint = constraint as ConstraintKey;
-        trigger.constraints ??= {};
+    if (!trigger.constraints) {
+      trigger.constraints = {};
+    }
+    trigger.constraints[entity] ??= {} as any;
 
-        switch (selectedConstraint) {
-          case 'source':
-          case 'target':
-          case 'inRoomWithMembers':
-          case 'inRoomNamed':
-            trigger.constraints[selectedConstraint] = { entries: [] };
-            break;
-          case 'arousalMin':
-          case 'arousalMax':
-            trigger.constraints[selectedConstraint] = 0;
-            break;
-          case 'restrained':
-          case 'gagged':
-          case 'blinded':
-          case 'deafened':
-            trigger.constraints[selectedConstraint] = false;
-            break;
-          default:
-            return assertNever(selectedConstraint);
-        }
-      });
-
-      buildCollapsibleSection({
-        id: selector.constraintsSection(trigger.id),
-        headerKey: 'behaviors.section.constraints',
-        content: () => this.buildTriggerContraintsOptions(trigger),
-        expanded: true
-      });
-      this.buildTriggerListItem(trigger);
+    selected.forEach((constraintKey) => {
+      const entityConstraints = trigger.constraints![entity] as any;
+      switch (constraintKey) {
+        case 'memberNumber':
+          entityConstraints.memberNumber = { entries: [] };
+          break;
+        case 'inRoomWithMembers':
+        case 'inRoomNamed':
+          entityConstraints[constraintKey] = { entries: [] };
+          break;
+        case 'arousalMin':
+        case 'arousalMax':
+          entityConstraints[constraintKey] = 0;
+          break;
+        case 'restrained':
+        case 'gagged':
+        case 'blinded':
+        case 'deafened':
+          entityConstraints[constraintKey] = false;
+          break;
+        default:
+          return assertNever(constraintKey as never);
+      }
     });
+
+    buildCollapsibleSection({
+      id: selector.constraintsSection(trigger.id),
+      headerKey: 'behaviors.section.constraints',
+      content: () => this.buildTriggerContraintsOptions(trigger),
+      expanded: true
+    });
+    this.buildTriggerListItem(trigger);
   }
 
   buildTriggersSection(behavior: Behavior): HTMLElement {

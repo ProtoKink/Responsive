@@ -632,8 +632,10 @@ describe('processTriggerConstraint', () => {
       // arousalMin: progress <= value (progress is at/below the min threshold)
       // For progress = 50, we need: arousalMin >= 50 and arousalMax <= 50
       const constraint: TriggerConstraint = {
-        arousalMin: 50, // Progress (50) <= 50 = true
-        arousalMax: 50, // Progress (50) >= 50 = true
+        player: {
+          arousalMin: 50, // Progress (50) <= 50 = true
+          arousalMax: 50, // Progress (50) >= 50 = true
+        },
       };
 
       gg.Player.ArousalSettings.Progress = 50;
@@ -646,8 +648,10 @@ describe('processTriggerConstraint', () => {
 
     it('should fail when any constraint is not met', () => {
       const constraint: TriggerConstraint = {
-        arousalMin: 40, // Progress (50) <= 40 = false
-        arousalMax: 60, // Progress (50) >= 60 = false
+        player: {
+          arousalMin: 40, // Progress (50) <= 40 = false
+          arousalMax: 60, // Progress (50) >= 60 = false
+        },
       };
 
       gg.Player.ArousalSettings.Progress = 50;
@@ -662,8 +666,10 @@ describe('processTriggerConstraint', () => {
   describe('constraint mode: any', () => {
     it('should pass when any constraint is met', () => {
       const constraint: TriggerConstraint = {
-        arousalMin: 60, // Progress (50) <= 60 = true
-        arousalMax: 40, // Progress (50) >= 40 = true
+        player: {
+          arousalMin: 60, // Progress (50) <= 60 = true
+          arousalMax: 40, // Progress (50) >= 40 = true
+        },
       };
 
       gg.Player.ArousalSettings.Progress = 50;
@@ -676,8 +682,10 @@ describe('processTriggerConstraint', () => {
 
     it('should fail when no constraints are met', () => {
       const constraint: TriggerConstraint = {
-        arousalMin: 30, // Progress (50) <= 30 = false
-        arousalMax: 70, // Progress (50) >= 70 = false
+        player: {
+          arousalMin: 30, // Progress (50) <= 30 = false
+          arousalMax: 70, // Progress (50) >= 70 = false
+        },
       };
 
       gg.Player.ArousalSettings.Progress = 50;
@@ -693,9 +701,11 @@ describe('processTriggerConstraint', () => {
     it('should pass when source matches include rule', () => {
       const constraint: TriggerConstraint = {
         source: {
-          entries: [
-            { value: '1', mode: 'include' },
-          ],
+          memberNumber: {
+            entries: [
+              { value: '1', mode: 'include' },
+            ],
+          },
         },
       };
 
@@ -710,9 +720,11 @@ describe('processTriggerConstraint', () => {
     it('should fail when source matches exclude rule', () => {
       const constraint: TriggerConstraint = {
         source: {
-          entries: [
-            { value: '1', mode: 'exclude' },
-          ],
+          memberNumber: {
+            entries: [
+              { value: '1', mode: 'exclude' },
+            ],
+          },
         },
       };
 
@@ -729,9 +741,11 @@ describe('processTriggerConstraint', () => {
     it('should pass when target matches include rule', () => {
       const constraint: TriggerConstraint = {
         target: {
-          entries: [
-            { value: '2', mode: 'include' },
-          ],
+          memberNumber: {
+            entries: [
+              { value: '2', mode: 'include' },
+            ],
+          },
         },
       };
 
@@ -747,10 +761,12 @@ describe('processTriggerConstraint', () => {
   describe('inRoomNamed constraint', () => {
     it('should pass when room name matches include rule', () => {
       const constraint: TriggerConstraint = {
-        inRoomNamed: {
-          entries: [
-            { value: 'Test Room', mode: 'include' },
-          ],
+        room: {
+          inRoomNamed: {
+            entries: [
+              { value: 'Test Room', mode: 'include' },
+            ],
+          },
         },
       };
 
@@ -762,10 +778,12 @@ describe('processTriggerConstraint', () => {
 
     it('should fail when room name matches exclude rule', () => {
       const constraint: TriggerConstraint = {
-        inRoomNamed: {
-          entries: [
-            { value: 'Test Room', mode: 'exclude' },
-          ],
+        room: {
+          inRoomNamed: {
+            entries: [
+              { value: 'Test Room', mode: 'exclude' },
+            ],
+          },
         },
       };
 
@@ -779,10 +797,12 @@ describe('processTriggerConstraint', () => {
   describe('inRoomWithMembers constraint', () => {
     it('should pass when member is in room (include rule)', () => {
       const constraint: TriggerConstraint = {
-        inRoomWithMembers: {
-          entries: [
-            { value: '1', mode: 'include' },
-          ],
+        room: {
+          inRoomWithMembers: {
+            entries: [
+              { value: '1', mode: 'include' },
+            ],
+          },
         },
       };
 
@@ -794,10 +814,12 @@ describe('processTriggerConstraint', () => {
 
     it('should fail when member is not in room (include rule)', () => {
       const constraint: TriggerConstraint = {
-        inRoomWithMembers: {
-          entries: [
-            { value: '999', mode: 'include' },
-          ],
+        room: {
+          inRoomWithMembers: {
+            entries: [
+              { value: '999', mode: 'include' },
+            ],
+          },
         },
       };
 

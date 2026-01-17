@@ -235,12 +235,16 @@ describe('Trigger Creation', () => {
           { value: 'hello', matchMode: 'contains' }
         ],
         constraints: {
-          arousalMin: 30,
-          arousalMax: 70,
+          player: {
+            arousalMin: 30,
+            arousalMax: 70,
+          },
           source: {
-            entries: [
-              { value: '1', mode: 'include' },
-            ],
+            memberNumber: {
+              entries: [
+                { value: '1', mode: 'include' },
+              ],
+            },
           },
         },
         constraintMode: 'all',
@@ -250,9 +254,9 @@ describe('Trigger Creation', () => {
 
       expect(result).toBeDefined();
       expect(result?.constraints).toBeDefined();
-      expect(result?.constraints?.arousalMin).toBe(30);
-      expect(result?.constraints?.arousalMax).toBe(70);
-      expect(result?.constraints?.source).toBeDefined();
+      expect(result?.constraints?.player?.arousalMin).toBe(30);
+      expect(result?.constraints?.player?.arousalMax).toBe(70);
+      expect(result?.constraints?.source?.memberNumber).toBeDefined();
       expect(result?.constraintMode).toBe('all');
     });
   });

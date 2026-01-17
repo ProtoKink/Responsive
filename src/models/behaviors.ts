@@ -48,17 +48,49 @@ export const IncludeExcludeRuleSchema = z.object({
 });
 export type IncludeExcludeRule = z.infer<typeof IncludeExcludeRuleSchema>;
 
-export const TriggerConstraintSchema = z.object({
-  source: IncludeExcludeRuleSchema.optional(),
-  target: IncludeExcludeRuleSchema.optional(),
-  arousalMin: z.number().optional(),
-  arousalMax: z.number().optional(),
-  inRoomWithMembers: IncludeExcludeRuleSchema.optional(),
-  inRoomNamed: IncludeExcludeRuleSchema.optional(),
+export const SourceConstraintSchema = z.object({
+  memberNumber: IncludeExcludeRuleSchema.optional(),
   restrained: z.boolean().optional(),
   gagged: z.boolean().optional(),
   blinded: z.boolean().optional(),
   deafened: z.boolean().optional(),
+  arousalMin: z.number().optional(),
+  arousalMax: z.number().optional(),
+});
+export type SourceConstraint = z.infer<typeof SourceConstraintSchema>;
+
+export const TargetConstraintSchema = z.object({
+  memberNumber: IncludeExcludeRuleSchema.optional(),
+  restrained: z.boolean().optional(),
+  gagged: z.boolean().optional(),
+  blinded: z.boolean().optional(),
+  deafened: z.boolean().optional(),
+  arousalMin: z.number().optional(),
+  arousalMax: z.number().optional(),
+});
+export type TargetConstraint = z.infer<typeof TargetConstraintSchema>;
+
+export const PlayerConstraintSchema = z.object({
+  restrained: z.boolean().optional(),
+  gagged: z.boolean().optional(),
+  blinded: z.boolean().optional(),
+  deafened: z.boolean().optional(),
+  arousalMin: z.number().optional(),
+  arousalMax: z.number().optional(),
+});
+export type PlayerConstraint = z.infer<typeof PlayerConstraintSchema>;
+
+export const RoomConstraintSchema = z.object({
+  inRoomWithMembers: IncludeExcludeRuleSchema.optional(),
+  inRoomNamed: IncludeExcludeRuleSchema.optional(),
+});
+export type RoomConstraint = z.infer<typeof RoomConstraintSchema>;
+
+export const TriggerConstraintSchema = z.object({
+  source: SourceConstraintSchema.optional(),
+  target: TargetConstraintSchema.optional(),
+  player: PlayerConstraintSchema.optional(),
+  room: RoomConstraintSchema.optional(),
 });
 export type TriggerConstraint = z.infer<typeof TriggerConstraintSchema>;
 

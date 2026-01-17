@@ -5,8 +5,7 @@ import { CharTalkModule } from '../modules/char_talk';
 import { ProfilesModule } from '../modules/profiles';
 import { CommandsModule } from '../modules/commands';
 
-//messageTimer
-export const MT = {
+export const MSG_TIMER = {
   CHANGELOG: 30,
   INFO: 15,
   COMMANDS: 20

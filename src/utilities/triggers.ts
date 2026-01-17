@@ -1,14 +1,14 @@
 import { modLogger } from 'bc-deeplib/deeplib';
-import { TriggerConstraint, MessageData, ConstraintMode, TriggerType, Behavior, TriggerTypeSchema, MessageDataSchema, TriggerConstraintSchema, ConstraintModeSchema, Trigger, TriggerSpeech, MatchMode } from '../models/behaviors';
+import { TriggerConstraint, MessageData, ConstraintMode, TriggerType, Behavior, TriggerTypeSchema, MessageDataSchema, TriggerConstraintSchema, ConstraintModeSchema, Trigger, TriggerSpeech, MatchMode, SourceConstraint, TargetConstraint, PlayerConstraint, RoomConstraint, IncludeExcludeRule } from '../models/behaviors';
 import { BehaviorsModule } from '../modules/behaviors';
 import { assertNever } from './other';
 import { replaceTemplate } from './chat_messages';
 
-type TriggerConstraintHandlers = {
-  [K in keyof TriggerConstraint]: (
-    rule: NonNullable<TriggerConstraint[K]>,
-    data: MessageData
-  ) => boolean;
+type ConstraintResults = {
+  source?: Record<string, boolean>;
+  target?: Record<string, boolean>;
+  player?: Record<string, boolean>;
+  room?: Record<string, boolean>;
 };
 
 type TriggerPredicate = (trigger: Trigger, data: MessageData) => boolean;
@@ -106,39 +106,112 @@ function checkTriggerPredicates(trigger: Trigger, data: MessageData): boolean {
   return predicates.every(predicate => predicate(trigger, data));
 }
 
-const triggerConstraints: TriggerConstraintHandlers = {
-  arousalMax: (value) => Player.ArousalSettings.Progress >= value,
-  arousalMin: (value) => Player.ArousalSettings.Progress <= value,
-  inRoomNamed: (rule) => {
+function checkMemberNumberRule(rule: IncludeExcludeRule, memberNumber: number): boolean {
+  const memberId = memberNumber.toString();
+  return rule.entries.some(entry => {
+    const matches = entry.value === memberId;
+    return entry.mode === 'include' ? matches : !matches;
+  });
+}
+
+function evaluateCharacterConstraints(
+  constraints: SourceConstraint | TargetConstraint | PlayerConstraint,
+  char: Character | undefined
+): Record<string, boolean> {
+  const results: Record<string, boolean> = {};
+  const hasChar = char !== undefined;
+
+  if ('memberNumber' in constraints && constraints.memberNumber !== undefined) {
+    results.memberNumber = hasChar && char.MemberNumber !== undefined
+      ? checkMemberNumberRule(constraints.memberNumber, char!.MemberNumber)
+      : false;
+  }
+
+  if (constraints.restrained !== undefined) {
+    results.restrained = hasChar ? char.IsRestrained() === constraints.restrained : false;
+  }
+
+  if (constraints.gagged !== undefined) {
+    results.gagged = hasChar ? char.IsGagged() === constraints.gagged : false;
+  }
+
+  if (constraints.blinded !== undefined) {
+    results.blinded = hasChar ? char.IsBlind() === constraints.blinded : false;
+  }
+
+  if (constraints.deafened !== undefined) {
+    results.deafened = hasChar ? char.IsDeaf() === constraints.deafened : false;
+  }
+
+  if (constraints.arousalMin !== undefined) {
+    const arousal = char?.ArousalSettings?.Progress ?? 0;
+    results.arousalMin = arousal <= constraints.arousalMin;
+  }
+
+  if (constraints.arousalMax !== undefined) {
+    const arousal = char?.ArousalSettings?.Progress ?? 0;
+    results.arousalMax = arousal >= constraints.arousalMax;
+  }
+
+  return results;
+}
+
+function evaluateSourceConstraints(constraints: SourceConstraint, data: MessageData): Record<string, boolean> {
+  return evaluateCharacterConstraints(constraints, data.source);
+}
+
+function evaluateTargetConstraints(constraints: TargetConstraint, data: MessageData): Record<string, boolean> {
+  return evaluateCharacterConstraints(constraints, data.target);
+}
+
+function evaluatePlayerConstraints(constraints: PlayerConstraint, _data: MessageData): Record<string, boolean> {
+  return evaluateCharacterConstraints(constraints, Player);
+}
+
+function evaluateRoomConstraints(constraints: RoomConstraint, _data: MessageData): Record<string, boolean> {
+  const results: Record<string, boolean> = {};
+
+  if (constraints.inRoomNamed !== undefined) {
     const roomName = ChatRoomData?.Name ?? '';
-    return rule.entries.some(entry => {
+    results.inRoomNamed = constraints.inRoomNamed.entries.some(entry => {
       const matches = entry.value === roomName;
       return entry.mode === 'include' ? matches : !matches;
     });
-  },
-  inRoomWithMembers: (rule) => {
+  }
+
+  if (constraints.inRoomWithMembers !== undefined) {
     const members = ChatRoomData?.Character?.map(c => c.MemberNumber) ?? [];
-    return rule.entries.some(entry => {
+    results.inRoomWithMembers = constraints.inRoomWithMembers.entries.some(entry => {
       const memberId = parseInt(entry.value, 10);
       const matches = members.includes(memberId);
       return entry.mode === 'include' ? matches : !matches;
     });
-  },
-  source: (rule, data) => {
-    const sourceId = (data.source?.MemberNumber ?? -1).toString();
-    return rule.entries.some(entry => {
-      const matches = entry.value === sourceId;
-      return entry.mode === 'include' ? matches : !matches;
-    });
-  },
-  target: (rule, data) => {
-    const targetId = (data.target?.MemberNumber ?? -1).toString();
-    return rule.entries.some(entry => {
-      const matches = entry.value === targetId;
-      return entry.mode === 'include' ? matches : !matches;
-    });
   }
-};
+
+  return results;
+}
+
+function evaluateAllConstraints(constraints: TriggerConstraint, data: MessageData): ConstraintResults {
+  const results: ConstraintResults = {};
+
+  if (constraints.source) {
+    results.source = evaluateSourceConstraints(constraints.source, data);
+  }
+
+  if (constraints.target) {
+    results.target = evaluateTargetConstraints(constraints.target, data);
+  }
+
+  if (constraints.player) {
+    results.player = evaluatePlayerConstraints(constraints.player, data);
+  }
+
+  if (constraints.room) {
+    results.room = evaluateRoomConstraints(constraints.room, data);
+  }
+
+  return results;
+}
 
 export function processTrigger(type: TriggerType, messageData: MessageData): Behavior | undefined {
   try {
@@ -192,21 +265,24 @@ export function processTriggerConstraint(triggerConstraint: TriggerConstraint, m
     return false;
   }
 
-  const triggerConstraintEntries = CommonKeys(triggerConstraint);
+  const results = evaluateAllConstraints(triggerConstraint, messageData);
 
-  if (triggerConstraintEntries.length === 0) return true;
+  const allResults: boolean[] = [];
+  for (const entityKey in results) {
+    const entityResults = results[entityKey as keyof ConstraintResults];
+    if (entityResults) {
+      for (const constraintKey in entityResults) {
+        allResults.push(entityResults[constraintKey]);
+      }
+    }
+  }
 
-  const predicate = <K extends keyof TriggerConstraint>(key: K) => {
-    const value = triggerConstraint[key];
-    if (value === null || value === undefined) return true;
-
-    return triggerConstraints[key]?.(value, messageData) ?? true;
-  };
+  if (allResults.length === 0) return true;
 
   if (mode === 'any') {
-    return triggerConstraintEntries.some(key => predicate(key));
+    return allResults.some(result => result === true);
   } else if (mode === 'all') {
-    return triggerConstraintEntries.every(key => predicate(key));
+    return allResults.every(result => result === true);
   }
 
   return true;
@@ -215,46 +291,32 @@ export function processTriggerConstraint(triggerConstraint: TriggerConstraint, m
 export function triggerHasAnyConstraints(trigger: Trigger): boolean {
   if (!trigger.constraints) return false;
 
-  for (const key in trigger.constraints) {
-    const typedKey = key as keyof TriggerConstraint;
-    let hasConstraint = false;
-    switch (typedKey) {
-      case 'source':
-      case 'target':
-      case 'arousalMin':
-      case 'arousalMax':
-      case 'inRoomWithMembers':
-      case 'inRoomNamed':
-      case 'restrained':
-      case 'gagged':
-      case 'blinded':
-      case 'deafened':
-        hasConstraint = triggerHasConstraint(trigger, typedKey);
-        break;
-      default:
-        assertNever(typedKey);
-    }
-    if (hasConstraint) return true;
-  }
-  return false;
+  return trigger.constraints.source !== undefined ||
+    trigger.constraints.target !== undefined ||
+    trigger.constraints.player !== undefined ||
+    trigger.constraints.room !== undefined;
 }
 
-export function triggerHasConstraint<K extends keyof TriggerConstraint>(trigger: Trigger, key: K): boolean {
+export function triggerHasConstraint(trigger: Trigger, entity: 'source' | 'target' | 'player' | 'room', constraintKey?: string): boolean {
   if (!trigger.constraints) return false;
-  const value = trigger.constraints[key] as TriggerConstraint[K];
+
+  const entityConstraints = trigger.constraints[entity];
+  if (!entityConstraints) return false;
+
+  if (constraintKey === undefined) {
+    return Object.keys(entityConstraints).length > 0;
+  }
+
+  const value = (entityConstraints as any)[constraintKey];
   if (value === null || value === undefined) return false;
 
-  switch (typeof value) {
-    case 'number':
-      return true;
-    case 'object':
-      if ('entries' in value) {
-        return !!value.entries;
-      }
-      return false;
-    case 'boolean':
-      return true;
-    default:
-      return assertNever(value);
+  if (typeof value === 'boolean' || typeof value === 'number') {
+    return true;
   }
+
+  if (typeof value === 'object' && 'entries' in value) {
+    return Array.isArray(value.entries) && value.entries.length > 0;
+  }
+
+  return false;
 }

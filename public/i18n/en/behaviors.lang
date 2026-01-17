@@ -41,7 +41,6 @@ behaviors.text.do_not_show_this_again_until_leaving_this_screen = Do not show th
 behaviors.text.no_constraints = No constraints added
 behaviors.text.select_constraint_type = Select Constraint Type
 
-
 # Fields
 behaviors.field.name = Name
 behaviors.field.enabled = Enabled
@@ -58,15 +57,26 @@ behaviors.field.room_presence_event = Room Presence Event
 behaviors.field.constraint_mode = Constraint Mode
 behaviors.field.constraint_source = Source Constraint
 behaviors.field.constraint_target = Target Constraint
-behaviors.field.arousal_min = Arousal Minimum
-behaviors.field.arousal_max = Arousal Maximum
-behaviors.field.in_room_with_members = In Room With Members
-behaviors.field.in_room_named = In Room Named
+behaviors.field.constraint_member_number = Member Number
+behaviors.field.constraint_arousalMin = Arousal Minimum
+behaviors.field.constraint_arousalMax = Arousal Maximum
+behaviors.field.constraint_restrained = Restrained
+behaviors.field.constraint_gagged = Gagged
+behaviors.field.constraint_blinded = Blinded
+behaviors.field.constraint_deafened = Deafened
+behaviors.field.constraint_in_room_with_members = In Room With Members
+behaviors.field.constraint_in_room_named = In Room Named
 
 # Sections
 behaviors.section.triggers = Triggers
 behaviors.section.reactions = Reactions
 behaviors.section.constraints = Constraints
+
+# Entities
+behaviors.entity.source = Source
+behaviors.entity.target = Target
+behaviors.entity.player = Player
+behaviors.entity.room = Room
 
 # Trigger Types
 behaviors.trigger_type.speech = Speech
@@ -83,6 +93,7 @@ behaviors.reaction_type.action = Action
 behaviors.reaction_type.activity = Activity
 
 # Options
+
 behaviors.option.any = Any
 behaviors.option.all = All
 behaviors.option.random = Random
@@ -102,6 +113,8 @@ behaviors.option.join = Join
 behaviors.option.leashed = Leashed
 behaviors.option.include = Include
 behaviors.option.exclude = Exclude
+behaviors.option.false = False
+behaviors.option.true = True
 
 behaviors.option.speech = Speech
 behaviors.option.emote = Emote

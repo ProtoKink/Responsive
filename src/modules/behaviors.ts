@@ -87,7 +87,6 @@ export class BehaviorsModule extends BaseModule {
       }
     });
 
-    //Leave Message
     sdk.hookFunction(
       'ServerAccountBeep',
       HookPriority.AddBehavior,
