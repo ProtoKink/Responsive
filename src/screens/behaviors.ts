@@ -648,7 +648,10 @@ export class GuiBehaviors extends BaseSubscreen {
       id: `${behavior.id}-cooldown`,
       labelKey: 'behaviors.field.cooldown',
       value: behavior.cooldownSec?.toString() || '',
-      onChange: (val) => behavior.cooldownSec = val ? parseFloat(val) : undefined,
+      onChange: (val) => {
+        behavior.cooldownSec = val ? parseFloat(val) : undefined;
+        this.buildBehaviorListItem(behavior);
+      },
       step: '0.1'
     });
     elements.push(cooldownField);
