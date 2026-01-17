@@ -2090,21 +2090,27 @@ export class GuiBehaviors extends BaseSubscreen {
           name: trigger.name || getText('behaviors.text.new_trigger'),
           type: 'speech',
           speechType: 'any',
-          content: []
+          content: [],
+          constraintMode: trigger.constraintMode,
+          constraints: trigger.constraints
         });
         break;
       case 'emote':
         newTrigger = BehaviorsModule.createTrigger({
           name: trigger.name || getText('behaviors.text.new_trigger'),
           type: 'emote',
-          content: []
+          content: [],
+          constraintMode: trigger.constraintMode,
+          constraints: trigger.constraints
         });
         break;
       case 'action':
         newTrigger = BehaviorsModule.createTrigger({
           name: trigger.name || getText('behaviors.text.new_trigger'),
           type: 'action',
-          content: []
+          content: [],
+          constraintMode: trigger.constraintMode,
+          constraints: trigger.constraints
         });
         break;
       case 'activity':
@@ -2112,21 +2118,27 @@ export class GuiBehaviors extends BaseSubscreen {
           name: trigger.name || getText('behaviors.text.new_trigger'),
           type: 'activity',
           activityName: [],
-          groupName: []
+          groupName: [],
+          constraintMode: trigger.constraintMode,
+          constraints: trigger.constraints
         });
         break;
       case 'orgasm':
         newTrigger = BehaviorsModule.createTrigger({
           name: trigger.name || getText('behaviors.text.new_trigger'),
           type: 'orgasm',
-          orgasmType: 'any'
+          orgasmType: 'any',
+          constraintMode: trigger.constraintMode,
+          constraints: trigger.constraints
         });
         break;
       case 'roomPresence':
         newTrigger = BehaviorsModule.createTrigger({
           name: trigger.name || getText('behaviors.text.new_trigger'),
           type: 'roomPresence',
-          event: 'join'
+          event: 'join',
+          constraintMode: trigger.constraintMode,
+          constraints: trigger.constraints
         });
         break;
       default:
