@@ -23,6 +23,7 @@ export class GuiAnimatronikka extends BaseSubscreen {
   selectedAnimationId: string | null = null;
   searchQuery = '';
   previewMode: PreviewMode = 'full';
+  draggingKeyframeId: string | null = null;
 
   protected static override subscreenOptions: SubscreenOptions = {
     name: 'animatronikka',
@@ -435,6 +436,7 @@ export class GuiAnimatronikka extends BaseSubscreen {
       classList: ['rsp-animatronikka-keyframes'],
       children: animation.keyframes.map((keyframe, index) => this.buildKeyframeRow(animation, keyframe, index))
     });
+    this.attachKeyframeContainerDragHandlers(content, animation);
 
     return buildContentListSection({
       id: `${animation.id}-keyframes`,
@@ -448,6 +450,7 @@ export class GuiAnimatronikka extends BaseSubscreen {
   buildKeyframeRow(animation: Animation, keyframe: Keyframe, index: number): HTMLElement {
     const label = this.getKeyframeLabel(keyframe);
 
+    const dragHandle = this.buildKeyframeDragHandle();
     const editButton = advElement.createButton({
       id: `${animation.id}-keyframe-edit-${keyframe.id}`,
       onClick: () => this.handleEditKeyframe(animation, keyframe),
@@ -467,24 +470,11 @@ export class GuiAnimatronikka extends BaseSubscreen {
       htmlOptions: { button: { classList: ['rsp-animatronikka-keyframe-button'] } }
     });
 
-    const moveUp = advElement.createButton({
-      id: `${animation.id}-keyframe-up-${keyframe.id}`,
-      onClick: () => this.moveKeyframe(animation, index, -1),
-      options: { label: getText('animatronikka.button.move_up') },
-      htmlOptions: { button: { classList: ['rsp-animatronikka-keyframe-button'] } }
-    });
-
-    const moveDown = advElement.createButton({
-      id: `${animation.id}-keyframe-down-${keyframe.id}`,
-      onClick: () => this.moveKeyframe(animation, index, 1),
-      options: { label: getText('animatronikka.button.move_down') },
-      htmlOptions: { button: { classList: ['rsp-animatronikka-keyframe-button'] } }
-    });
-
-    return ElementCreate({
+    const row = ElementCreate({
       tag: 'div',
       classList: ['rsp-animatronikka-keyframe-row'],
       children: [
+        dragHandle,
         advElement.createLabel({
           id: null,
           label: label,
@@ -492,17 +482,116 @@ export class GuiAnimatronikka extends BaseSubscreen {
             classList: ['rsp-animatronikka-keyframe-label', 'truncated-text']
           }
         }),
-        ElementCreate({ tag: 'div', classList: ['rsp-animatronikka-keyframe-actions'], children: [moveUp, moveDown, editButton, deleteButton] })
+        ElementCreate({ tag: 'div', classList: ['rsp-animatronikka-keyframe-actions'], children: [editButton, deleteButton] })
       ]
+    });
+    row.setAttribute('draggable', 'true');
+    row.addEventListener('dragstart', (event) => this.handleKeyframeDragStart(event, keyframe));
+    row.addEventListener('dragend', () => this.handleKeyframeDragEnd());
+    row.addEventListener('dragover', (event) => this.handleKeyframeDragOver(event, row));
+    row.addEventListener('dragleave', () => this.clearKeyframeDropIndicators(row));
+    row.addEventListener('drop', (event) => this.handleKeyframeDrop(event, animation, index, row));
+    return row;
+  }
+
+  buildKeyframeDragHandle(): HTMLDivElement {
+    return ElementCreate({ 
+      tag: 'div', 
+      classList: ['rsp-animatronikka-keyframe-drag-handle'], 
+      children: [
+        { 
+          tag: 'span', 
+          classList: ['rsp-animatronikka-keyframe-drag-icon']
+        }
+      ] 
     });
   }
 
-  moveKeyframe(animation: Animation, index: number, delta: number): void {
-    const nextIndex = index + delta;
-    if (nextIndex < 0 || nextIndex >= animation.keyframes.length) return;
-    const [item] = animation.keyframes.splice(index, 1);
-    animation.keyframes.splice(nextIndex, 0, item);
-    this.buildEditorPanel();
+  handleKeyframeDragStart(event: DragEvent, keyframe: Keyframe): void {
+    this.draggingKeyframeId = keyframe.id;
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', keyframe.id);
+    }
+  }
+
+  handleKeyframeDragEnd(): void {
+    this.draggingKeyframeId = null;
+    document
+      .querySelectorAll('.rsp-animatronikka-keyframe-row--drag-over, .rsp-animatronikka-keyframe-row--drag-over-top, .rsp-animatronikka-keyframe-row--drag-over-bottom')
+      .forEach(row => this.clearKeyframeDropIndicators(row as HTMLElement));
+  }
+
+  handleKeyframeDragOver(event: DragEvent, row: HTMLElement): void {
+    if (!this.draggingKeyframeId) return;
+    event.preventDefault();
+    const rect = row.getBoundingClientRect();
+    const isAfter = event.clientY >= rect.top + rect.height / 2;
+    row.setAttribute('data-drop-position', isAfter ? 'after' : 'before');
+    row.classList.add('rsp-animatronikka-keyframe-row--drag-over');
+    row.classList.toggle('rsp-animatronikka-keyframe-row--drag-over-top', !isAfter);
+    row.classList.toggle('rsp-animatronikka-keyframe-row--drag-over-bottom', isAfter);
+  }
+
+  handleKeyframeDrop(event: DragEvent, animation: Animation, targetIndex: number, row?: HTMLElement): void {
+    const draggedId = this.draggingKeyframeId ?? event.dataTransfer?.getData('text/plain');
+    if (!draggedId) return;
+    event.preventDefault();
+    const position = row?.getAttribute('data-drop-position');
+    const insertIndex = position === 'after' ? targetIndex + 1 : targetIndex;
+    if (this.reorderKeyframe(animation, draggedId, insertIndex)) {
+      this.buildEditorPanel();
+    } else {
+      this.draggingKeyframeId = null;
+    }
+  }
+
+  attachKeyframeContainerDragHandlers(container: HTMLElement, animation: Animation): void {
+    container.addEventListener('dragover', (event) => {
+      if (!this.draggingKeyframeId) return;
+      event.preventDefault();
+    });
+    container.addEventListener('drop', (event) => {
+      if (!this.draggingKeyframeId) return;
+      if (event.target !== container) return;
+      const draggedId = this.draggingKeyframeId ?? event.dataTransfer?.getData('text/plain');
+      if (!draggedId) return;
+      event.preventDefault();
+      this.clearAllKeyframeDropIndicators();
+      if (this.reorderKeyframe(animation, draggedId, animation.keyframes.length)) {
+        this.buildEditorPanel();
+      } else {
+        this.draggingKeyframeId = null;
+      }
+    });
+  }
+
+  reorderKeyframe(animation: Animation, draggedId: string, targetIndex: number): boolean {
+    const dragIndex = animation.keyframes.findIndex(keyframe => keyframe.id === draggedId);
+    if (dragIndex === -1) return false;
+    let insertIndex = Math.max(0, Math.min(targetIndex, animation.keyframes.length));
+    if (dragIndex < insertIndex) {
+      insertIndex -= 1;
+    }
+    if (dragIndex === insertIndex) return false;
+    const [item] = animation.keyframes.splice(dragIndex, 1);
+    animation.keyframes.splice(insertIndex, 0, item);
+    return true;
+  }
+
+  clearKeyframeDropIndicators(row: HTMLElement): void {
+    row.classList.remove(
+      'rsp-animatronikka-keyframe-row--drag-over',
+      'rsp-animatronikka-keyframe-row--drag-over-top',
+      'rsp-animatronikka-keyframe-row--drag-over-bottom',
+    );
+    row.removeAttribute('data-drop-position');
+  }
+
+  clearAllKeyframeDropIndicators(): void {
+    document
+      .querySelectorAll('.rsp-animatronikka-keyframe-row')
+      .forEach(row => this.clearKeyframeDropIndicators(row as HTMLElement));
   }
 
   getKeyframeLabel(keyframe: Keyframe): string {
@@ -512,7 +601,7 @@ export class GuiAnimatronikka extends BaseSubscreen {
       case 'pose':
         return `${getText('animatronikka.keyframe.pose')} ${keyframe.poseName || getText('animatronikka.text.none')} (${keyframe.durationMs}ms)`;
       case 'restraint':
-        return `${getText('animatronikka.keyframe.appearance')} ${keyframe.group}: ${keyframe.assetName ?? getText('animatronikka.text.none')} (${keyframe.durationMs}ms)`;
+        return `${getText('animatronikka.keyframe.restraint')} ${keyframe.group}: ${keyframe.assetName ?? getText('animatronikka.text.none')} (${keyframe.durationMs}ms)`;
       default:
         return getText('animatronikka.text.unknown_keyframe');
     }
@@ -646,8 +735,9 @@ export class GuiAnimatronikka extends BaseSubscreen {
           modalClassList: ['rsp-modal']
         });
         if (colorInput === null) return null;
+
         return {
-          id: current?.id ?? '',
+          id: current?.id ?? CommonGenerateUniqueID(),
           type,
           durationMs,
           group,
@@ -662,10 +752,10 @@ export class GuiAnimatronikka extends BaseSubscreen {
         });
         if (poseInput === null) return null;
         const poseName = poseInput || '';
-        return { id: current?.id ?? '', type, durationMs, poseName };
+        return { id: current?.id ?? CommonGenerateUniqueID(), type, durationMs, poseName };
       }
       case 'restraint': {
-        const group = await Modal.prompt(getText('animatronikka.prompt.appearance_group'), {
+        const group = await Modal.prompt(getText('animatronikka.prompt.restraint_group'), {
           defaultValue: current && current.type === 'restraint' ? current.group : '',
           modalClassList: ['rsp-modal']
         });
@@ -680,8 +770,9 @@ export class GuiAnimatronikka extends BaseSubscreen {
           modalClassList: ['rsp-modal']
         });
         if (colorInput === null) return null;
+        
         return {
-          id: current?.id ?? '',
+          id: current?.id ?? CommonGenerateUniqueID(),
           type,
           durationMs,
           group,

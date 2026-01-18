@@ -43,7 +43,7 @@ animatronikka.section.keyframes = Keyframes
 # Keyframes
 animatronikka.keyframe.expression = Expression
 animatronikka.keyframe.pose = Pose
-animatronikka.keyframe.appearance = Appearance
+animatronikka.keyframe.restraint = Restraint
 
 # Prompts
 animatronikka.prompt.animation_name = Enter animation name
@@ -55,7 +55,7 @@ animatronikka.prompt.export_json = Animation JSON
 animatronikka.prompt.expression_group = Expression group (e.g. Mouth)
 animatronikka.prompt.expression_name = Expression name (optional)
 animatronikka.prompt.pose_list = Pose list (comma separated)
-animatronikka.prompt.appearance_group = Appearance group (e.g. ItemMouth)
+animatronikka.prompt.restraint_group = Restraint group (e.g. ItemMouth)
 animatronikka.prompt.asset_name_optional = Asset name (optional)
 animatronikka.prompt.expression_optional = Expression (optional)
 animatronikka.prompt.color_optional = Color (optional, comma for multiple)

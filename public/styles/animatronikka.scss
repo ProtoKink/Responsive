@@ -175,6 +175,55 @@
   gap: var(--gap);
 }
 
+.rsp-animatronikka-keyframe-row--drag-over-top {
+  position: relative;
+}
+
+.rsp-animatronikka-keyframe-row--drag-over-bottom {
+  position: relative;
+}
+
+.rsp-animatronikka-keyframe-row--drag-over-top::before,
+.rsp-animatronikka-keyframe-row--drag-over-bottom::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: minv(0.4, 0.2);
+  background-color: var(--tmd-accent, $active-color);
+}
+
+.rsp-animatronikka-keyframe-row--drag-over-top::before {
+  top: -0.25em;
+}
+
+.rsp-animatronikka-keyframe-row--drag-over-bottom::after {
+  bottom: -0.25em;
+}
+
+.rsp-animatronikka-keyframe-drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  opacity: 0.7;
+  padding: 0 var(--half-gap);
+}
+
+.rsp-animatronikka-keyframe-drag-handle:active {
+  cursor: grabbing;
+}
+
+.rsp-animatronikka-keyframe-drag-icon {
+  width: minv(2.2, 1.1);
+  height: minv(3.2, 1.6);
+  display: inline-block;
+  background-color: currentColor;
+  mask: url('../images/drag_handle.svg') no-repeat center / contain;
+  -webkit-mask: url('../images/drag_handle.svg') no-repeat center / contain;
+  color: var(--tmd-accent, black);
+}
+
 .rsp-animatronikka-keyframe-label {
   flex: 1;
 }
