@@ -6,3 +6,4 @@ mainmenu.title = - BC Responsive v$ModVersion -
 mainmenu.button.settings = Settings
 mainmenu.button.behaviors = Behaviors
 mainmenu.button.profiles = Profiles
+mainmenu.button.animatronikka = Animatronikka

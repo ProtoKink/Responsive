@@ -1,0 +1,57 @@
+import { BaseSettingsModel } from 'bc-deeplib/deeplib';
+import { z } from 'zod';
+import { v4 as uuidv4 } from 'uuid';
+
+export const KeyframeTypeSchema = z.enum(['expression', 'pose', 'restraint']);
+export type KeyframeType = z.infer<typeof KeyframeTypeSchema>;
+
+const KeyframeBaseSchema = z.object({
+  id: z.string().default(() => uuidv4()),
+  type: KeyframeTypeSchema,
+  durationMs: z.number().min(0).default(500),
+});
+
+export const ExpressionKeyframeSchema = KeyframeBaseSchema.extend({
+  type: z.literal('expression'),
+  group: z.string(),
+  expression: z.string().nullable().optional(),
+  color: z.union([z.string(), z.array(z.string())]).optional(),
+});
+export type ExpressionKeyframe = z.infer<typeof ExpressionKeyframeSchema>;
+
+export const PoseKeyframeSchema = KeyframeBaseSchema.extend({
+  type: z.literal('pose'),
+  poseName: z.string(),
+});
+export type PoseKeyframe = z.infer<typeof PoseKeyframeSchema>;
+
+export const RestraintKeyframeSchema = KeyframeBaseSchema.extend({
+  type: z.literal('restraint'),
+  group: z.string(),
+  assetName: z.string().optional(),
+  color: z.union([z.string(), z.array(z.string())]).optional(),
+});
+export type RestraintKeyframe = z.infer<typeof RestraintKeyframeSchema>;
+
+export const KeyframeSchema = z.discriminatedUnion('type', [
+  ExpressionKeyframeSchema,
+  PoseKeyframeSchema,
+  RestraintKeyframeSchema,
+]);
+export type Keyframe = z.infer<typeof KeyframeSchema>;
+
+export const AnimationSchema = z.object({
+  id: z.string().default(() => uuidv4()),
+  name: z.string().default('New Animation'),
+  keyframes: z.array(KeyframeSchema).default([]),
+  tags: z.array(z.string()).default([]),
+  loop: z.boolean().default(false),
+});
+export type Animation = z.infer<typeof AnimationSchema>;
+
+export const AnimationInputSchema = AnimationSchema.partial({ id: true, name: true });
+export type AnimationInput = z.infer<typeof AnimationInputSchema>;
+
+export type AnimatronikkaSettingsModel = BaseSettingsModel & {
+  animations: Record<string, Animation>;
+};

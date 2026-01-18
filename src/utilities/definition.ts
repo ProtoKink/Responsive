@@ -4,6 +4,7 @@ import { BehaviorsModule } from '../modules/behaviors';
 import { CharTalkModule } from '../modules/char_talk';
 import { ProfilesModule } from '../modules/profiles';
 import { CommandsModule } from '../modules/commands';
+import { AnimatronikkaModule } from '../modules/animatronikka';
 
 export const MSG_TIMER = {
   CHANGELOG: 30,
@@ -31,5 +32,6 @@ declare module 'bc-deeplib/deeplib' {
     ProfilesModule: ProfilesModule;
     CharTalkModule: CharTalkModule;
     CommandsModule: CommandsModule;
+    AnimatronikkaModule: AnimatronikkaModule;
   }
 }

@@ -1,5 +1,6 @@
 import { modLogger, sendActionMessage } from 'bc-deeplib/deeplib';
 import { MessageData, MessageDataSchema, Reaction, ReactionMode, ReactionModeSchema, ReactionSchema } from '../models/behaviors';
+import { AnimatronikkaModule } from '../modules/animatronikka';
 import { chatRoomAutoInterceptMessage, randomResponse, replaceTemplate } from './chat_messages';
 import { assertNever, getRandomInt } from './other';
 import { doesBcxAllowsTalking } from './handlers';
@@ -91,6 +92,19 @@ function processReaction(reaction: Reaction, messageData: MessageData): boolean 
       ActivityRun(Player, character, group, { Activity: activity, Group: group.Name });
 
       return true;
+    }
+    case 'animation': {
+      const module = AnimatronikkaModule.instance;
+      if (!module || !reaction.animationId) return false;
+
+      const success = module.playAnimation(reaction.animationId, {
+        loop: reaction.loop,
+        interrupt: reaction.interrupt,
+        priority: reaction.priority,
+        target: Player,
+      });
+
+      return success;
     }
     default:
       assertNever(reaction);

@@ -1,0 +1,61 @@
+# Animatronikka
+animatronikka.title = - Animatronikka -
+
+# Search
+animatronikka.search.placeholder = Search animations...
+
+# Buttons
+animatronikka.button.add_animation = Add Animation
+animatronikka.button.add_keyframe = Add Keyframe
+animatronikka.button.select_animation = Select Animation
+animatronikka.button.import = Import JSON
+animatronikka.button.export = Export JSON
+animatronikka.button.play = Play
+animatronikka.button.stop = Stop
+animatronikka.button.edit = Edit
+animatronikka.button.delete = Delete
+animatronikka.button.move_up = Up
+animatronikka.button.move_down = Down
+
+# Text
+animatronikka.text.select_animation_to_edit = Select an animation to edit
+animatronikka.text.preview_mode = Preview mode
+animatronikka.text.toggle_delete_mode = Toggle delete mode
+animatronikka.text.new_animation = New Animation
+animatronikka.text.unknown_keyframe = Unknown keyframe
+animatronikka.text.none = None
+animatronikka.text.import_success = Imported $count animation(s)
+animatronikka.text.import_failed = Import failed. Invalid JSON.
+
+# Preview modes
+animatronikka.preview_mode.full = Full body
+animatronikka.preview_mode.face = Face only
+animatronikka.preview_mode.body = Body only
+
+# Fields
+animatronikka.field.name = Name
+animatronikka.field.tags = Tags (comma separated)
+animatronikka.field.loop = Loop
+
+# Sections
+animatronikka.section.keyframes = Keyframes
+
+# Keyframes
+animatronikka.keyframe.expression = Expression
+animatronikka.keyframe.pose = Pose
+animatronikka.keyframe.appearance = Appearance
+
+# Prompts
+animatronikka.prompt.animation_name = Enter animation name
+animatronikka.prompt.delete_confirm = Delete animation "$name"?
+animatronikka.prompt.keyframe_type = Select keyframe type
+animatronikka.prompt.duration_ms = Duration (ms)
+animatronikka.prompt.import_json = Paste animation JSON
+animatronikka.prompt.export_json = Animation JSON
+animatronikka.prompt.expression_group = Expression group (e.g. Mouth)
+animatronikka.prompt.expression_name = Expression name (optional)
+animatronikka.prompt.pose_list = Pose list (comma separated)
+animatronikka.prompt.appearance_group = Appearance group (e.g. ItemMouth)
+animatronikka.prompt.asset_name_optional = Asset name (optional)
+animatronikka.prompt.expression_optional = Expression (optional)
+animatronikka.prompt.color_optional = Color (optional, comma for multiple)

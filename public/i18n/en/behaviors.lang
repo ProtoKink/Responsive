@@ -21,6 +21,7 @@ behaviors.button.select_activity = Select Activity
 behaviors.button.select_body_part = Select Body Part
 behaviors.button.select_activities = Select Activities
 behaviors.button.select_body_parts = Select Body Parts
+behaviors.button.select_animation = Select Animation
 behaviors.button.add_constraint = Add Constraint
 behaviors.button.remove_constraint = Remove Constraint
 
@@ -76,6 +77,10 @@ behaviors.field.activity_names = Activity Names
 behaviors.field.group_names = Group Names
 behaviors.field.orgasm_type = Orgasm Type
 behaviors.field.room_presence_event = Room Presence Event
+behaviors.field.animation = Animation
+behaviors.field.animation_loop = Loop Animation
+behaviors.field.animation_interrupt = Interrupt Active Animation
+behaviors.field.animation_priority = Animation Priority
 behaviors.field.constraint_mode = Constraint Mode
 behaviors.field.constraint_source = Source Constraint
 behaviors.field.constraint_target = Target Constraint
@@ -113,6 +118,7 @@ behaviors.reaction_type.speech = Speech
 behaviors.reaction_type.emote = Emote
 behaviors.reaction_type.action = Action
 behaviors.reaction_type.activity = Activity
+behaviors.reaction_type.animation = Animation
 
 # Options
 
@@ -144,3 +150,4 @@ behaviors.option.action = Action
 behaviors.option.activity = Activity
 behaviors.option.orgasm = Orgasm
 behaviors.option.roomPresence = Room Presence
+behaviors.option.animation = Animation

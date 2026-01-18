@@ -3,6 +3,7 @@ import { CharTalkModule } from './modules/char_talk';
 import { GlobalModule } from './modules/global';
 import { ProfilesModule } from './modules/profiles';
 import { BehaviorsModule } from './modules/behaviors';
+import { AnimatronikkaModule } from './modules/animatronikka';
 import { ModName, ModRepository } from './utilities/definition';
 import { GuiReset } from './screens/reset';
 import { CommandsModule } from './modules/commands';
@@ -17,6 +18,7 @@ initMod({
     Style.injectEmbed('bcr_behaviors_style', `${PUBLIC_URL}/styles/behaviors.css`);
     Style.injectEmbed('bcr_modals_style', `${PUBLIC_URL}/styles/modals.css`);
     Style.injectEmbed('bcr_field_style', `${PUBLIC_URL}/styles/fields.css`);
+    Style.injectEmbed('bcr_animatronikka_style', `${PUBLIC_URL}/styles/animatronikka.css`);
 
     ServerPlayerChatRoom.register({
       callback: () => CurrentModule === 'DeepLibMod' as keyof ModuleScreens && InformationSheetReturnScreen?.[1] === 'ChatRoom'
@@ -30,6 +32,7 @@ initMod({
     }),
     GlobalModule: new GlobalModule(),
     BehaviorsModule: new BehaviorsModule(),
+    AnimatronikkaModule: new AnimatronikkaModule(),
     ProfilesModule: new ProfilesModule(),
     CharTalkModule: new CharTalkModule(),
     CommandsModule: new CommandsModule(),

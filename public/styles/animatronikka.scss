@@ -1,0 +1,198 @@
+@use 'helpers' as *;
+@use 'variables' as *;
+
+.rsp-animatronikka-container {
+  display: flex;
+  flex-direction: row;
+  gap: min(2vh, 1vw);
+  width: min(95vh, 60vw);
+  height: min(60vh, 35vw);
+
+
+  .rsp-animatronikka-list-panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+    width: 25%;
+    min-width: 250px;
+    background-color: var(--tmd-element, lightgray);
+    border-radius: var(--deeplib-border-radius);
+    padding: minv(1.8, 0.6);
+    box-shadow: minv(0.2, 0.1) minv(0.2, 0.1) minv(0.4, 0.2) black;
+
+    .rsp-animatronikka-list-header {
+      display: flex;
+      flex-direction: row;
+      gap: var(--gap);
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+
+      .rsp-animatronikka-add {
+        width: minv(6, 3);
+        height: minv(6, 3);
+        flex: 0 0 auto;
+        padding: 0;
+      }
+
+      .rsp-animatronikka-search {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        align-items: center;
+        justify-content: center;
+
+        input {
+          width: 100%;
+          padding: minv(1, 0.5);
+          font-size: 0.8em;
+        }
+      }
+    }
+
+    .rsp-animatronikka-list-items {
+      display: flex;
+      flex-direction: column;
+      gap: var(--gap);
+      width: 100%;
+      flex: 1;
+
+      .rsp-animatronikka-list-item {
+        width: 100%;
+        padding: minv(1, 0.5);
+        transition: background-color 0.2s;
+        height: unset;
+        position: relative !important;
+
+        &:hover {
+          background-color: var(--tmd-accent-hover, #e0e0e0);
+        }
+
+        &[data-selected] {
+          background-color: var(--tmd-accent, $active-color);
+          color: white;
+
+          .rsp-behaviors-item-info {
+            color: var(--tmd-text, white);
+          }
+        }
+
+        &[data-deletable][data-delete-mode] {
+          background-color: $delete-color;
+          color: white;
+
+          &:hover {
+            background-color: $delete-hover-color;
+          }
+
+          .rsp-behaviors-item-name {
+            color: white;
+          }
+        }
+      }
+    }
+  }
+}
+
+.rsp-animatronikka-library-controls {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+
+  .rsp-animatronikka-library-controls-button {
+    width: minv(6, 3);
+    height: minv(6, 3);
+    flex: 0 0 auto;
+    padding: 0;
+  }
+}
+
+.rsp-animatronikka-editor-panel {
+  display: flex;
+  flex-direction: column;
+  gap: minv(1.5, 0.75);
+  flex: 1;
+  background-color: var(--tmd-element, lightgray);
+  border-radius: var(--deeplib-border-radius);
+  padding: minv(1.8, 0.6);
+  box-shadow: minv(0.2, 0.1) minv(0.2, 0.1) minv(0.4, 0.2) black;
+}
+
+.rsp-animatronikka-editor-empty {
+  text-align: center;
+  padding: minv(5, 2.5);
+  opacity: 0.6;
+}
+
+.rsp-animatronikka-preview-controls {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: min(1vh, 0.5vw);
+
+  .rsp-animatronikka-playback-controls-button,
+  .rsp-animatronikka-export-button {
+    width: minv(6, 3);
+    height: minv(6, 3);
+    flex: 0 0 auto;
+    padding: 0;
+  }
+
+  .rsp-animatronikka-preview-modes {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--gap);
+    margin-left: auto;
+  }
+
+  .rsp-animatronikka-preview-button {
+    flex: 0 0 fit-content;
+    padding: 0 var(--half-gap);
+  }
+
+  .rsp-animatronikka-preview-button[data-selected='true'] {
+    background-color: var(--tmd-accent, $active-color);
+  }
+  
+  .rsp-animatronikka-preview-label {
+    opacity: 0.75;
+    flex: 0 0 auto;
+  }
+}
+
+.rsp-animatronikka-keyframes {
+  display: flex;
+  flex-direction: column;
+  gap: min(1vh, 0.5vw);
+}
+
+.rsp-animatronikka-keyframe-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--gap);
+}
+
+.rsp-animatronikka-keyframe-label {
+  flex: 1;
+}
+
+.rsp-animatronikka-keyframe-actions {
+  display: flex;
+  flex-direction: row;
+  gap: var(--half-gap);
+}
+
+.rsp-animatronikka-keyframe-button {
+  min-width: 2.2em;
+  padding: 0 var(--half-gap);
+  flex-basis: fit-content;
+}
+
+.rsp-animatronikka-json-textarea {
+  width: min(60vh, 30vw);
+  min-height: min(25vh, 15vw);
+  resize: vertical;
+}

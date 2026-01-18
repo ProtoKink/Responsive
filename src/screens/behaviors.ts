@@ -3,9 +3,10 @@ import { advElement, BaseSubscreen, exportToGlobal, getText, layout, Modal, Sett
 import { BehaviorsSettingsModel, Behavior, Trigger, Reaction, ConstraintMode, MatchMode, SpeechType, OrgasmType, RoomPresenceEvent, ReactionMode, TriggerTypeSchema, ReactionTypeSchema, ReactionType, TriggerType, IncludeExcludeEntry, MatchContentEntry, SpeechTypeSchema, MatchModeSchema, OrgasmTypeSchema, RoomPresenceEventSchema, ReactionModeSchema, ConstraintModeSchema, IncludeExcludeEntrySchema } from '../models/behaviors';
 import { BehaviorsModule } from '../modules/behaviors';
 import { assertNever } from '../utilities/other';
-import { activitySelectorModal, bodyPartSelectorModal, idSelectorModal, memberNumberSelectorModal, textReactionSelectorModal } from '@/utilities/selectorModals';
+import { activitySelectorModal, animationSelectorModal, bodyPartSelectorModal, idSelectorModal, memberNumberSelectorModal, textReactionSelectorModal } from '@/utilities/selectorModals';
 import { triggerHasAnyConstraints } from '@/utilities/triggers';
 import { buildCollapsibleSection, buildContentListSection, createDropdownField, createInputField, createNumberInputField } from '@/utilities/fields';
+import { AnimatronikkaModule } from '@/modules/animatronikka';
 import { DebugStorage, BehaviorExecutionEntry } from '@/utilities/debugStorage';
 
 type TabType = 'behaviors' | 'triggers' | 'reactions' | 'debugger';
@@ -1015,6 +1016,76 @@ export class GuiBehaviors extends BaseSubscreen {
       });
       const groupNamesSection = rerenderGroupNames();
       elements.push(groupNamesSection);
+    } else if (reaction.type === 'animation') {
+      const renderAnimation = () => buildContentListSection({
+        id: `${reaction.id}-animation`,
+        labelKey: 'behaviors.field.animation',
+        onAdd: async () => {
+          const animations = AnimatronikkaModule.instance?.settings.animations ?? {};
+          const selected = reaction.animationId ? [reaction.animationId] : [];
+          const result = await animationSelectorModal({ selectedIds: selected, limit: 1, animations });
+          if (!result || result.length === 0) return;
+          const [animationId] = result;
+          if (reaction.animationId !== animationId) {
+            reaction.animationId = animationId;
+            renderAnimation();
+          }
+        },
+        addLabel: 'behaviors.button.select_animation',
+        content: this.buildChipList(
+          `${reaction.id}-animation`,
+          reaction.animationId
+            ? [{
+              id: reaction.animationId,
+              name: AnimatronikkaModule.instance?.settings.animations?.[reaction.animationId]?.name ?? reaction.animationId
+            }]
+            : [],
+          function () {
+            reaction.animationId = '';
+            this.remove();
+          }
+        )
+      });
+      elements.push(renderAnimation());
+
+      const loopField = advElement.createCheckbox({
+        id: `${reaction.id}-animation-loop`,
+        label: getText('behaviors.field.animation_loop'),
+        setElementValue: () => reaction.loop ?? false,
+        setSettingValue: (val) => (reaction.loop = val),
+        htmlOptions: {
+          container: {
+            classList: ['rsp-behaviors-field'],
+          }
+        }
+      });
+      elements.push(loopField);
+
+      const interruptField = advElement.createCheckbox({
+        id: `${reaction.id}-animation-interrupt`,
+        label: getText('behaviors.field.animation_interrupt'),
+        setElementValue: () => reaction.interrupt ?? false,
+        setSettingValue: (val) => reaction.interrupt = val,
+        htmlOptions: {
+          container: {
+            classList: ['rsp-behaviors-field'],
+          }
+        }
+      });
+      elements.push(interruptField);
+
+      const priorityField = createNumberInputField({
+        id: `${reaction.id}-animation-priority`,
+        labelKey: 'behaviors.field.animation_priority',
+        value: reaction.priority?.toString() ?? '',
+        onChange: (val) => {
+          reaction.priority = val ? parseFloat(val) : undefined;
+        },
+        step: '1',
+        min: '0',
+        max: '100'
+      });
+      elements.push(priorityField);
     }
 
     return elements;
@@ -2387,6 +2458,16 @@ export class GuiBehaviors extends BaseSubscreen {
           type: 'activity',
           activityName: '',
           groupName: ''
+        });
+        break;
+      case 'animation':
+        newReaction = BehaviorsModule.createReaction({
+          name: reaction.name || getText('behaviors.text.new_reaction'),
+          type: 'animation',
+          animationId: '',
+          loop: false,
+          interrupt: false,
+          priority: 0
         });
         break;
       default:

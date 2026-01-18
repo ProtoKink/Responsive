@@ -25,7 +25,7 @@ export type MatchMode = z.infer<typeof MatchModeSchema>;
 export const RoomPresenceEventSchema = z.enum(['leave', 'join', 'leashed']);
 export type RoomPresenceEvent = z.infer<typeof RoomPresenceEventSchema>;
 
-export const ReactionTypeSchema = z.enum(['speech', 'emote', 'action', 'activity']);
+export const ReactionTypeSchema = z.enum(['speech', 'emote', 'action', 'activity', 'animation']);
 export type ReactionType = z.infer<typeof ReactionTypeSchema>;
 
 export const TriggerTypeSchema = z.enum(['speech', 'emote', 'action', 'activity', 'orgasm', 'roomPresence']);
@@ -150,14 +150,24 @@ export type ReactionActivity = Prettify<Omit<z.infer<typeof ReactionActivitySche
   groupName: AssetGroupItemName;
 }>;
 
-export const ReactionSchema = z.union([ReactionSpeechSchema, ReactionEmoteSchema, ReactionActionSchema, ReactionActivitySchema]);
+const ReactionAnimationSchema = BaseReactionSchema.extend({
+  type: z.literal('animation'),
+  animationId: z.string(),
+  loop: z.boolean().optional(),
+  interrupt: z.boolean().optional(),
+  priority: z.number().optional(),
+});
+export type ReactionAnimation = z.infer<typeof ReactionAnimationSchema>;
+
+export const ReactionSchema = z.union([ReactionSpeechSchema, ReactionEmoteSchema, ReactionActionSchema, ReactionActivitySchema, ReactionAnimationSchema]);
 export type Reaction = z.infer<typeof ReactionSchema>;
 
 export const ReactionInputSchema = z.discriminatedUnion('type', [
   ReactionSpeechSchema.partial({ id: true, name: true }),
   ReactionEmoteSchema.partial({ id: true, name: true }),
   ReactionActionSchema.partial({ id: true, name: true }),
-  ReactionActivitySchema.partial({ id: true, name: true })
+  ReactionActivitySchema.partial({ id: true, name: true }),
+  ReactionAnimationSchema.partial({ id: true, name: true })
 ]);
 export type ReactionInput = z.infer<typeof ReactionInputSchema>;
 

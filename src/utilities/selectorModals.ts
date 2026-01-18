@@ -52,6 +52,18 @@ export async function idSelectorModal(options: { buttons?: { label: string, valu
   });
 }
 
+export async function animationSelectorModal(options?: { selectedIds?: string[]; limit?: number; animations?: Record<string, { id: string; name: string }> }): Promise<string[] | null> {
+  options ??= {};
+  const animations = options.animations ?? {};
+  const buttons = Object.values(animations).map(animation => ({
+    label: animation.name,
+    value: animation.id,
+    selected: options?.selectedIds?.includes(animation.id) ?? false,
+  }));
+
+  return await idSelectorModal({ buttons, limit: options.limit });
+}
+
 export async function bodyPartSelectorModal(options?: { selectedParts?: AssetGroupItemName[], limit?: number }): Promise<AssetGroupItemName[] | null> {
   options ??= {};
   const limit = options.limit ?? Infinity;
@@ -975,6 +987,7 @@ export async function textReactionSelectorModal(options?: { initialValue?: strin
 }
 
 exportToGlobal('activitySelectorModal', activitySelectorModal);
+exportToGlobal('animationSelectorModal', animationSelectorModal);
 exportToGlobal('bodyPartSelectorModal', bodyPartSelectorModal);
 exportToGlobal('memberNumberSelectorModal', memberNumberSelectorModal);
 exportToGlobal('textReactionSelectorModal', textReactionSelectorModal);

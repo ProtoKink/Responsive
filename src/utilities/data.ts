@@ -3,6 +3,7 @@ import { GlobalSettingsModel } from '../models/base';
 import { ProfileEntryModel } from '../models/profiles';
 import { BehaviorsSettingsModel } from '../models/behaviors';
 import { SettingsModel } from '../models/settings';
+import { AnimatronikkaSettingsModel } from '../models/animations';
 
 export const modStorage = new ModStorage<SettingsModel>('Responsive');
 
@@ -14,6 +15,7 @@ export function dataErase(doResetSettings: boolean, doResetResponses: boolean, d
 
   if (doResetResponses) {
     data.BehaviorsModule = <BehaviorsSettingsModel>{};
+    data.AnimatronikkaModule = <AnimatronikkaSettingsModel>{};
   }
 
   if (doResetProfiles) {
@@ -24,15 +26,13 @@ export function dataErase(doResetSettings: boolean, doResetResponses: boolean, d
 
 export function dataResetForManual() {
   const data = modStorage.playerStorage;
-  data.BehaviorsModule = <BehaviorsSettingsModel><unknown>{
-    mainResponses: [],
-    extraResponses: {
-      low: [],
-      light: [],
-      medium: [],
-      hot: [],
-      orgasm: []
-    }
-  };
+  data.BehaviorsModule = {
+    behaviors: {},
+    triggers: {},
+    reactions: {}
+  } as BehaviorsSettingsModel;
+  data.AnimatronikkaModule = {
+    animations: {}
+  } as AnimatronikkaSettingsModel;
   modStorage.save();
 }
