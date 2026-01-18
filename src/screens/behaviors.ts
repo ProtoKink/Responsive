@@ -6,8 +6,9 @@ import { assertNever } from '../utilities/other';
 import { activitySelectorModal, bodyPartSelectorModal, idSelectorModal, memberNumberSelectorModal, textReactionSelectorModal } from '@/utilities/selectorModals';
 import { triggerHasAnyConstraints } from '@/utilities/triggers';
 import { buildCollapsibleSection, buildContentListSection, createDropdownField, createInputField, createNumberInputField } from '@/utilities/fields';
+import { DebugStorage, BehaviorExecutionEntry } from '@/utilities/debugStorage';
 
-type TabType = 'behaviors' | 'triggers' | 'reactions';
+type TabType = 'behaviors' | 'triggers' | 'reactions' | 'debugger';
 // #endregion !SECTION Imports & Types
 
 // #region SECTION Constants
@@ -135,6 +136,7 @@ export class GuiBehaviors extends BaseSubscreen {
         this.createTabButton('behaviors', getText('behaviors.tab.behaviors')),
         this.createTabButton('triggers', getText('behaviors.tab.triggers')),
         this.createTabButton('reactions', getText('behaviors.tab.reactions')),
+        this.createTabButton('debugger', getText('behaviors.tab.debugger')),
       ]
     });
 
@@ -175,6 +177,14 @@ export class GuiBehaviors extends BaseSubscreen {
   }
 
   buildTabContent(): HTMLElement {
+    if (this.activeTab === 'debugger') {
+      return ElementCreate({
+        tag: 'div',
+        classList: ['rsp-behaviors-tab-content'],
+        children: [this.buildDebuggerPanel()]
+      });
+    }
+
     const content = ElementCreate({
       tag: 'div',
       classList: ['rsp-behaviors-tab-content'],
@@ -233,7 +243,9 @@ export class GuiBehaviors extends BaseSubscreen {
     return searchInput;
   }
 
-  buildAddButton(): HTMLElement {
+  buildAddButton(): HTMLElement | undefined {
+    if (this.activeTab === 'debugger') return undefined;
+
     const tooltipMap = {
       behaviors: 'behaviors.button.add_behavior',
       triggers: 'behaviors.button.add_trigger',
@@ -600,6 +612,200 @@ export class GuiBehaviors extends BaseSubscreen {
     }
 
     return panel;
+  }
+
+  buildDebuggerPanel(): HTMLElement {
+    const history = DebugStorage.getHistory();
+
+    const title = advElement.createLabel({
+      id: 'rsp-debugger-title',
+      label: getText('behaviors.debugger.title'),
+      htmlOptions: {
+        classList: ['rsp-debugger-title']
+      }
+    });
+
+    const countLabel = advElement.createLabel({
+      id: 'rsp-debugger-count',
+      label: getText('behaviors.debugger.entry_count', { $count: history.length.toString() }),
+      htmlOptions: {
+        classList: ['rsp-debugger-count']
+      }
+    });
+
+    const clearButton = advElement.createButton({
+      id: 'rsp-debugger-clear',
+      onClick: () => {
+        BehaviorsModule.clearDebugHistory();
+        this.render();
+      },
+      options: {
+        label: getText('behaviors.debugger.clear_history'),
+      },
+      htmlOptions: {
+        button: {
+          classList: ['rsp-debugger-clear']
+        }
+      }
+    });
+
+    const note = advElement.createLabel({
+      id: 'rsp-debugger-note',
+      label: getText('behaviors.debugger.local_storage_note'),
+      htmlOptions: {
+        classList: ['rsp-debugger-note']
+      }
+    });
+
+    const header = ElementCreate({
+      tag: 'div',
+      classList: ['rsp-debugger-header'],
+      children: [title, note, countLabel, clearButton]
+    });
+
+    const list = ElementCreate({
+      tag: 'div',
+      classList: ['rsp-debugger-list', 'scroll-box'],
+      children: []
+    });
+
+    if (history.length === 0) {
+      list.appendChild(advElement.createLabel({
+        id: 'rsp-debugger-empty',
+        label: getText('behaviors.debugger.no_executions'),
+        htmlOptions: {
+          classList: ['rsp-debugger-empty']
+        }
+      }));
+    } else {
+      history.forEach(entry => list.appendChild(this.buildDebuggerEntry(entry)));
+    }
+
+    return ElementCreate({
+      tag: 'div',
+      classList: ['rsp-debugger-panel'],
+      children: [header, list]
+    });
+  }
+
+  buildDebuggerEntry(entry: BehaviorExecutionEntry): HTMLElement {
+    const behavior = this.module.getBehavior(entry.behaviorId);
+    const trigger = this.module.getTrigger(entry.triggerId);
+
+    const behaviorLabel = behavior
+      ? behavior.name
+      : `${getText('behaviors.debugger.unknown_behavior')} (${entry.behaviorId})`;
+
+    const triggerLabel = trigger
+      ? `${trigger.name} (${getText(`behaviors.trigger_type.${trigger.type}`)})`
+      : `${getText('behaviors.debugger.unknown_trigger')} (${entry.triggerId})`;
+
+    const reactionLabels = entry.reactionIds.length === 0
+      ? [getText('behaviors.text.empty_content')]
+      : entry.reactionIds.map(id => {
+        const reaction = this.module.getReaction(id);
+        return reaction
+          ? reaction.name
+          : `${getText('behaviors.debugger.unknown_reaction')} (${id})`;
+      });
+
+    const header = ElementCreate({
+      tag: 'div',
+      classList: ['rsp-debugger-entry-header'],
+      children: [
+        advElement.createLabel({
+          id: null,
+          label: behaviorLabel,
+          htmlOptions: {
+            classList: ['rsp-debugger-entry-title', !behavior ? 'rsp-debugger-unknown' : undefined]
+          }
+        }),
+        advElement.createLabel({
+          id: null,
+          label: new Date(entry.timestamp).toLocaleString(),
+          htmlOptions: {
+            classList: ['rsp-debugger-entry-time']
+          }
+        }),
+        {
+          tag: 'div',
+          classList: ['rsp-debugger-badge'],
+          children: [getText(`behaviors.trigger_type.${entry.triggerType}`)]
+        }
+      ]
+    });
+
+    const body = ElementCreate({
+      tag: 'div',
+      classList: ['rsp-debugger-entry-body'],
+      children: [
+        this.buildDebuggerField('behaviors.debugger.trigger', triggerLabel, !trigger),
+        this.buildDebuggerField('behaviors.debugger.reactions', reactionLabels.join(', '), reactionLabels.some(label => label.startsWith(getText('behaviors.debugger.unknown_reaction')))),
+      ]
+    });
+
+    const messageFields: HTMLElement[] = [];
+    const data = entry.messageData;
+    if (data.sourceMemberNumber !== undefined) {
+      messageFields.push(this.buildDebuggerField('behaviors.debugger.source_member', data.sourceMemberNumber.toString()));
+    }
+    if (data.targetMemberNumber !== undefined) {
+      messageFields.push(this.buildDebuggerField('behaviors.debugger.target_member', data.targetMemberNumber.toString()));
+    }
+    if (data.messageContent) {
+      messageFields.push(this.buildDebuggerField('behaviors.debugger.message_content', data.messageContent));
+    }
+    if (data.activityName) {
+      messageFields.push(this.buildDebuggerField('behaviors.debugger.activity_name', data.activityName));
+    }
+    if (data.groupName) {
+      messageFields.push(this.buildDebuggerField('behaviors.debugger.group_name', data.groupName));
+    }
+    if (data.orgasmType) {
+      messageFields.push(this.buildDebuggerField('behaviors.field.orgasm_type', data.orgasmType));
+    }
+    if (data.roomPrecenseEvent) {
+      messageFields.push(this.buildDebuggerField('behaviors.field.room_presence_event', data.roomPrecenseEvent));
+    }
+    if (data.speechType) {
+      messageFields.push(this.buildDebuggerField('behaviors.field.speech_type', data.speechType));
+    }
+
+    const messageSection = buildCollapsibleSection({
+      headerKey: 'behaviors.debugger.message_data',
+      content: () => messageFields.length > 0
+        ? messageFields
+        : [this.buildDebuggerField('behaviors.debugger.message_data', getText('behaviors.text.empty_content'))]
+    });
+
+    return ElementCreate({
+      tag: 'div',
+      classList: ['rsp-debugger-entry'],
+      children: [header, body, messageSection]
+    });
+  }
+
+  buildDebuggerField(labelKey: string, value: string, isUnknown: boolean = false): HTMLElement {
+    return ElementCreate({
+      tag: 'div',
+      classList: ['rsp-debugger-field'],
+      children: [
+        advElement.createLabel({
+          id: null,
+          label: getText(labelKey),
+          htmlOptions: {
+            classList: ['rsp-debugger-field-label']
+          }
+        }),
+        advElement.createLabel({
+          id: null,
+          label: value,
+          htmlOptions: {
+            classList: ['rsp-debugger-field-value', isUnknown ? 'rsp-debugger-unknown' : undefined]
+          }
+        })
+      ]
+    });
   }
 
   buildBehaviorEditor(behavior: Behavior): HTMLElement[] {

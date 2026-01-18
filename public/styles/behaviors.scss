@@ -387,3 +387,124 @@
 }
 
 // #endregion !SECTION Delete Mode
+
+// #region SECTION Debugger
+
+.rsp-debugger-panel {
+  display: flex;
+  flex-direction: column;
+  gap: minv(1, 0.5);
+  width: 100%;
+
+  * {
+    user-select: none;
+  }
+}
+
+.rsp-debugger-header {
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+  padding: minv(1, 0.5);
+  background-color: var(--tmd-element, lightgray);
+  border-radius: var(--deeplib-border-radius);
+  box-shadow: minv(0.2, 0.1) minv(0.2, 0.1) minv(0.4, 0.2) black;
+
+  .rsp-debugger-title {
+    font-weight: 700;
+  }
+
+  .rsp-debugger-count {
+    opacity: 0.8;
+  }
+
+  .rsp-debugger-note {
+    opacity: 0.7;
+    font-size: 0.9em;
+  }
+
+  .rsp-debugger-clear {
+    margin-left: auto;
+    flex: 0 1 fit-content;
+    padding: 0 minv(1, 0.5);
+  }
+}
+
+.rsp-debugger-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  flex: 1;
+  min-height: 0;
+  padding: minv(1, 0.5);
+  background-color: var(--tmd-element, lightgray);
+  border-radius: var(--deeplib-border-radius);
+}
+
+.rsp-debugger-entry {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  padding: minv(1, 0.5);
+  border-radius: var(--deeplib-border-radius);
+  background-color: var(--tmd-element-hover, #eee);
+}
+
+.rsp-debugger-entry-header {
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+}
+
+.rsp-debugger-entry-title {
+  font-weight: 600;
+}
+
+.rsp-debugger-entry-time {
+  margin-left: auto;
+  opacity: 0.8;
+  font-size: 0.9em;
+}
+
+.rsp-debugger-badge {
+  padding: minv(0.4, 0.2) minv(0.8, 0.4);
+  border-radius: var(--deeplib-border-radius);
+  background-color: var(--tmd-accent, $active-color);
+  color: white;
+  font-size: 0.85em;
+}
+
+.rsp-debugger-entry-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--half-gap);
+}
+
+.rsp-debugger-field {
+  display: grid;
+  grid-template-columns: minv(40, 20) 1fr;
+  gap: var(--gap);
+  align-items: start;
+}
+
+.rsp-debugger-field-label {
+  font-weight: 600;
+}
+
+.rsp-debugger-field-value {
+  word-break: break-word;
+  user-select: text;
+}
+
+.rsp-debugger-unknown {
+  opacity: 0.65;
+  font-style: italic;
+}
+
+.rsp-debugger-empty {
+  opacity: 0.7;
+  text-align: center;
+  padding: minv(2, 1);
+}
+
+// #endregion !SECTION Debugger

@@ -5,6 +5,7 @@ import { GuiBehaviors } from '../screens/behaviors';
 import { HookPriority, ModuleCategory } from '../utilities/sdk';
 import { processTrigger } from '../utilities/triggers';
 import { processReactions } from '../utilities/reactions';
+import { DebugStorage } from '../utilities/debugStorage';
 
 const orgasmTypesFromMessage = (msg: string): TriggerOrgasmType | undefined => {
   switch (true) {
@@ -232,6 +233,10 @@ export class BehaviorsModule extends BaseModule {
     return ret.data;
   }
 
+  static clearDebugHistory(): void {
+    DebugStorage.clearHistory();
+  }
+
   static deleteBehavior(id: string): void {
     delete BehaviorsModule.instance.settings.behaviors[id];
   }
@@ -262,17 +267,37 @@ export class BehaviorsModule extends BaseModule {
     type = TriggerTypeSchema.parse(type);
     messageData = MessageDataSchema.parse(messageData) as MessageData;
 
-    const behavior = processTrigger(type, messageData);
+    const triggerResult = processTrigger(type, messageData);
 
-    if (!behavior) return undefined;
+    if (!triggerResult) return undefined;
+
+    const { behavior, trigger } = triggerResult;
 
     const reactions = behavior.reactions
       .map(r => BehaviorsModule.instance.getReaction(r))
       .filter(r => r !== undefined);
 
-    const isReactionProcessed = processReactions(reactions, behavior.reactionMode, messageData);
+    const reactionResult = processReactions(reactions, behavior.reactionMode, messageData);
 
-    if (isReactionProcessed && behavior.cooldownSec) {
+    DebugStorage.addEntry({
+      timestamp: Date.now(),
+      behaviorId: behavior.id,
+      triggerId: trigger.id,
+      reactionIds: reactionResult.executedReactionIds,
+      triggerType: type,
+      messageData: {
+        sourceMemberNumber: messageData.source?.MemberNumber,
+        targetMemberNumber: messageData.target?.MemberNumber,
+        messageContent: messageData.messageContent,
+        activityName: messageData.activityName,
+        groupName: messageData.groupName,
+        orgasmType: messageData.orgasmType,
+        roomPrecenseEvent: messageData.roomPrecenseEvent,
+        speechType: messageData.speechType,
+      }
+    });
+
+    if (reactionResult.success && behavior.cooldownSec) {
       BehaviorsModule.instance.behaviorExecutionMap.set(behavior.id, CommonTime());
     }
 

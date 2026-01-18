@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { processTrigger, processTriggerConstraint } from '@/utilities/triggers';
-import type { Behavior, Trigger, MessageData, TriggerConstraint } from '@/models/behaviors';
+import type { Behavior, Trigger, MessageData, TriggerConstraint, Reaction } from '@/models/behaviors';
 import { BehaviorsModule } from '@/modules/behaviors';
 import * as gg from '../mocks/game-globals';
 import { setMockTime, advanceMockTime } from '../mocks/game-globals';
@@ -52,14 +52,12 @@ vi.mock('bc-deeplib/deeplib', async () => {
         ProfilesModule: [],
       };
       save = vi.fn();
+      getLocalStorage = vi.fn(() => []);
+      setLocalStorage = vi.fn();
       constructor(_name: string) {}
     },
   };
 });
-
-vi.mock('@/utilities/reactions', () => ({
-  processReactions: vi.fn(() => true),
-}));
 
 vi.mock('@/utilities/chat_messages', () => ({
   chatRoomAutoInterceptMessage: vi.fn(),
@@ -78,13 +76,17 @@ global.AssetGroupGet = vi.fn(() => ({ Name: 'TestGroup' } as any));
 describe('processTrigger', () => {
   let mockBehaviors: Record<string, Behavior>;
   let mockTriggers: Record<string, Trigger>;
+  let mockReactions: Record<string, Reaction>;
 
   beforeEach(() => {
     mockBehaviors = {};
     mockTriggers = {};
+    mockReactions = {};
     (BehaviorsModule.instance.getTrigger as any).mockImplementation((id: string) => mockTriggers[id]);
+    (BehaviorsModule.instance.getReaction as any).mockImplementation((id: string) => mockReactions[id]);
     BehaviorsModule.instance.settings.behaviors = mockBehaviors;
     BehaviorsModule.instance.settings.triggers = mockTriggers;
+    BehaviorsModule.instance.settings.reactions = mockReactions;
     BehaviorsModule.instance.behaviorExecutionMap.clear();
     setMockTime(1000000);
   });
@@ -117,7 +119,7 @@ describe('processTrigger', () => {
       };
 
       const result = processTrigger('speech', messageData);
-      expect(result).toEqual(behavior);
+      expect(result?.behavior).toEqual(behavior);
     });
 
     it('should match speech with startsWith mode', () => {
@@ -147,7 +149,7 @@ describe('processTrigger', () => {
       };
 
       const result = processTrigger('speech', messageData);
-      expect(result).toEqual(behavior);
+      expect(result?.behavior).toEqual(behavior);
     });
 
     it('should match speech with endsWith mode', () => {
@@ -177,7 +179,7 @@ describe('processTrigger', () => {
       };
 
       const result = processTrigger('speech', messageData);
-      expect(result).toEqual(behavior);
+      expect(result?.behavior).toEqual(behavior);
     });
 
     it('should match speech with exact mode', () => {
@@ -207,7 +209,7 @@ describe('processTrigger', () => {
       };
 
       const result = processTrigger('speech', messageData);
-      expect(result).toEqual(behavior);
+      expect(result?.behavior).toEqual(behavior);
     });
 
     it('should match speech with regex mode', () => {
@@ -237,7 +239,7 @@ describe('processTrigger', () => {
       };
 
       const result = processTrigger('speech', messageData);
-      expect(result).toEqual(behavior);
+      expect(result?.behavior).toEqual(behavior);
     });
 
     it('should not match when content does not match', () => {
@@ -298,7 +300,7 @@ describe('processTrigger', () => {
       };
 
       const result = processTrigger('emote', messageData);
-      expect(result).toEqual(behavior);
+      expect(result?.behavior).toEqual(behavior);
     });
   });
 
@@ -329,7 +331,7 @@ describe('processTrigger', () => {
       };
 
       const result = processTrigger('action', messageData);
-      expect(result).toEqual(behavior);
+      expect(result?.behavior).toEqual(behavior);
     });
   });
 
@@ -361,7 +363,7 @@ describe('processTrigger', () => {
       };
 
       const result = processTrigger('activity', messageData);
-      expect(result).toEqual(behavior);
+      expect(result?.behavior).toEqual(behavior);
     });
 
     it('should not match activity when activityName does not match', () => {
@@ -421,7 +423,7 @@ describe('processTrigger', () => {
       };
 
       const result = processTrigger('orgasm', messageData);
-      expect(result).toEqual(behavior);
+      expect(result?.behavior).toEqual(behavior);
     });
 
     it('should match orgasm when type matches', () => {
@@ -449,7 +451,7 @@ describe('processTrigger', () => {
       };
 
       const result = processTrigger('orgasm', messageData);
-      expect(result).toEqual(behavior);
+      expect(result?.behavior).toEqual(behavior);
     });
 
     it('should not match orgasm when type does not match', () => {
@@ -507,7 +509,7 @@ describe('processTrigger', () => {
       };
 
       const result = processTrigger('roomPresence', messageData);
-      expect(result).toEqual(behavior);
+      expect(result?.behavior).toEqual(behavior);
     });
 
     it('should not match roomPresence when event does not match', () => {
@@ -549,17 +551,25 @@ describe('processTrigger', () => {
         content: [{ value: 'hello', matchMode: 'contains' }],
       };
 
+      const reaction: Reaction = {
+        id: 'reaction1',
+        name: 'Test Reaction',
+        type: 'speech',
+        content: ['Hello!'],
+      };
+
       const behavior: Behavior = {
         id: 'behavior1',
         name: 'Test Behavior',
         enabled: true,
         triggers: ['trigger1'],
-        reactions: [],
+        reactions: ['reaction1'],
         reactionMode: 'random',
         cooldownSec: 5,
       };
 
       mockTriggers['trigger1'] = trigger;
+      mockReactions['reaction1'] = reaction;
       mockBehaviors['behavior1'] = behavior;
 
       const messageData: MessageData = {
@@ -578,7 +588,7 @@ describe('processTrigger', () => {
       advanceMockTime(3000);
 
       const result3 = processTrigger('speech', messageData);
-      expect(result3).toEqual(behavior);
+      expect(result3?.behavior).toEqual(behavior);
     });
   });
 

@@ -5,24 +5,41 @@ import { assertNever, getRandomInt } from './other';
 import { doesBcxAllowsTalking } from './handlers';
 import z from 'zod';
 
-export function processReactions(reactions: Reaction[], reactionMode: ReactionMode, messageData: MessageData): boolean {
+export function processReactions(reactions: Reaction[], reactionMode: ReactionMode, messageData: MessageData): { success: boolean; executedReactionIds: string[] } {
   try {
     reactions = z.array(ReactionSchema).parse(reactions);
     reactionMode = ReactionModeSchema.parse(reactionMode);
     messageData = MessageDataSchema.parse(messageData) as MessageData;
   } catch (e) {
     modLogger.error(e);
-    return false;
+    return { success: false, executedReactionIds: [] };
   }
 
+  if (reactions.length === 0) {
+    return { success: false, executedReactionIds: [] };
+  }
+  
   switch (reactionMode) {
     case 'random': {
       const reaction = reactions[getRandomInt(reactions.length)];
 
-      return processReaction(reaction, messageData);
+      const success = processReaction(reaction, messageData);
+      return {
+        success,
+        executedReactionIds: success ? [reaction.id] : [],
+      };
     }
     case 'all':
-      return reactions.every(r => processReaction(r, messageData));
+    {
+      const executedReactionIds: string[] = [];
+      const success = reactions.every(reaction => {
+        const processed = processReaction(reaction, messageData);
+        if (processed) executedReactionIds.push(reaction.id);
+        return processed;
+      });
+
+      return { success, executedReactionIds };
+    }
 
     default:
       assertNever(reactionMode);

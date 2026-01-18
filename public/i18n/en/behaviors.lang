@@ -8,6 +8,7 @@ behaviors.search.placeholder = Search...
 behaviors.tab.behaviors = Behaviors
 behaviors.tab.triggers = Triggers
 behaviors.tab.reactions = Reactions
+behaviors.tab.debugger = Debugger
 
 # Buttons
 behaviors.button.add_behavior = Add Behavior
@@ -40,6 +41,27 @@ behaviors.text.no_reactions_available = No reactions available. Create a reactio
 behaviors.text.do_not_show_this_again_until_leaving_this_screen = Do not show this again until leaving this screen
 behaviors.text.no_constraints = No constraints added
 behaviors.text.select_constraint_type = Select Constraint Type
+
+# Debugger
+behaviors.debugger.title = Execution History
+behaviors.debugger.clear_history = Clear History
+behaviors.debugger.no_executions = No behavior executions recorded yet
+behaviors.debugger.behavior = Behavior
+behaviors.debugger.trigger = Trigger
+behaviors.debugger.reactions = Reactions
+behaviors.debugger.timestamp = Time
+behaviors.debugger.message_data = Message Data
+behaviors.debugger.source_member = Source Member
+behaviors.debugger.target_member = Target Member
+behaviors.debugger.message_content = Message Content
+behaviors.debugger.unknown_behavior = Unknown Behavior
+behaviors.debugger.unknown_trigger = Unknown Trigger
+behaviors.debugger.unknown_reaction = Unknown Reaction
+behaviors.debugger.trigger_type = Trigger Type
+behaviors.debugger.activity_name = Activity
+behaviors.debugger.group_name = Body Part
+behaviors.debugger.local_storage_note = (stored locally)
+behaviors.debugger.entry_count = $count entries
 
 # Fields
 behaviors.field.name = Name

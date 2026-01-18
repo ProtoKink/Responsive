@@ -213,7 +213,7 @@ function evaluateAllConstraints(constraints: TriggerConstraint, data: MessageDat
   return results;
 }
 
-export function processTrigger(type: TriggerType, messageData: MessageData): Behavior | undefined {
+export function processTrigger(type: TriggerType, messageData: MessageData): { behavior: Behavior; trigger: Trigger } | undefined {
   try {
     type = TriggerTypeSchema.parse(type);
     messageData = MessageDataSchema.parse(messageData) as MessageData;
@@ -227,32 +227,33 @@ export function processTrigger(type: TriggerType, messageData: MessageData): Beh
 
   if (enabledBehaviors.length === 0) return undefined;
 
-  return enabledBehaviors
-    .filter(behavior => {
-      const last = BehaviorsModule.instance.behaviorExecutionMap.get(behavior.id);
+  for (const behavior of enabledBehaviors) {
+    const last = BehaviorsModule.instance.behaviorExecutionMap.get(behavior.id);
+    if (last && CommonTime() - last < (behavior.cooldownSec ?? 0) * 1000) {
+      continue;
+    }
 
-      if (!last) return true;
+    const triggers = behavior.triggers.map(t => BehaviorsModule.instance.getTrigger(t));
+    const triggersOfType = triggers.filter(t => t?.type === type).filter(t => t !== undefined);
 
-      return CommonTime() - last >= (behavior.cooldownSec ?? 0) * 1000;
-    })
-    .find(behavior => {
-      const triggers = behavior.triggers.map(t => BehaviorsModule.instance.getTrigger(t));
-      const triggersOfType = triggers.filter(t => t?.type === type).filter(t => t !== undefined);
+    const metTrigger = triggersOfType.find(trigger => {
+      let isConstraintMet = true;
 
-      const metTrigger = triggersOfType.find(trigger => {
-        let isConstraintMet = true;
+      if (trigger.constraints && trigger.constraintMode) {
+        isConstraintMet = processTriggerConstraint(trigger.constraints, trigger.constraintMode, messageData);
+      }
 
-        if (trigger.constraints && trigger.constraintMode) {
-          isConstraintMet = processTriggerConstraint(trigger.constraints, trigger.constraintMode, messageData);
-        };
+      if (!isConstraintMet) return false;
 
-        if (!isConstraintMet) return false;
-
-        return checkTriggerPredicates(trigger, messageData);
-      });
-
-      return metTrigger;
+      return checkTriggerPredicates(trigger, messageData);
     });
+
+    if (metTrigger) {
+      return { behavior, trigger: metTrigger };
+    }
+  }
+
+  return undefined;
 }
 
 export function processTriggerConstraint(triggerConstraint: TriggerConstraint, mode: ConstraintMode, messageData: MessageData): boolean {
