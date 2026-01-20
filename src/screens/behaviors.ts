@@ -3,7 +3,7 @@ import { advElement, BaseSubscreen, exportToGlobal, getText, layout, Modal, Sett
 import { BehaviorsSettingsModel, Behavior, Trigger, Reaction, ConstraintMode, MatchMode, SpeechType, OrgasmType, RoomPresenceEvent, ReactionMode, TriggerTypeSchema, ReactionTypeSchema, ReactionType, TriggerType, IncludeExcludeEntry, MatchContentEntry, SpeechTypeSchema, MatchModeSchema, OrgasmTypeSchema, RoomPresenceEventSchema, ReactionModeSchema, ConstraintModeSchema, IncludeExcludeEntrySchema } from '../models/behaviors';
 import { BehaviorsModule } from '../modules/behaviors';
 import { assertNever } from '../utilities/other';
-import { activitySelectorModal, animationSelectorModal, bodyPartSelectorModal, idSelectorModal, memberNumberSelectorModal, textReactionSelectorModal } from '@/utilities/selectorModals';
+import { activitySelectorModal, animationSelectorModal, bodyPartSelectorModal, itemSelectorModal, memberNumberSelectorModal, textReactionSelectorModal } from '@/utilities/selectorModals';
 import { triggerHasAnyConstraints } from '@/utilities/triggers';
 import { buildCollapsibleSection, buildContentListSection, createDropdownField, createInputField, createNumberInputField } from '@/utilities/fields';
 import { AnimatronikkaModule } from '@/modules/animatronikka';
@@ -1319,7 +1319,7 @@ export class GuiBehaviors extends BaseSubscreen {
       { value: 'room', label: getText('behaviors.entity.room') }
     ];
 
-    const selected = await idSelectorModal({ buttons: entities.map(e => ({ label: e.label, value: e.value })) });
+    const selected = await itemSelectorModal({ buttons: entities.map(e => ({ label: e.label, value: e.value })) });
     if (selected === null || selected.length === 0) return;
     for (const entity of selected) {
       await this.showConstraintTypeSelector(trigger, entity as 'source' | 'target' | 'player' | 'room');
@@ -1637,7 +1637,7 @@ export class GuiBehaviors extends BaseSubscreen {
       return;
     }
 
-    const selected = await idSelectorModal({ buttons: availableConstraints.map(c => ({ label: c.label, value: c.key })) });
+    const selected = await itemSelectorModal({ buttons: availableConstraints.map(c => ({ label: c.label, value: c.key })) });
     if (selected === null || selected.length === 0) return;
 
     if (!trigger.constraints) {
@@ -2321,7 +2321,7 @@ export class GuiBehaviors extends BaseSubscreen {
       value: t.id
     }));
 
-    const selectedIds = await idSelectorModal({ buttons: options });
+    const selectedIds = await itemSelectorModal({ buttons: options });
     if (selectedIds === null || selectedIds.length === 0) return;
 
     selectedIds.forEach((id: string) => {
@@ -2344,7 +2344,7 @@ export class GuiBehaviors extends BaseSubscreen {
       value: r.id
     }));
 
-    const selectedIds = await idSelectorModal({ buttons: options });
+    const selectedIds = await itemSelectorModal({ buttons: options });
     if (selectedIds === null || selectedIds.length === 0) return;
 
     selectedIds.forEach((id) => behavior.reactions.push(id));

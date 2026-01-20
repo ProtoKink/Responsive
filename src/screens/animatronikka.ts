@@ -1,8 +1,9 @@
 import { advElement, BaseSubscreen, exportToGlobal, getText, layout, Modal, SettingElement, SubscreenOptions } from 'bc-deeplib/deeplib';
-import { AnimatronikkaModule } from '../modules/animatronikka';
+import { animationGroups, AnimatronikkaModule } from '../modules/animatronikka';
 import { Animation, AnimatronikkaSettingsModel, Keyframe, KeyframeType } from '../models/animations';
 import { buildContentListSection, createInputField } from '../utilities/fields';
-import { idSelectorModal } from '../utilities/selectorModals';
+import { expressionSelectorModal, itemSelectorModal } from '../utilities/selectorModals';
+import { assertNever } from '@/utilities/other';
 
 type PreviewMode = 'full' | 'face' | 'body';
 
@@ -699,7 +700,7 @@ export class GuiAnimatronikka extends BaseSubscreen {
   }
 
   async selectKeyframeType(): Promise<KeyframeType | null> {
-    const selected = await idSelectorModal({
+    const selected = await itemSelectorModal({
       buttons: (['expression', 'pose', 'restraint'] as KeyframeType[]).map(type => ({
         label: getText(`animatronikka.keyframe.${type}`),
         value: type,
@@ -711,48 +712,59 @@ export class GuiAnimatronikka extends BaseSubscreen {
   }
 
   async promptKeyframe(type: KeyframeType, current?: Keyframe): Promise<Keyframe | null> {
-    const duration = await Modal.prompt(getText('animatronikka.prompt.duration_ms'), {
-      defaultValue: current ? current.durationMs.toString() : '500',
-      modalClassList: ['rsp-modal']
-    });
-    if (duration === null) return null;
-    const durationMs = Math.max(0, parseInt(duration || '0', 10));
-
     switch (type) {
       case 'expression': {
-        const group = await Modal.prompt(getText('animatronikka.prompt.expression_group'), {
-          defaultValue: current && current.type === 'expression' ? current.group : 'Mouth',
-          modalClassList: ['rsp-modal']
+        const group = (await itemSelectorModal({
+          buttons: animationGroups.map(group => ({
+            label: group,
+            value: group,
+            selected: current && current.type === 'expression' ? current.group === group : false,
+          })),
+          limit: 1,
+          prompt: getText('animatronikka.prompt.expression_group')
+        }))?.[0];
+        if (!group) return null;
+        const realGroup = group === 'Eyes1' ? 'Eyes' : group;
+        const assetGroup = AssetGroupGet('Female3DCG', realGroup as ExpressionGroupName);
+        if (!assetGroup) return null;
+        const expression = await expressionSelectorModal({
+          group: assetGroup.Name as ExpressionGroupName,
+          selectedExpressions: current && current.type === 'expression' ? [current.expression as ExpressionName] : [],
+          limit: 1
         });
-        if (group === null) return null;
-        const expression = await Modal.prompt(getText('animatronikka.prompt.expression_name'), {
-          defaultValue: current && current.type === 'expression' ? (current.expression ?? '') : '',
-          modalClassList: ['rsp-modal']
-        });
-        if (expression === null) return null;
+        if (!expression) return null;
         const colorInput = await Modal.prompt(getText('animatronikka.prompt.color_optional'), {
           defaultValue: current && current.type === 'expression' ? this.formatColor(current.color) : '',
           modalClassList: ['rsp-modal']
         });
         if (colorInput === null) return null;
 
+        const durationMs = await this.promptDurationMs(current);
+        if (durationMs === null) return null;
         return {
           id: current?.id ?? CommonGenerateUniqueID(),
           type,
           durationMs,
           group,
-          expression: expression === '' ? null : expression,
+          expression: expression?.[0] ?? null,
           color: this.parseColor(colorInput),
         };
       }
       case 'pose': {
-        const poseInput = await Modal.prompt(getText('animatronikka.prompt.pose_list'), {
-          defaultValue: current && current.type === 'pose' ? current.poseName : '',
-          modalClassList: ['rsp-modal']
+        const allowedPoses = Object.keys(PoseRecord).map(pose => ({
+          label: pose,
+          value: pose,
+          selected: current && current.type === 'pose' ? current.poseName === pose : false,
+        }));
+        const pose = await itemSelectorModal({
+          buttons: allowedPoses,
+          limit: 1,
+          prompt: getText('animatronikka.prompt.pose_name')
         });
-        if (poseInput === null) return null;
-        const poseName = poseInput || '';
-        return { id: current?.id ?? CommonGenerateUniqueID(), type, durationMs, poseName };
+        if (!pose || pose.length === 0) return null;
+        const durationMs = await this.promptDurationMs(current);
+        if (durationMs === null) return null;
+        return { id: current?.id ?? CommonGenerateUniqueID(), type, durationMs, poseName: pose[0] };
       }
       case 'restraint': {
         const group = await Modal.prompt(getText('animatronikka.prompt.restraint_group'), {
@@ -771,6 +783,8 @@ export class GuiAnimatronikka extends BaseSubscreen {
         });
         if (colorInput === null) return null;
         
+        const durationMs = await this.promptDurationMs(current);
+        if (durationMs === null) return null;
         return {
           id: current?.id ?? CommonGenerateUniqueID(),
           type,
@@ -781,8 +795,17 @@ export class GuiAnimatronikka extends BaseSubscreen {
         };
       }
       default:
-        return null;
+        return assertNever(type);
     }
+  }
+
+  async promptDurationMs(current?: Keyframe): Promise<number | null> {
+    const duration = await Modal.prompt(getText('animatronikka.prompt.duration_ms'), {
+      defaultValue: current ? current.durationMs.toString() : '500',
+      modalClassList: ['rsp-modal']
+    });
+    if (duration === null) return null;
+    return Math.max(0, parseInt(duration || '0', 10));
   }
 
   parseColor(input: string): string | string[] | undefined {

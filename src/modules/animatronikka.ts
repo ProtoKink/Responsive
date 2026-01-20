@@ -12,7 +12,7 @@ type AnimationRun = {
   timerId?: number;
 };
 
-export const animationGroups = ['Eyes', 'Eyes2', 'Eyebrows', 'Mouth', 'Fluids', 'Emoticon', 'Blush', 'Pussy'];
+export const animationGroups = ['Eyes', 'Eyes1', 'Eyes2', 'Eyebrows', 'Mouth', 'Fluids', 'Emoticon', 'Blush', 'Pussy'] as const;
 
 export class AnimatronikkaModule extends BaseModule {
   static instance: AnimatronikkaModule;

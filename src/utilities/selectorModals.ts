@@ -1,23 +1,40 @@
 import { advElement, exportToGlobal, getText, Modal } from 'bc-deeplib/deeplib';
 
-export async function idSelectorModal(options: { buttons?: { label: string, value: string, selected?: boolean }[], limit?: number }): Promise<string[] | null> {
+export async function itemSelectorModal(options: { buttons?: { label: string, value: string, selected?: boolean }[], limit?: number, prompt?: string }): Promise<string[] | null> {
   options ??= {};
   const buttons = options.buttons ?? [];
   const limit = options.limit ?? Infinity;
   if (buttons.length === 0 || limit < 1) {
     return [];
   }
-
+  const prompt = options.prompt ?? getText('behaviors.prompt.select_item');
   const selectedIds: Set<string> = new Set(buttons.filter(button => button.selected).map(button => button.value));
+  while (selectedIds.size > limit) {
+    const oldest = selectedIds.values().next().value;
+    if (oldest === undefined) {
+      break;
+    }
+    selectedIds.delete(oldest);
+  }
 
+  const buttonByValue = new Map<string, HTMLElement>();
   const buttonElements = buttons.map(button => {
-    const isSelected = button.selected ?? false;
-    return advElement.createButton({
+    const isSelected = selectedIds.has(button.value);
+    const buttonElement = advElement.createButton({
       id: `rsp-selector-${button.value}`,
       onClick: function () {
         const state = this.toggleAttribute('data-selected');
         if (state) {
-          selectedIds.add(button.value);
+          if (!selectedIds.has(button.value)) {
+            if (selectedIds.size >= limit) {
+              const oldest = selectedIds.values().next().value;
+              if (oldest !== undefined) {
+                selectedIds.delete(oldest);
+                buttonByValue.get(oldest)?.removeAttribute('data-selected');
+              }
+            }
+            selectedIds.add(button.value);
+          }
         } else {
           selectedIds.delete(button.value);
         }
@@ -28,16 +45,21 @@ export async function idSelectorModal(options: { buttons?: { label: string, valu
       htmlOptions: {
         button: {
           classList: ['rsp-selector-button'],
-          attributes: {
+          dataAttributes: {
             selected: isSelected ? '' : undefined
+          },
+          attributes: {
+            name: button.value
           }
         }
       }
     });
+    buttonByValue.set(button.value, buttonElement);
+    return buttonElement;
   });
 
   return await Modal.confirm([
-    advElement.createLabel({ id: null, label: getText('behaviors.prompt.select_item') }),
+    advElement.createLabel({ id: null, label: prompt }),
     ElementCreate({ tag: 'br' }),
     {
       tag: 'div',
@@ -61,7 +83,7 @@ export async function animationSelectorModal(options?: { selectedIds?: string[];
     selected: options?.selectedIds?.includes(animation.id) ?? false,
   }));
 
-  return await idSelectorModal({ buttons, limit: options.limit });
+  return await itemSelectorModal({ buttons, limit: options.limit });
 }
 
 export async function bodyPartSelectorModal(options?: { selectedParts?: AssetGroupItemName[], limit?: number }): Promise<AssetGroupItemName[] | null> {
@@ -983,6 +1005,83 @@ export async function textReactionSelectorModal(options?: { initialValue?: strin
       return null;
     }
     return textValue;
+  });
+}
+
+export async function expressionSelectorModal(options: { group: ExpressionGroupName | 'Eyes1'; selectedExpressions?: ExpressionName[]; limit?: number }): Promise<ExpressionName[] | null> {
+  const limit = options.limit ?? Infinity;
+  if (limit < 1) {
+    return [];
+  }
+  
+  const selectedExpressions: Set<ExpressionName | null> = new Set(options.selectedExpressions ?? []);
+  while (selectedExpressions.size > limit) {
+    const oldest = selectedExpressions.values().next().value;
+    if (oldest === undefined) {
+      break;
+    }
+    selectedExpressions.delete(oldest);
+  }
+  const realGroup = options.group;
+  const group = realGroup === 'Eyes1' ? 'Eyes' : realGroup;
+
+  const allowedExpressions: (ExpressionName | null)[] = [];
+  const assetGroup = AssetGroupGet('Female3DCG', group);
+  if (assetGroup) {
+    allowedExpressions.push(null);
+    allowedExpressions.push(...(assetGroup.AllowExpression ?? []));
+  }
+  
+  const buttonByValue = new Map<ExpressionName, HTMLElement>();
+  const buttons = allowedExpressions.map(expression => {
+    const isSelected = selectedExpressions.has(expression);
+    const buttonElement = advElement.createButton({
+      id: null,
+      onClick: function () {
+        const state = this.toggleAttribute('data-selected');
+        if (state) {
+          if (!selectedExpressions.has(expression)) {
+            if (selectedExpressions.size >= limit) {
+              const oldest = selectedExpressions.values().next().value;
+              if (oldest !== undefined) {
+                selectedExpressions.delete(oldest);
+                buttonByValue.get(oldest)?.removeAttribute('data-selected');
+              }
+            }
+            selectedExpressions.add(expression);
+          }
+        } else {
+          selectedExpressions.delete(expression);
+        }
+      },
+      options: {
+        image: expression ? `Assets/Female3DCG/${realGroup}/${expression}/Icon.png` : `Assets/Female3DCG/${group}/Icon.png`
+      },
+      htmlOptions: {
+        button: {
+          classList: ['rsp-expression-selector-button'],
+          dataAttributes: {
+            selected: isSelected ? '' : undefined
+          }
+        }
+      }
+    });
+    buttonByValue.set(expression, buttonElement);
+    return buttonElement;
+  });
+
+  return await Modal.confirm([
+    advElement.createLabel({ id: null, label: getText('animatronikka.prompt.expression_name') }),
+    {
+      tag: 'div',
+      classList: ['rsp-expression-selector-buttons-container'],
+      children: buttons
+    }
+  ], { modalClassList: ['rsp-modal', 'rsp-expression-selector-modal'] }).then((result) => {
+    if (!result) {
+      return null;
+    }
+    return Array.from(selectedExpressions).filter(expression => Boolean(expression));
   });
 }
 

@@ -368,3 +368,35 @@
     }
   }
 }
+
+.rsp-expression-selector-modal {
+  justify-content: center;
+  align-items: center;
+
+  .rsp-expression-selector-buttons-container {
+    display: grid;
+    grid-template-columns: repeat(5, minv(8, 4));
+    grid-auto-rows: repeat(auto-fill);
+    gap: var(--gap);
+    box-sizing: border-box;
+
+    .rsp-expression-selector-button {
+      aspect-ratio: 1/1;
+      white-space: nowrap;
+      box-sizing: border-box;
+
+      &[data-selected] {
+        background-color: var(--tmd-accent, $active-color);
+        color: var(--tmd-text, white);
+      }
+
+      &:hover {
+        background-color: color-mix(in srgb, var(--tmd-accent, $active-color) 20%, transparent);
+      }
+
+      img {
+        background-color: unset;
+      }
+    }
+  }
+}
