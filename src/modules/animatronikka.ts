@@ -7,10 +7,16 @@ type AnimationRun = {
   id: string;
   animation: Animation;
   target: Character;
-  currentIndex: number;
   loop: boolean;
   priority: number;
-  timerId?: number;
+  groupStates: Map<string, GroupState>;
+  activeGroupCount: number;
+};
+
+type GroupState = {
+  keyframes: Keyframe[];
+  index: number;
+  cancelTimer?: () => void;
 };
 
 export const animationGroups = ['Eyes', 'Eyes1', 'Eyes2', 'Eyebrows', 'Mouth', 'Fluids', 'Emoticon', 'Blush', 'Pussy'] as const;
@@ -69,9 +75,10 @@ export class AnimatronikkaModule extends BaseModule {
       id: animationId,
       animation: AnimationSchema.parse(animation),
       target,
-      currentIndex: 0,
       loop: options?.loop ?? animation.loop ?? false,
       priority: options?.priority ?? 0,
+      groupStates: new Map(),
+      activeGroupCount: 0,
     };
 
     const existing = this.activeRuns.get(target.MemberNumber);
@@ -94,15 +101,19 @@ export class AnimatronikkaModule extends BaseModule {
   stopAnimation(memberNumber: number): void {
     const existing = this.activeRuns.get(memberNumber);
     if (!existing) return;
-    if (existing.timerId) {
-      clearTimeout(existing.timerId);
-    }
+    existing.groupStates.forEach(group => {
+      if (group.cancelTimer) group.cancelTimer();
+      group.cancelTimer = undefined;
+    });
     this.activeRuns.delete(memberNumber);
   }
 
   stopAll(): void {
     this.activeRuns.forEach(run => {
-      if (run.timerId) clearTimeout(run.timerId);
+      run.groupStates.forEach(group => {
+        if (group.cancelTimer) group.cancelTimer();
+        group.cancelTimer = undefined;
+      });
     });
     this.activeRuns.clear();
     this.queuedRuns.clear();
@@ -112,27 +123,64 @@ export class AnimatronikkaModule extends BaseModule {
     const memberNumber = run.target.MemberNumber;
     if (memberNumber === undefined) return;
     this.activeRuns.set(memberNumber, run);
-    this.runNextFrame(run);
-  }
-
-  private runNextFrame(run: AnimationRun): void {
-    const keyframes = run.animation.keyframes;
-    if (keyframes.length === 0) {
+    run.groupStates = this.buildGroupStates(run.animation.keyframes);
+    run.activeGroupCount = run.groupStates.size;
+    if (run.activeGroupCount === 0) {
       return this.finishRun(run);
     }
 
-    if (run.currentIndex >= keyframes.length) {
-      if (run.loop) {
-        run.currentIndex = 0;
-      } else {
-        return this.finishRun(run);
-      }
+    run.groupStates.forEach((_group, groupKey) => {
+      this.runNextGroupFrame(run, groupKey);
+    });
+  }
+
+  private runNextGroupFrame(run: AnimationRun, groupKey: string): void {
+    const group = run.groupStates.get(groupKey);
+    if (!group) return;
+
+    if (group.index >= group.keyframes.length) {
+      return this.finishGroup(run, groupKey);
     }
 
-    const keyframe = keyframes[run.currentIndex++];
+    const keyframe = group.keyframes[group.index++];
     this.applyKeyframe(run.target, keyframe);
 
-    run.timerId = setTimeout(() => this.runNextFrame(run), Math.max(0, keyframe.durationMs)) as unknown as number;
+    group.cancelTimer = TimerCreate(
+      () => this.runNextGroupFrame(run, groupKey),
+      Math.max(0, keyframe.durationMs),
+      false,
+      'universal'
+    );
+  }
+
+  private finishGroup(run: AnimationRun, groupKey: string): void {
+    const group = run.groupStates.get(groupKey);
+    if (!group) return;
+    if (group.cancelTimer) group.cancelTimer();
+    group.cancelTimer = undefined;
+
+    run.activeGroupCount -= 1;
+    if (run.activeGroupCount > 0) return;
+
+    if (run.loop) {
+      this.restartRun(run);
+      return;
+    }
+
+    this.finishRun(run);
+  }
+
+  private restartRun(run: AnimationRun): void {
+    run.groupStates.forEach(group => {
+      if (group.cancelTimer) group.cancelTimer();
+      group.cancelTimer = undefined;
+      group.index = 0;
+    });
+
+    run.activeGroupCount = run.groupStates.size;
+    run.groupStates.forEach((_group, groupKey) => {
+      this.runNextGroupFrame(run, groupKey);
+    });
   }
 
   private finishRun(run: AnimationRun): void {
@@ -178,6 +226,34 @@ export class AnimatronikkaModule extends BaseModule {
     item.Property = keyframe.asset.properties;
 
     CharacterRefresh(target, true, true);
+  }
+
+  private buildGroupStates(keyframes: Keyframe[]): Map<string, GroupState> {
+    const groups = new Map<string, GroupState>();
+    keyframes.forEach(keyframe => {
+      const groupKey = this.getKeyframeGroupKey(keyframe);
+      const group = groups.get(groupKey);
+      if (group) {
+        group.keyframes.push(keyframe);
+      } else {
+        groups.set(groupKey, { keyframes: [keyframe], index: 0 });
+      }
+    });
+
+    return groups;
+  }
+
+  private getKeyframeGroupKey(keyframe: Keyframe): string {
+    switch (keyframe.type) {
+      case 'expression':
+        return `expression:${keyframe.group}`;
+      case 'pose':
+        return 'pose';
+      case 'restraint':
+        return `restraint:${keyframe.group}`;
+      default:
+        return assertNever(keyframe);
+    }
   }
 }
 

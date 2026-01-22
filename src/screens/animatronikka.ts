@@ -1,4 +1,5 @@
 import { advElement, BaseSubscreen, exportToGlobal, getText, layout, Modal, SettingElement, SubscreenOptions } from 'bc-deeplib/deeplib';
+import { v4 as uuidv4 } from 'uuid';
 import { animationGroups, AnimatronikkaModule } from '../modules/animatronikka';
 import { Animation, AnimatronikkaSettingsModel, Keyframe, KeyframeType } from '../models/animations';
 import { buildContentListSection, createInputField } from '../utilities/fields';
@@ -16,6 +17,8 @@ const selector = Object.freeze({
   addButton: 'rsp-animatronikka-add',
   deleteModeToggle: 'rsp-animatronikka-delete-mode',
   previewMode: 'rsp-animatronikka-preview-mode',
+  animatronikkaKeyframes: (id: string) => `rsp-animatronikka-keyframes-${id}`,
+  animatronikkaKeyframeRow: (animationId: string, keyframeId: string) => `rsp-animatronikka-keyframe-row-${animationId}-${keyframeId}`,
 });
 
 export class GuiAnimatronikka extends BaseSubscreen {
@@ -440,7 +443,7 @@ export class GuiAnimatronikka extends BaseSubscreen {
     this.attachKeyframeContainerDragHandlers(content, animation);
 
     return buildContentListSection({
-      id: `${animation.id}-keyframes`,
+      id: selector.animatronikkaKeyframes(animation.id),
       labelKey: 'animatronikka.section.keyframes',
       onAdd: () => this.handleAddKeyframe(animation),
       addLabel: 'animatronikka.button.add_keyframe',
@@ -449,6 +452,11 @@ export class GuiAnimatronikka extends BaseSubscreen {
   }
 
   buildKeyframeRow(animation: Animation, keyframe: Keyframe, index: number): HTMLElement {
+    const thisElement = ElementWrap(selector.animatronikkaKeyframeRow(animation.id, keyframe.id));
+    if (thisElement) {
+      thisElement.replaceChildren();
+    }
+
     const label = this.getKeyframeLabel(keyframe);
 
     const dragHandle = this.buildKeyframeDragHandle();
@@ -459,12 +467,19 @@ export class GuiAnimatronikka extends BaseSubscreen {
       htmlOptions: { button: { classList: ['rsp-animatronikka-keyframe-button'] } }
     });
 
+    const duplicateButton = advElement.createButton({
+      id: `${animation.id}-keyframe-duplicate-${keyframe.id}`,
+      onClick: () => this.handleDuplicateKeyframe(animation, keyframe, index),
+      options: { label: getText('animatronikka.button.duplicate') },
+      htmlOptions: { button: { classList: ['rsp-animatronikka-keyframe-button'] } }
+    });
+
     const deleteButton = advElement.createButton({
       id: `${animation.id}-keyframe-delete-${keyframe.id}`,
       onClick: () => {
         if (this.deleteMode) {
           animation.keyframes.splice(index, 1);
-          this.buildEditorPanel();
+          this.buildKeyframesSection(animation);
         }
       },
       options: { label: getText('animatronikka.button.delete') },
@@ -474,6 +489,10 @@ export class GuiAnimatronikka extends BaseSubscreen {
     const row = ElementCreate({
       tag: 'div',
       classList: ['rsp-animatronikka-keyframe-row'],
+      attributes: {
+        id: thisElement ? CommonGenerateUniqueID() : selector.animatronikkaKeyframeRow(animation.id, keyframe.id),
+        draggable: 'true'
+      },
       children: [
         dragHandle,
         advElement.createLabel({
@@ -483,15 +502,26 @@ export class GuiAnimatronikka extends BaseSubscreen {
             classList: ['rsp-animatronikka-keyframe-label', 'truncated-text']
           }
         }),
-        ElementCreate({ tag: 'div', classList: ['rsp-animatronikka-keyframe-actions'], children: [editButton, deleteButton] })
-      ]
+        {
+          tag: 'div',
+          classList: ['rsp-animatronikka-keyframe-actions'],
+          children: [editButton, duplicateButton, deleteButton]
+        }
+      ],
+      eventListeners: {
+        dragstart: (event) => this.handleKeyframeDragStart(event, keyframe),
+        dragend: () => this.handleKeyframeDragEnd(),
+        dragover: (event) => this.handleKeyframeDragOver(event, row),
+        dragleave: () => this.clearKeyframeDropIndicators(row),
+        drop: (event) => this.handleKeyframeDrop(event, animation, index, row),
+      }
     });
-    row.setAttribute('draggable', 'true');
-    row.addEventListener('dragstart', (event) => this.handleKeyframeDragStart(event, keyframe));
-    row.addEventListener('dragend', () => this.handleKeyframeDragEnd());
-    row.addEventListener('dragover', (event) => this.handleKeyframeDragOver(event, row));
-    row.addEventListener('dragleave', () => this.clearKeyframeDropIndicators(row));
-    row.addEventListener('drop', (event) => this.handleKeyframeDrop(event, animation, index, row));
+
+    if (thisElement) {
+      thisElement.replaceWith(row);
+      row.id = selector.animatronikkaKeyframeRow(animation.id, keyframe.id);
+    }
+
     return row;
   }
 
@@ -541,7 +571,7 @@ export class GuiAnimatronikka extends BaseSubscreen {
     const position = row?.getAttribute('data-drop-position');
     const insertIndex = position === 'after' ? targetIndex + 1 : targetIndex;
     if (this.reorderKeyframe(animation, draggedId, insertIndex)) {
-      this.buildEditorPanel();
+      this.buildKeyframesSection(animation);
     } else {
       this.draggingKeyframeId = null;
     }
@@ -560,7 +590,7 @@ export class GuiAnimatronikka extends BaseSubscreen {
       event.preventDefault();
       this.clearAllKeyframeDropIndicators();
       if (this.reorderKeyframe(animation, draggedId, animation.keyframes.length)) {
-        this.buildEditorPanel();
+        this.buildKeyframesSection(animation);
       } else {
         this.draggingKeyframeId = null;
       }
@@ -604,7 +634,7 @@ export class GuiAnimatronikka extends BaseSubscreen {
       case 'restraint':
         return `${getText('animatronikka.keyframe.restraint')} ${keyframe.group}: ${keyframe.asset.name ?? getText('animatronikka.text.none')} (${keyframe.durationMs}ms)`;
       default:
-        return getText('animatronikka.text.unknown_keyframe');
+        return assertNever(keyframe);
     }
   }
 
@@ -687,7 +717,7 @@ export class GuiAnimatronikka extends BaseSubscreen {
     const keyframe = await this.promptKeyframe(type);
     if (!keyframe) return;
     animation.keyframes.push(keyframe);
-    this.buildEditorPanel();
+    this.buildKeyframesSection(animation);
   }
 
   async handleEditKeyframe(animation: Animation, keyframe: Keyframe): Promise<void> {
@@ -696,7 +726,13 @@ export class GuiAnimatronikka extends BaseSubscreen {
     const index = animation.keyframes.findIndex(k => k.id === keyframe.id);
     if (index === -1) return;
     animation.keyframes[index] = { ...updated, id: keyframe.id };
-    this.buildEditorPanel();
+    this.buildKeyframesSection(animation);
+  }
+
+  handleDuplicateKeyframe(animation: Animation, keyframe: Keyframe, index: number): void {
+    const copy = this.cloneKeyframe(keyframe);
+    animation.keyframes.splice(index + 1, 0, copy);
+    this.buildKeyframesSection(animation);
   }
 
   async selectKeyframeType(): Promise<KeyframeType | null> {
@@ -851,6 +887,13 @@ export class GuiAnimatronikka extends BaseSubscreen {
       }
       return value;
     });
+  }
+
+  private cloneKeyframe(keyframe: Keyframe): Keyframe {
+    const clone = typeof structuredClone === 'function'
+      ? structuredClone(keyframe)
+      : JSON.parse(JSON.stringify(keyframe)) as Keyframe;
+    return { ...clone, id: uuidv4() };
   }
 }
 
