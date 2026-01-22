@@ -2,7 +2,7 @@ import { advElement, BaseSubscreen, exportToGlobal, getText, layout, Modal, Sett
 import { animationGroups, AnimatronikkaModule } from '../modules/animatronikka';
 import { Animation, AnimatronikkaSettingsModel, Keyframe, KeyframeType } from '../models/animations';
 import { buildContentListSection, createInputField } from '../utilities/fields';
-import { expressionSelectorModal, itemSelectorModal } from '../utilities/selectorModals';
+import { bodyPartSelectorModal, expressionSelectorModal, itemSelectorModal } from '../utilities/selectorModals';
 import { assertNever } from '@/utilities/other';
 
 type PreviewMode = 'full' | 'face' | 'body';
@@ -602,7 +602,7 @@ export class GuiAnimatronikka extends BaseSubscreen {
       case 'pose':
         return `${getText('animatronikka.keyframe.pose')} ${keyframe.poseName || getText('animatronikka.text.none')} (${keyframe.durationMs}ms)`;
       case 'restraint':
-        return `${getText('animatronikka.keyframe.restraint')} ${keyframe.group}: ${keyframe.assetName ?? getText('animatronikka.text.none')} (${keyframe.durationMs}ms)`;
+        return `${getText('animatronikka.keyframe.restraint')} ${keyframe.group}: ${keyframe.asset.name ?? getText('animatronikka.text.none')} (${keyframe.durationMs}ms)`;
       default:
         return getText('animatronikka.text.unknown_keyframe');
     }
@@ -767,31 +767,23 @@ export class GuiAnimatronikka extends BaseSubscreen {
         return { id: current?.id ?? CommonGenerateUniqueID(), type, durationMs, poseName: pose[0] };
       }
       case 'restraint': {
-        const group = await Modal.prompt(getText('animatronikka.prompt.restraint_group'), {
-          defaultValue: current && current.type === 'restraint' ? current.group : '',
-          modalClassList: ['rsp-modal']
+        const group = await bodyPartSelectorModal({
+          selectedParts: current && current.type === 'restraint' ? [current.group as AssetGroupItemName] : [],
+          limit: 1
         });
-        if (group === null) return null;
-        const assetName = await Modal.prompt(getText('animatronikka.prompt.asset_name_optional'), {
-          defaultValue: current && current.type === 'restraint' ? (current.assetName ?? '') : '',
-          modalClassList: ['rsp-modal']
-        });
-        if (assetName === null) return null;
-        const colorInput = await Modal.prompt(getText('animatronikka.prompt.color_optional'), {
-          defaultValue: current && current.type === 'restraint' ? this.formatColor(current.color) : '',
-          modalClassList: ['rsp-modal']
-        });
-        if (colorInput === null) return null;
-        
-        const durationMs = await this.promptDurationMs(current);
-        if (durationMs === null) return null;
-        return {
-          id: current?.id ?? CommonGenerateUniqueID(),
-          type,
-          durationMs,
-          group,
-          assetName: assetName || undefined,
-          color: this.parseColor(colorInput),
+        if (!group || group.length === 0) return null;
+        const asset = InventoryGet(Player, group[0]);
+        if (!asset) return null;
+        return { 
+          id: current?.id ?? CommonGenerateUniqueID(), 
+          type, 
+          durationMs: 0, 
+          group: group[0], 
+          asset: {
+            name: asset.Asset.Name,
+            properties: structuredClone(asset.Property),
+            color: asset.Color,
+          }
         };
       }
       default:

@@ -1,6 +1,7 @@
 import { BaseModule, Subscreen, exportToGlobal, modLogger } from 'bc-deeplib/deeplib';
 import { Animation, AnimationInput, AnimationSchema, AnimatronikkaSettingsModel, Keyframe } from '../models/animations';
 import { GuiAnimatronikka } from '../screens/animatronikka';
+import { assertNever } from '@/utilities/other';
 
 type AnimationRun = {
   id: string;
@@ -159,12 +160,12 @@ export class AnimatronikkaModule extends BaseModule {
         this.applyRestraintKeyframe(target, keyframe);
         break;
       default:
-        return;
+        return assertNever(keyframe);
     }
   }
 
   private applyExpressionKeyframe(target: Character, keyframe: Extract<Keyframe, { type: 'expression' }>): void {
-    CharacterSetFacialExpression(target, keyframe.group as keyof ExpressionNameMap, keyframe.expression as ExpressionName);
+    CharacterSetFacialExpression(target, keyframe.group as keyof ExpressionNameMap, keyframe.expression as ExpressionName, undefined, keyframe.color);
   }
 
   private applyPoseKeyframe(target: Character, keyframe: Extract<Keyframe, { type: 'pose' }>): void {
@@ -172,16 +173,11 @@ export class AnimatronikkaModule extends BaseModule {
   }
 
   private applyRestraintKeyframe(target: Character, keyframe: Extract<Keyframe, { type: 'restraint' }>): void {
-    if (keyframe.assetName) {
-      InventoryWear(target, keyframe.assetName, keyframe.group as AssetGroupItemName, keyframe.color);
-    }
+    const item = InventoryWear(target, keyframe.asset.name, keyframe.group as AssetGroupItemName, keyframe.asset.color, undefined, undefined, undefined, false);
+    if (!item) return;
+    item.Property = keyframe.asset.properties;
 
-    const appearance = target.Appearance.find(a => a.Asset.Group.Name === keyframe.group);
-    if (!appearance) return;
-    if (keyframe.color) {
-      appearance.Color = keyframe.color;
-    }
-    CharacterRefresh(target, false, false);
+    CharacterRefresh(target, true, true);
   }
 }
 

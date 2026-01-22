@@ -28,8 +28,11 @@ export type PoseKeyframe = z.infer<typeof PoseKeyframeSchema>;
 export const RestraintKeyframeSchema = KeyframeBaseSchema.extend({
   type: z.literal('restraint'),
   group: z.string(),
-  assetName: z.string().optional(),
-  color: z.union([z.string(), z.array(z.string())]).optional(),
+  asset: z.object({
+    name: z.string(),
+    color: z.union([z.string(), z.array(z.string())]).optional(),
+    properties: z.record(z.string(), z.any()).optional(),
+  }),
 });
 export type RestraintKeyframe = z.infer<typeof RestraintKeyframeSchema>;
 

@@ -1028,8 +1028,10 @@ export async function expressionSelectorModal(options: { group: ExpressionGroupN
   const allowedExpressions: (ExpressionName | null)[] = [];
   const assetGroup = AssetGroupGet('Female3DCG', group);
   if (assetGroup) {
-    allowedExpressions.push(null);
     allowedExpressions.push(...(assetGroup.AllowExpression ?? []));
+    if (!allowedExpressions.includes(null)) {
+      allowedExpressions.unshift(null);
+    }
   }
   
   const buttonByValue = new Map<ExpressionName, HTMLElement>();
