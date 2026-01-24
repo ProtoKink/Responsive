@@ -14,6 +14,7 @@ behaviors.prompt.select_reaction = Select a reaction to add
 behaviors.prompt.select_item = Select an item
 behaviors.prompt.select_multiple_items = Select multiple items
 behaviors.prompt.search_activities = Search activities...
+behaviors.prompt.search_items = Search items...
 behaviors.prompt.select_all = Select All
 behaviors.prompt.deselect_all = Deselect All
 behaviors.prompt.select_constraint_type = Select a constraint type to add

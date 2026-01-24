@@ -1,9 +1,10 @@
 import { advElement, exportToGlobal, getText, Modal } from 'bc-deeplib/deeplib';
 
-export async function itemSelectorModal(options: { buttons?: { label: string, value: string, selected?: boolean }[], limit?: number, prompt?: string }): Promise<string[] | null> {
+export async function itemSelectorModal(options: { buttons?: { label: string, value: string, selected?: boolean }[], limit?: number, prompt?: string, showSearch?: boolean }): Promise<string[] | null> {
   options ??= {};
   const buttons = options.buttons ?? [];
   const limit = options.limit ?? Infinity;
+  const showSearch = options.showSearch ?? false;
   if (buttons.length === 0 || limit < 1) {
     return [];
   }
@@ -46,7 +47,8 @@ export async function itemSelectorModal(options: { buttons?: { label: string, va
         button: {
           classList: ['rsp-selector-button'],
           dataAttributes: {
-            selected: isSelected ? '' : undefined
+            selected: isSelected ? '' : undefined,
+            label: button.label
           },
           attributes: {
             name: button.value
@@ -58,12 +60,36 @@ export async function itemSelectorModal(options: { buttons?: { label: string, va
     return buttonElement;
   });
 
+  const searchInput = showSearch ? advElement.createInput({
+    id: 'rsp-selector-search',
+    type: 'text',
+    setSettingValue(val) {
+      const searchTerm = val.toLowerCase().trim();
+      buttonElements.forEach(button => {
+        if (button instanceof HTMLElement) {
+          const label = button.getAttribute('data-label') || button.textContent || '';
+          const matches = label.toLowerCase().includes(searchTerm);
+          button.style.display = matches ? '' : 'none';
+        }
+      });
+    },
+    htmlOptions: {
+      input: {
+        classList: ['rsp-selector-search-input'],
+        attributes: {
+          placeholder: getText('behaviors.prompt.search_items')
+        }
+      }
+    }
+  }) : null;
+
   return await Modal.confirm([
     advElement.createLabel({ id: null, label: prompt }),
     ElementCreate({ tag: 'br' }),
+    ...(searchInput ? [searchInput] : []),
     {
       tag: 'div',
-      classList: ['rsp-selector-buttons-container'],
+      classList: ['rsp-selector-buttons-container', 'scroll-box'],
       children: buttonElements
     }
   ], { modalClassList: ['rsp-modal'] }).then((result) => {

@@ -29,6 +29,7 @@
     align-items: flex-start;
     padding: minv(1, 0.5) 0;
     width: 100%;
+    max-height: minv(60, 30);
     box-sizing: border-box;
 
     .rsp-selector-button {
@@ -39,6 +40,7 @@
       padding: minv(1, 0.5) minv(2, 1);
       white-space: nowrap;
       box-sizing: border-box;
+      height: fit-content;
 
       &[data-selected] {
         background-color: var(--tmd-accent, $active-color);
@@ -48,6 +50,17 @@
           background-color: var(--tmd-accent-hover, #e0e0e0);
         }
       }
+    }
+  }
+
+  .rsp-selector-search-input {
+    border-color: color-mix(in srgb, var(--tmd-accent, $active-color) 30%, transparent);
+    font-size: inherit;
+    transition: border-color 0.2s ease;
+
+    &:focus {
+      outline: none;
+      border-color: var(--tmd-accent, $active-color);
     }
   }
 }

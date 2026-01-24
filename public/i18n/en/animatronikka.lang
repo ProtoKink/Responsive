@@ -36,7 +36,7 @@ animatronikka.preview_mode.body = Body only
 # Fields
 animatronikka.field.name = Name
 animatronikka.field.tags = Tags (comma separated)
-animatronikka.field.loop = Loop
+animatronikka.field.loop_count = Loop count
 
 # Sections
 animatronikka.section.keyframes = Keyframes
@@ -45,6 +45,7 @@ animatronikka.section.keyframes = Keyframes
 animatronikka.keyframe.expression = Expression
 animatronikka.keyframe.pose = Pose
 animatronikka.keyframe.restraint = Restraint
+animatronikka.keyframe.appearance = Appearance
 
 # Prompts
 animatronikka.prompt.animation_name = Enter animation name
@@ -53,10 +54,4 @@ animatronikka.prompt.keyframe_type = Select keyframe type
 animatronikka.prompt.duration_ms = Duration (ms)
 animatronikka.prompt.import_json = Paste animation JSON
 animatronikka.prompt.export_json = Animation JSON
-animatronikka.prompt.expression_group = Expression group (e.g. Mouth)
-animatronikka.prompt.expression_name = Expression name (optional)
-animatronikka.prompt.pose_list = Pose list (comma separated)
-animatronikka.prompt.restraint_group = Restraint group (e.g. ItemMouth)
-animatronikka.prompt.asset_name_optional = Asset name (optional)
-animatronikka.prompt.expression_optional = Expression (optional)
 animatronikka.prompt.color_optional = Color (optional, comma for multiple)

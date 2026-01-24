@@ -8,7 +8,6 @@
   gap: var(--gap);
   width: 100%;
 
-  // Direct label children (for manually created fields)
   >label {
     font-weight: bold;
     font-size: 0.9em;
@@ -17,13 +16,11 @@
     padding-top: minv(1, 0.5);
   }
 
-  // All labels should be bold
   label {
     font-weight: bold;
     font-size: 0.9em;
   }
 
-  // Elements on the right side (excluding labels)
   >*:not(label):not(input[type='checkbox']) {
     flex: 1;
     min-width: 0;
@@ -36,7 +33,6 @@
     font-size: 0.9em;
   }
 
-  // Container for multiple elements (like include/exclude fields)
   .rsp-field-elements {
     display: flex;
     flex-direction: column;

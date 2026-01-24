@@ -153,7 +153,6 @@ export type ReactionActivity = Prettify<Omit<z.infer<typeof ReactionActivitySche
 const ReactionAnimationSchema = BaseReactionSchema.extend({
   type: z.literal('animation'),
   animationId: z.string(),
-  loop: z.boolean().optional(),
   interrupt: z.boolean().optional(),
   priority: z.number().optional(),
 });

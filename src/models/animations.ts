@@ -2,7 +2,7 @@ import { BaseSettingsModel } from 'bc-deeplib/deeplib';
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
 
-export const KeyframeTypeSchema = z.enum(['expression', 'pose', 'restraint']);
+export const KeyframeTypeSchema = z.enum(['expression', 'pose', 'restraint', 'appearance']);
 export type KeyframeType = z.infer<typeof KeyframeTypeSchema>;
 
 const KeyframeBaseSchema = z.object({
@@ -31,15 +31,27 @@ export const RestraintKeyframeSchema = KeyframeBaseSchema.extend({
   asset: z.object({
     name: z.string(),
     color: z.union([z.string(), z.array(z.string())]).optional(),
-    properties: z.record(z.string(), z.any()).optional(),
+    property: z.record(z.string(), z.any()).optional(),
   }),
 });
 export type RestraintKeyframe = z.infer<typeof RestraintKeyframeSchema>;
+
+export const AppearanceKeyframeSchema = KeyframeBaseSchema.extend({
+  type: z.literal('appearance'),
+  group: z.string(),
+  asset: z.object({
+    name: z.string(),
+    color: z.union([z.string(), z.array(z.string())]).optional(),
+    property: z.record(z.string(), z.any()).optional(),
+  })
+});
+export type AppearanceKeyframe = z.infer<typeof AppearanceKeyframeSchema>;
 
 export const KeyframeSchema = z.discriminatedUnion('type', [
   ExpressionKeyframeSchema,
   PoseKeyframeSchema,
   RestraintKeyframeSchema,
+  AppearanceKeyframeSchema,
 ]);
 export type Keyframe = z.infer<typeof KeyframeSchema>;
 
@@ -48,7 +60,7 @@ export const AnimationSchema = z.object({
   name: z.string().default('New Animation'),
   keyframes: z.array(KeyframeSchema).default([]),
   tags: z.array(z.string()).default([]),
-  loop: z.boolean().default(false),
+  loopCount: z.number().int().min(0).default(1),
 });
 export type Animation = z.infer<typeof AnimationSchema>;
 

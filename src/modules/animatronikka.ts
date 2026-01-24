@@ -7,7 +7,7 @@ type AnimationRun = {
   id: string;
   animation: Animation;
   target: Character;
-  loop: boolean;
+  loopsRemaining: number;
   priority: number;
   groupStates: Map<string, GroupState>;
   activeGroupCount: number;
@@ -64,7 +64,7 @@ export class AnimatronikkaModule extends BaseModule {
     delete this.settings.animations[id];
   }
 
-  playAnimation(animationId: string, options?: { target?: Character; loop?: boolean; priority?: number; interrupt?: boolean }): boolean {
+  playAnimation(animationId: string, options?: { target?: Character; loopCount?: number; priority?: number; interrupt?: boolean }): boolean {
     const animation = this.getAnimation(animationId);
     if (!animation) return false;
 
@@ -75,7 +75,7 @@ export class AnimatronikkaModule extends BaseModule {
       id: animationId,
       animation: AnimationSchema.parse(animation),
       target,
-      loop: options?.loop ?? animation.loop ?? false,
+      loopsRemaining: this.getLoopsRemaining(animation, options?.loopCount),
       priority: options?.priority ?? 0,
       groupStates: new Map(),
       activeGroupCount: 0,
@@ -162,12 +162,20 @@ export class AnimatronikkaModule extends BaseModule {
     run.activeGroupCount -= 1;
     if (run.activeGroupCount > 0) return;
 
-    if (run.loop) {
+    if (run.loopsRemaining > 0) {
+      run.loopsRemaining -= 1;
       this.restartRun(run);
       return;
     }
 
     this.finishRun(run);
+  }
+
+  private getLoopsRemaining(animation: Animation, loopCount?: number): number {
+    if (typeof loopCount === 'number') {
+      return Math.max(0, Math.floor(loopCount));
+    }
+    return Math.max(0, Math.floor(animation.loopCount ?? 1));
   }
 
   private restartRun(run: AnimationRun): void {
@@ -207,6 +215,9 @@ export class AnimatronikkaModule extends BaseModule {
       case 'restraint':
         this.applyRestraintKeyframe(target, keyframe);
         break;
+      case 'appearance':
+        this.applyAppearanceKeyframe(target, keyframe);
+        break;
       default:
         return assertNever(keyframe);
     }
@@ -223,7 +234,19 @@ export class AnimatronikkaModule extends BaseModule {
   private applyRestraintKeyframe(target: Character, keyframe: Extract<Keyframe, { type: 'restraint' }>): void {
     const item = InventoryWear(target, keyframe.asset.name, keyframe.group as AssetGroupItemName, keyframe.asset.color, undefined, undefined, undefined, false);
     if (!item) return;
-    item.Property = keyframe.asset.properties;
+    if (keyframe.asset.property) {
+      item.Property = keyframe.asset.property;
+    }
+
+    CharacterRefresh(target, true, true);
+  }
+  
+  private applyAppearanceKeyframe(target: Character, keyframe: Extract<Keyframe, { type: 'appearance' }>): void {
+    const item = InventoryWear(target, keyframe.asset.name, keyframe.group as AssetGroupName, keyframe.asset.color, undefined, undefined, undefined, false);
+    if (!item) return;
+    if (keyframe.asset.property) {
+      item.Property = keyframe.asset.property;
+    }
 
     CharacterRefresh(target, true, true);
   }
@@ -251,6 +274,8 @@ export class AnimatronikkaModule extends BaseModule {
         return 'pose';
       case 'restraint':
         return `restraint:${keyframe.group}`;
+      case 'appearance':
+        return `appearance:${keyframe.group}`;
       default:
         return assertNever(keyframe);
     }

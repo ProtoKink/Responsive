@@ -1048,19 +1048,6 @@ export class GuiBehaviors extends BaseSubscreen {
       });
       elements.push(renderAnimation());
 
-      const loopField = advElement.createCheckbox({
-        id: `${reaction.id}-animation-loop`,
-        label: getText('behaviors.field.animation_loop'),
-        setElementValue: () => reaction.loop ?? false,
-        setSettingValue: (val) => (reaction.loop = val),
-        htmlOptions: {
-          container: {
-            classList: ['rsp-behaviors-field'],
-          }
-        }
-      });
-      elements.push(loopField);
-
       const interruptField = advElement.createCheckbox({
         id: `${reaction.id}-animation-interrupt`,
         label: getText('behaviors.field.animation_interrupt'),
@@ -2465,7 +2452,6 @@ export class GuiBehaviors extends BaseSubscreen {
           name: reaction.name || getText('behaviors.text.new_reaction'),
           type: 'animation',
           animationId: '',
-          loop: false,
           interrupt: false,
           priority: 0
         });

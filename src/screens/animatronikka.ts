@@ -1,8 +1,8 @@
 import { advElement, BaseSubscreen, exportToGlobal, getText, layout, Modal, SettingElement, SubscreenOptions } from 'bc-deeplib/deeplib';
 import { v4 as uuidv4 } from 'uuid';
 import { animationGroups, AnimatronikkaModule } from '../modules/animatronikka';
-import { Animation, AnimatronikkaSettingsModel, Keyframe, KeyframeType } from '../models/animations';
-import { buildContentListSection, createInputField } from '../utilities/fields';
+import { Animation, AnimatronikkaSettingsModel, Keyframe, KeyframeType, KeyframeTypeSchema } from '../models/animations';
+import { buildContentListSection, createInputField, createNumberInputField } from '../utilities/fields';
 import { bodyPartSelectorModal, expressionSelectorModal, itemSelectorModal } from '../utilities/selectorModals';
 import { assertNever } from '@/utilities/other';
 
@@ -314,18 +314,19 @@ export class GuiAnimatronikka extends BaseSubscreen {
     });
     elements.push(tagsField);
 
-    const loopField = advElement.createCheckbox({
-      id: `${animation.id}-loop`,
-      label: getText('animatronikka.field.loop'),
-      setElementValue: () => animation.loop ?? false,
-      setSettingValue: (val) => (animation.loop = val),
-      htmlOptions: {
-        container: {
-          classList: ['rsp-animatronikka-field']
-        }
-      }
+    const loopCountField = createNumberInputField({
+      id: `${animation.id}-loop-count`,
+      labelKey: 'animatronikka.field.loop_count',
+      value: (animation.loopCount ?? 1).toString(),
+      onChange: (val) => {
+        const parsed = Math.max(0, parseInt(val || '0', 10));
+        animation.loopCount = Number.isNaN(parsed) ? 1 : parsed;
+      },
+      min: '0',
+      max: '999',
+      step: '1'
     });
-    elements.push(loopField);
+    elements.push(loopCountField);
 
     elements.push(this.buildKeyframesSection(animation));
 
@@ -631,8 +632,22 @@ export class GuiAnimatronikka extends BaseSubscreen {
         return `${getText('animatronikka.keyframe.expression')} ${keyframe.group}: ${keyframe.expression ?? getText('animatronikka.text.none')} (${keyframe.durationMs}ms)`;
       case 'pose':
         return `${getText('animatronikka.keyframe.pose')} ${keyframe.poseName || getText('animatronikka.text.none')} (${keyframe.durationMs}ms)`;
-      case 'restraint':
-        return `${getText('animatronikka.keyframe.restraint')} ${keyframe.group}: ${keyframe.asset.name ?? getText('animatronikka.text.none')} (${keyframe.durationMs}ms)`;
+      case 'restraint': {
+        const asset = InventoryGet(Player, keyframe.group as AssetGroupItemName);
+        let assetName = getText('animatronikka.text.none');
+        if (asset) {
+          assetName = asset.Asset.Name;
+        }
+        return `${getText('animatronikka.keyframe.restraint')} ${keyframe.group}: ${assetName} (${keyframe.durationMs}ms)`;
+      }
+      case 'appearance': {
+        const asset = AssetGet('Female3DCG', keyframe.group as AssetGroupName, keyframe.asset.name);
+        let assetName = getText('animatronikka.text.none');
+        if (asset) {
+          assetName = asset.Description ?? keyframe.asset.name;
+        }
+        return `${getText('animatronikka.keyframe.appearance')} ${keyframe.group}: ${assetName} (${keyframe.durationMs}ms)`;
+      }
       default:
         return assertNever(keyframe);
     }
@@ -645,7 +660,7 @@ export class GuiAnimatronikka extends BaseSubscreen {
       name: name || getText('animatronikka.text.new_animation'),
       keyframes: [],
       tags: [],
-      loop: false
+      loopCount: 1
     });
     if (!animation) return;
     this.settings.animations[animation.id] = animation;
@@ -672,7 +687,9 @@ export class GuiAnimatronikka extends BaseSubscreen {
           name: typeof item?.name === 'string' ? item.name : getText('animatronikka.text.new_animation'),
           keyframes: Array.isArray(item?.keyframes) ? item.keyframes : [],
           tags: Array.isArray(item?.tags) ? item.tags : [],
-          loop: typeof item?.loop === 'boolean' ? item.loop : false,
+          loopCount: typeof item?.loopCount === 'number'
+            ? Math.max(0, Math.floor(item.loopCount))
+            : 1,
         };
         delete (inputAnimation as { id?: string }).id;
         const animation = AnimatronikkaModule.createAnimation(inputAnimation);
@@ -737,7 +754,7 @@ export class GuiAnimatronikka extends BaseSubscreen {
 
   async selectKeyframeType(): Promise<KeyframeType | null> {
     const selected = await itemSelectorModal({
-      buttons: (['expression', 'pose', 'restraint'] as KeyframeType[]).map(type => ({
+      buttons: (KeyframeTypeSchema.options).map(type => ({
         label: getText(`animatronikka.keyframe.${type}`),
         value: type,
       })),
@@ -803,21 +820,50 @@ export class GuiAnimatronikka extends BaseSubscreen {
         return { id: current?.id ?? CommonGenerateUniqueID(), type, durationMs, poseName: pose[0] };
       }
       case 'restraint': {
-        const group = await bodyPartSelectorModal({
+        const group = (await bodyPartSelectorModal({
           selectedParts: current && current.type === 'restraint' ? [current.group as AssetGroupItemName] : [],
           limit: 1
-        });
-        if (!group || group.length === 0) return null;
-        const asset = InventoryGet(Player, group[0]);
+        }))?.[0] as AssetGroupItemName;
+        if (!group) return null;
+        const asset = InventoryGet(Player, group);
         if (!asset) return null;
+        const durationMs = await this.promptDurationMs(current);
+        if (durationMs === null) return null;
         return { 
           id: current?.id ?? CommonGenerateUniqueID(), 
           type, 
-          durationMs: 0, 
-          group: group[0], 
+          durationMs, 
+          group, 
           asset: {
             name: asset.Asset.Name,
-            properties: structuredClone(asset.Property),
+            property: structuredClone(asset.Property),
+            color: asset.Color,
+          }
+        };
+      }
+      case 'appearance': {
+        const group = (await itemSelectorModal({
+          buttons: AssetGroup.filter(g => g.IsAppearance()).map(group => ({
+            label: group.Description,
+            value: group.Name,
+            selected: current && current.type === 'appearance' ? current.group === group.Name : false,
+          })),
+          limit: 1,
+          showSearch: true,
+        }))?.[0] as AssetGroupName;
+        if (!group) return null;
+        const asset = InventoryGet(Player, group);
+        if (!asset) return null;
+        const durationMs = await this.promptDurationMs(current);
+        if (durationMs === null) return null;
+        return {
+          id: current?.id ?? CommonGenerateUniqueID(),
+          type,
+          durationMs,
+          group,
+          asset: {
+            name: asset.Asset.Name,
+            property: structuredClone(asset.Property),
             color: asset.Color,
           }
         };
@@ -840,9 +886,16 @@ export class GuiAnimatronikka extends BaseSubscreen {
     const trimmed = input.trim();
     if (!trimmed) return undefined;
     if (trimmed.includes(',')) {
-      return trimmed.split(',').map(value => value.trim()).filter(Boolean);
+      return trimmed
+        .split(',')
+        .map(value => value.trim())
+        .filter(Boolean)
+        .filter(value => /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(value));
+    } else if (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(trimmed)) {
+      return trimmed;
     }
-    return trimmed;
+
+    return undefined;
   }
 
   formatColor(color?: string | string[] | null): string {

@@ -78,7 +78,6 @@ behaviors.field.group_names = Group Names
 behaviors.field.orgasm_type = Orgasm Type
 behaviors.field.room_presence_event = Room Presence Event
 behaviors.field.animation = Animation
-behaviors.field.animation_loop = Loop Animation
 behaviors.field.animation_interrupt = Interrupt Active Animation
 behaviors.field.animation_priority = Animation Priority
 behaviors.field.constraint_mode = Constraint Mode

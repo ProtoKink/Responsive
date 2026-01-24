@@ -98,7 +98,6 @@ function processReaction(reaction: Reaction, messageData: MessageData): boolean 
       if (!module || !reaction.animationId) return false;
 
       const success = module.playAnimation(reaction.animationId, {
-        loop: reaction.loop,
         interrupt: reaction.interrupt,
         priority: reaction.priority,
         target: Player,
