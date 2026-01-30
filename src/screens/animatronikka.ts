@@ -459,20 +459,41 @@ export class GuiAnimatronikka extends BaseSubscreen {
     }
 
     const label = this.getKeyframeLabel(keyframe);
+    const typeIcon = this.getKeyframeTypeIcon(keyframe);
 
     const dragHandle = this.buildKeyframeDragHandle();
+    const typeButton = advElement.createButton({
+      id: `${animation.id}-keyframe-type-${keyframe.id}`,
+      onClick: () => {},
+      options: {
+        image: typeIcon.image,
+        tooltip: typeIcon.tooltip,
+        noStyling: true,
+        tooltipPosition: 'right'
+      },
+      htmlOptions: {
+        button: { classList: ['rsp-animatronikka-keyframe-type'] }
+      }
+    });
     const editButton = advElement.createButton({
       id: `${animation.id}-keyframe-edit-${keyframe.id}`,
       onClick: () => this.handleEditKeyframe(animation, keyframe),
-      options: { label: getText('animatronikka.button.edit') },
-      htmlOptions: { button: { classList: ['rsp-animatronikka-keyframe-button'] } }
+      options: { image: `${PUBLIC_URL}/images/pencil.svg`, tooltip: getText('animatronikka.button.edit') },
+      htmlOptions: { button: { classList: ['rsp-animatronikka-keyframe-button', 'rsp-animatronikka-keyframe-square-button'] } }
+    });
+
+    const durationButton = advElement.createButton({
+      id: `${animation.id}-keyframe-duration-${keyframe.id}`,
+      onClick: () => this.handleEditKeyframeDuration(animation, keyframe),
+      options: { image: `${PUBLIC_URL}/images/clock.svg`, tooltip: getText('animatronikka.button.duration') },
+      htmlOptions: { button: { classList: ['rsp-animatronikka-keyframe-button', 'rsp-animatronikka-keyframe-square-button'] } }
     });
 
     const duplicateButton = advElement.createButton({
       id: `${animation.id}-keyframe-duplicate-${keyframe.id}`,
       onClick: () => this.handleDuplicateKeyframe(animation, keyframe, index),
-      options: { label: getText('animatronikka.button.duplicate') },
-      htmlOptions: { button: { classList: ['rsp-animatronikka-keyframe-button'] } }
+      options: { image: `${PUBLIC_URL}/images/duplicate.svg`, tooltip: getText('animatronikka.button.duplicate') },
+      htmlOptions: { button: { classList: ['rsp-animatronikka-keyframe-button', 'rsp-animatronikka-keyframe-square-button'] } }
     });
 
     const deleteButton = advElement.createButton({
@@ -483,8 +504,8 @@ export class GuiAnimatronikka extends BaseSubscreen {
           this.buildKeyframesSection(animation);
         }
       },
-      options: { label: getText('animatronikka.button.delete') },
-      htmlOptions: { button: { classList: ['rsp-animatronikka-keyframe-button'] } }
+      options: { image: `${PUBLIC_URL}/images/trash_bin.svg`, tooltip: getText('animatronikka.button.delete') },
+      htmlOptions: { button: { classList: ['rsp-animatronikka-keyframe-button', 'rsp-animatronikka-keyframe-square-button'] } }
     });
 
     const row = ElementCreate({
@@ -496,6 +517,7 @@ export class GuiAnimatronikka extends BaseSubscreen {
       },
       children: [
         dragHandle,
+        typeButton,
         advElement.createLabel({
           id: null,
           label: label,
@@ -506,7 +528,7 @@ export class GuiAnimatronikka extends BaseSubscreen {
         {
           tag: 'div',
           classList: ['rsp-animatronikka-keyframe-actions'],
-          children: [editButton, duplicateButton, deleteButton]
+          children: [editButton, durationButton, duplicateButton, deleteButton]
         }
       ],
       eventListeners: {
@@ -629,16 +651,16 @@ export class GuiAnimatronikka extends BaseSubscreen {
   getKeyframeLabel(keyframe: Keyframe): string {
     switch (keyframe.type) {
       case 'expression':
-        return `${getText('animatronikka.keyframe.expression')} ${keyframe.group}: ${keyframe.expression ?? getText('animatronikka.text.none')} (${keyframe.durationMs}ms)`;
+        return `${keyframe.group}: ${keyframe.expression ?? getText('animatronikka.text.none')} (${keyframe.durationMs}ms)`;
       case 'pose':
-        return `${getText('animatronikka.keyframe.pose')} ${keyframe.poseName || getText('animatronikka.text.none')} (${keyframe.durationMs}ms)`;
+        return `${keyframe.poseName || getText('animatronikka.text.none')} (${keyframe.durationMs}ms)`;
       case 'restraint': {
         const asset = InventoryGet(Player, keyframe.group as AssetGroupItemName);
         let assetName = getText('animatronikka.text.none');
         if (asset) {
           assetName = asset.Asset.Name;
         }
-        return `${getText('animatronikka.keyframe.restraint')} ${keyframe.group}: ${assetName} (${keyframe.durationMs}ms)`;
+        return `${keyframe.group}: ${assetName} (${keyframe.durationMs}ms)`;
       }
       case 'appearance': {
         const asset = AssetGet('Female3DCG', keyframe.group as AssetGroupName, keyframe.asset.name);
@@ -646,8 +668,35 @@ export class GuiAnimatronikka extends BaseSubscreen {
         if (asset) {
           assetName = asset.Description ?? keyframe.asset.name;
         }
-        return `${getText('animatronikka.keyframe.appearance')} ${keyframe.group}: ${assetName} (${keyframe.durationMs}ms)`;
+        return `${keyframe.group}: ${assetName} (${keyframe.durationMs}ms)`;
       }
+      default:
+        return assertNever(keyframe);
+    }
+  }
+
+  getKeyframeTypeIcon(keyframe: Keyframe): { image: string; tooltip: string } {
+    switch (keyframe.type) {
+      case 'expression':
+        return {
+          image: `${PUBLIC_URL}/images/expression.svg`,
+          tooltip: getText('animatronikka.keyframe.expression')
+        };
+      case 'pose':
+        return {
+          image: `${PUBLIC_URL}/images/pose.svg`,
+          tooltip: getText('animatronikka.keyframe.pose')
+        };
+      case 'restraint':
+        return {
+          image: `${PUBLIC_URL}/images/restraint.svg`,
+          tooltip: getText('animatronikka.keyframe.restraint')
+        };
+      case 'appearance':
+        return {
+          image: `${PUBLIC_URL}/images/appearance.svg`,
+          tooltip: getText('animatronikka.keyframe.appearance')
+        };
       default:
         return assertNever(keyframe);
     }
@@ -743,6 +792,13 @@ export class GuiAnimatronikka extends BaseSubscreen {
     const index = animation.keyframes.findIndex(k => k.id === keyframe.id);
     if (index === -1) return;
     animation.keyframes[index] = { ...updated, id: keyframe.id };
+    this.buildKeyframesSection(animation);
+  }
+
+  async handleEditKeyframeDuration(animation: Animation, keyframe: Keyframe): Promise<void> {
+    const durationMs = await this.promptDurationMs(keyframe);
+    if (durationMs === null) return;
+    keyframe.durationMs = durationMs;
     this.buildKeyframesSection(animation);
   }
 
