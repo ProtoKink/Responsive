@@ -8,6 +8,7 @@ animatronikka.search.placeholder = Search animations...
 animatronikka.button.add_animation = Add Animation
 animatronikka.button.add_keyframe = Add Keyframe
 animatronikka.button.select_animation = Select Animation
+animatronikka.button.back_to_list = Back to animations list
 animatronikka.button.import = Import JSON
 animatronikka.button.export = Export JSON
 animatronikka.button.play = Play

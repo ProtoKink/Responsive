@@ -6,11 +6,13 @@ import { buildContentListSection, createInputField, createNumberInputField } fro
 import { bodyPartSelectorModal, expressionSelectorModal, itemSelectorModal } from '../utilities/selectorModals';
 import { assertNever } from '@/utilities/other';
 
-type PreviewMode = 'full' | 'face' | 'body';
+type PreviewMode = 'full' | 'face';
 
 const selector = Object.freeze({
   container: 'rsp-animatronikka-container',
   listPanel: 'rsp-animatronikka-list-panel',
+  previewCanvas: 'rsp-animatronikka-preview-canvas',
+  backToListButton: 'rsp-animatronikka-back-to-list',
   editorPanel: 'rsp-animatronikka-editor-panel',
   listItem: (id: string) => `rsp-animatronikka-list-item-${id}`,
   listItemsContainer: 'rsp-animatronikka-list-items',
@@ -78,6 +80,19 @@ export class GuiAnimatronikka extends BaseSubscreen {
     this.render();
   }
 
+  run(): void {
+    super.run();
+    if (this.selectedAnimationId) {
+      const canvas = ElementWrap(selector.previewCanvas) as HTMLCanvasElement;
+      const ctx = canvas?.getContext('2d');
+      ctx?.clearRect(0, 0, canvas.width, canvas.height);
+      if (this.previewMode === 'full') 
+        DrawCharacter(Player, 0, 0, 1, false, ctx ?? undefined);
+      else if (this.previewMode === 'face') 
+        DrawCharacter(Player, -250, 250 - 2 * Player.HeightModifier, 2, false, ctx ?? undefined);
+    }
+  }
+
   exit(): void {
     GuiAnimatronikka.instance.deleteMode = false;
     GuiAnimatronikka.instance.selectedAnimationId = null;
@@ -89,7 +104,31 @@ export class GuiAnimatronikka extends BaseSubscreen {
     const container = ElementWrap(selector.container);
     if (!container) return;
     container.replaceChildren();
-    container.append(this.buildListPanel(), this.buildEditorPanel());
+    if (this.selectedAnimationId) {
+      container.append(this.buildPreviewCanvas(), this.buildEditorPanel());
+    } else {
+      container.append(this.buildListPanel(), this.buildEditorPanel());
+    }
+  }
+
+  buildPreviewCanvas(): HTMLElement {
+    return advElement.createCustom({
+      id: selector.previewCanvas,
+      htmlOptions: {
+        tag: 'canvas',
+        classList: [selector.previewCanvas],
+        parent: layout.getSubscreen(),
+        attributes: {
+          width: '500',
+          height: '1000',
+        },
+      },
+    });
+  }
+
+  goBackToAnimationList(): void {
+    this.selectedAnimationId = null;
+    this.render();
   }
 
   buildListPanel(): HTMLElement {
@@ -334,6 +373,23 @@ export class GuiAnimatronikka extends BaseSubscreen {
   }
 
   buildPreviewControls(animation: Animation): HTMLElement {
+    const backButton = advElement.createButton({
+      id: selector.backToListButton,
+      onClick: () => this.goBackToAnimationList(),
+      options: {
+        image: `${PUBLIC_URL}/dl_images/arrow_left.svg`,
+        tooltip: getText('animatronikka.button.back_to_list'),
+        tooltipPosition: 'right'
+      },
+      htmlOptions: {
+        button: {
+          classList: ['rsp-animatronikka-back-to-list-button']
+        }
+      }
+    });
+
+    const space = ElementCreate({ tag: 'div', classList: ['rsp-animatronikka-space'] });
+    
     const playButton = advElement.createButton({
       id: `${animation.id}-play`,
       onClick: () => {
@@ -393,7 +449,7 @@ export class GuiAnimatronikka extends BaseSubscreen {
       htmlOptions: { classList: ['rsp-animatronikka-preview-label'] }
     });
 
-    const previewModes: PreviewMode[] = ['full', 'face', 'body'];
+    const previewModes: PreviewMode[] = ['full', 'face'];
     const modeButtons = previewModes.map(mode =>
       advElement.createButton({
         id: `${selector.previewMode}-${mode}`,
@@ -416,6 +472,8 @@ export class GuiAnimatronikka extends BaseSubscreen {
       tag: 'div',
       classList: ['rsp-animatronikka-preview-controls'],
       children: [
+        backButton,
+        space,
         playButton,
         stopButton,
         exportButton,
@@ -766,15 +824,12 @@ export class GuiAnimatronikka extends BaseSubscreen {
     delete this.settings.animations[id];
     if (this.selectedAnimationId === id) this.selectedAnimationId = null;
     ElementWrap(selector.listItem(id))?.remove();
-    this.buildEditorPanel();
+    this.render();
   }
 
   selectAnimation(id: string): void {
-    const old = this.selectedAnimationId ? this.settings.animations[this.selectedAnimationId] : undefined;
     this.selectedAnimationId = id;
-    if (old) this.buildListItem(old);
-    this.buildListItem(this.settings.animations[id]);
-    this.buildEditorPanel();
+    this.render();
   }
 
   async handleAddKeyframe(animation: Animation): Promise<void> {

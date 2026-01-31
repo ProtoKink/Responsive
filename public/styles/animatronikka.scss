@@ -18,6 +18,19 @@
     border-radius: var(--deeplib-border-radius);
     padding: minv(1.8, 0.6);
     box-shadow: minv(0.2, 0.1) minv(0.2, 0.1) minv(0.4, 0.2) black;
+  }
+
+  .rsp-animatronikka-preview-canvas {
+    margin: 0;
+    user-select: none;
+    pointer-events: none;
+    position: relative;
+    height: 100%;
+    flex: 0 fit-content;
+    width: unset;
+  }
+
+  .rsp-animatronikka-list-panel {
 
     .rsp-animatronikka-list-header {
       display: flex;
@@ -130,12 +143,18 @@
   align-items: center;
   gap: min(1vh, 0.5vw);
 
+  .rsp-animatronikka-back-to-list-button,
   .rsp-animatronikka-playback-controls-button,
   .rsp-animatronikka-export-button {
     width: minv(6, 3);
     height: minv(6, 3);
     flex: 0 0 auto;
     padding: 0;
+  }
+
+  .rsp-animatronikka-space {
+    flex: 0 0 min(1vh, 0.5vw);
+    min-width: 0;
   }
 
   .rsp-animatronikka-preview-modes {
