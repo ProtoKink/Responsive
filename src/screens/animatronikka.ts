@@ -33,7 +33,7 @@ export class GuiAnimatronikka extends BaseSubscreen {
     name: 'animatronikka',
     icon: `${PUBLIC_URL}/images/clock.svg`,
     forceUpCharacter: true,
-    drawCharacter: true,
+    drawCharacter: false,
   };
 
   get settings(): AnimatronikkaSettingsModel {
@@ -54,8 +54,8 @@ export class GuiAnimatronikka extends BaseSubscreen {
           classList: ['rsp-animatronikka-container'],
           parent: layout.getSubscreen(),
         },
-        position: [150, 180, 'top-left'],
-        size: () => [1780, 720],
+        position: [100, 180, 'top-left'],
+        size: () => [1800, 720],
       }
     ]];
   }

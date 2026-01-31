@@ -75,8 +75,8 @@ export class GuiBehaviors extends BaseSubscreen {
             classList: ['rsp-behaviors-container'],
             parent: layout.getSubscreen()
           },
-          position: [150, 180],
-          size: () => [1780, 720],
+          position: [100, 180],
+          size: () => [1800, 720],
         }
       ]
     ];
