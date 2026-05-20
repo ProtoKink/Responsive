@@ -1,11 +1,10 @@
 import { modStorage } from './data';
-import { ModName } from './definition';
 
 export const doesBcxAllowsTalking = () => {
   if (!window.bcx) return true;
 
   const isRuleWorking = (ruleName: string) => {
-    const rule = window.bcx?.getModApi(ModName).getRuleState(ruleName);
+    const rule = window.bcx?.getModApi(MOD_INFO.name).getRuleState(ruleName);
     if (!rule) return false;
 
     switch (ruleName) {

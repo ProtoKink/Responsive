@@ -1,6 +1,5 @@
-import { advElement, BaseSubscreen, getText, layout, Modal, SubscreenOptions } from 'bc-deeplib/deeplib';
+import { advElement, BaseSubscreen, getText, layout, Modal, modLogger, SubscreenOptions } from 'bc-deeplib/deeplib';
 import { ProfileEntryModel, ProfilesSettingsModel } from '../models/profiles';
-import { logger } from '../utilities/definition';
 import { BehaviorsSettingsModel } from '../models/behaviors';
 import { GlobalSettingsModel } from '../models/base';
 import { modStorage } from '../utilities/data';
@@ -179,7 +178,7 @@ export class GuiProfiles extends BaseSubscreen {
 
   private isValidProfileId(id: number): boolean {
     if (id < 1 || id > 3) {
-      logger.warn(`Invalid profile id ${id}`);
+      modLogger.warn(`Invalid profile id ${id}`);
       return false;
     }
 

@@ -1,4 +1,4 @@
-import { Logger } from 'bc-deeplib/deeplib';
+
 import { GlobalModule } from '../modules/global';
 import { BehaviorsModule } from '../modules/behaviors';
 import { CharTalkModule } from '../modules/char_talk';
@@ -17,13 +17,6 @@ export const CMD_TOGGLE = 'toggle';
 export const CMD_CHANGELOG = 'changelog';
 export const CMD_VERSION = 'version';
 export const CMD_DEBUG_DATA = 'debug-data';
-
-export const ModName = 'Responsive';
-export const ModRepository = 'https://github.com/dDeepLb/BC-Responsive';
-
-export const DebugMode = false;
-
-export const logger = new Logger(ModName);
 
 declare module 'bc-deeplib/deeplib' {
   interface ModulesList { 
