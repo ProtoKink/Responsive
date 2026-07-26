@@ -4,9 +4,17 @@ import { animationGroups, AnimatronikkaModule } from '../modules/animatronikka';
 import { Animation, AnimatronikkaSettingsModel, Keyframe, KeyframeType, KeyframeTypeSchema } from '../models/animations';
 import { buildContentListSection, createInputField, createNumberInputField } from '../utilities/fields';
 import { bodyPartSelectorModal, expressionSelectorModal, itemSelectorModal } from '../utilities/selectorModals';
-import { assertNever } from '@/utilities/other';
+import { assertNever, easeOutBack, lerp } from '@/utilities/other';
 
 type PreviewMode = 'full' | 'face';
+
+type PreviewCamera = {
+  x: number;
+  y: number;
+  zoom: number;
+};
+
+const PREVIEW_TRANSITION_MS = 480;
 
 const selector = Object.freeze({
   container: 'rsp-animatronikka-container',
@@ -23,12 +31,22 @@ const selector = Object.freeze({
   animatronikkaKeyframeRow: (animationId: string, keyframeId: string) => `rsp-animatronikka-keyframe-row-${animationId}-${keyframeId}`,
 });
 
+function getPreviewCamera(mode: PreviewMode): PreviewCamera {
+  if (mode === 'full') return { x: 0, y: 0, zoom: 1 };
+  return { x: -250, y: 250 - 2 * Player.HeightModifier, zoom: 2 };
+}
+
 export class GuiAnimatronikka extends BaseSubscreen {
   static instance: GuiAnimatronikka;
   deleteMode = false;
   selectedAnimationId: string | null = null;
   searchQuery = '';
   previewMode: PreviewMode = 'full';
+  previewCamera: PreviewCamera = getPreviewCamera('full');
+  previewCameraFrom: PreviewCamera = getPreviewCamera('full');
+  previewCameraTo: PreviewCamera = getPreviewCamera('full');
+  previewTransitionStart = 0;
+  previewTransitioning = false;
   draggingKeyframeId: string | null = null;
 
   protected static override subscreenOptions: SubscreenOptions = {
@@ -86,10 +104,22 @@ export class GuiAnimatronikka extends BaseSubscreen {
       const canvas = ElementWrap(selector.previewCanvas) as HTMLCanvasElement;
       const ctx = canvas?.getContext('2d');
       ctx?.clearRect(0, 0, canvas.width, canvas.height);
-      if (this.previewMode === 'full') 
-        DrawCharacter(Player, 0, 0, 1, false, ctx ?? undefined);
-      else if (this.previewMode === 'face') 
-        DrawCharacter(Player, -250, 250 - 2 * Player.HeightModifier, 2, false, ctx ?? undefined);
+
+      if (this.previewTransitioning) {
+        const t = Math.min(1, (CommonTime() - this.previewTransitionStart) / PREVIEW_TRANSITION_MS);
+        const e = easeOutBack(t);
+        this.previewCamera = {
+          x: lerp(this.previewCameraFrom.x, this.previewCameraTo.x, e),
+          y: lerp(this.previewCameraFrom.y, this.previewCameraTo.y, e),
+          zoom: lerp(this.previewCameraFrom.zoom, this.previewCameraTo.zoom, e),
+        };
+        if (t >= 1) this.previewTransitioning = false;
+      } else {
+        this.previewCamera = getPreviewCamera(this.previewMode);
+      }
+
+      const { x, y, zoom } = this.previewCamera;
+      DrawCharacter(Player, x, y, zoom, false, ctx ?? undefined);
     }
   }
 
@@ -97,6 +127,8 @@ export class GuiAnimatronikka extends BaseSubscreen {
     GuiAnimatronikka.instance.deleteMode = false;
     GuiAnimatronikka.instance.selectedAnimationId = null;
     GuiAnimatronikka.instance.searchQuery = '';
+    GuiAnimatronikka.instance.previewTransitioning = false;
+    GuiAnimatronikka.instance.previewCamera = getPreviewCamera(GuiAnimatronikka.instance.previewMode);
     super.exit();
   }
 
@@ -483,7 +515,14 @@ export class GuiAnimatronikka extends BaseSubscreen {
   }
 
   setPreviewMode(mode: PreviewMode): void {
+    if (mode === this.previewMode && !this.previewTransitioning) return;
+
+    this.previewCameraFrom = { ...this.previewCamera };
+    this.previewCameraTo = getPreviewCamera(mode);
+    this.previewTransitionStart = CommonTime();
+    this.previewTransitioning = true;
     this.previewMode = mode;
+
     const buttons = document.querySelectorAll('.rsp-animatronikka-preview-button');
     buttons.forEach(button => {
       const buttonMode = button.getAttribute('id')?.split('-').pop();
