@@ -1,4 +1,4 @@
-import { GUI, GuiImportExport, initMod, Style, VersionModule } from 'bc-deeplib/deeplib';
+import { GUI, GuiImportExport, initMod, modStorage, Style, VersionModule } from 'bc-deeplib/deeplib';
 import { CharTalkModule } from './modules/char_talk';
 import { GlobalModule } from './modules/global';
 import { ProfilesModule } from './modules/profiles';
@@ -37,7 +37,8 @@ initMod({
       newVersionMessage: BCR_CHANGELOG,
       migrators: [
         new DeepLibMigrator()
-      ]
+      ],
+      showNewVersionMessage: () => modStorage.playerStorage.GlobalModule.doShowNewVersionMessage
     })
   },
   mainMenuOptions: {
