@@ -14,7 +14,7 @@
     flex-direction: column;
     gap: var(--gap);
     width: 25%;
-    background-color: var(--tmd-element, lightgray);
+    background-color: $background-color;
     border-radius: var(--deeplib-border-radius);
     padding: minv(1.8, 0.6);
     box-shadow: minv(0.2, 0.1) minv(0.2, 0.1) minv(0.4, 0.2) black;
@@ -82,7 +82,7 @@
         }
 
         &[data-selected] {
-          background-color: var(--tmd-accent, $active-color);
+          background-color: $active-color;
           color: white;
 
           .rsp-behaviors-item-info {
@@ -125,7 +125,7 @@
   flex-direction: column;
   gap: minv(1.5, 0.75);
   flex: 1;
-  background-color: var(--tmd-element, lightgray);
+  background-color: $background-color;
   border-radius: var(--deeplib-border-radius);
   padding: minv(1.8, 0.6);
   box-shadow: minv(0.2, 0.1) minv(0.2, 0.1) minv(0.4, 0.2) black;
@@ -171,7 +171,7 @@
   }
 
   .rsp-animatronikka-preview-button[data-selected='true'] {
-    background-color: var(--tmd-accent, $active-color);
+    background-color: $active-color;
   }
   
   .rsp-animatronikka-preview-label {
@@ -208,7 +208,7 @@
   left: 0;
   right: 0;
   height: minv(0.4, 0.2);
-  background-color: var(--tmd-accent, $active-color);
+  background-color: $active-color;
 }
 
 .rsp-animatronikka-keyframe-row--drag-over-top::before {

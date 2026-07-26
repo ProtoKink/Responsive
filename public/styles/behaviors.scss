@@ -26,7 +26,7 @@
   display: flex;
   gap: minv(1, 0.5);
   padding: minv(1, 0.5);
-  background-color: var(--tmd-element, lightgray);
+  background-color: $background-color;
   border-radius: var(--deeplib-border-radius);
   box-shadow: minv(0.2, 0.1) minv(0.2, 0.1) minv(0.4, 0.2) black;
 
@@ -35,7 +35,7 @@
     padding: minv(0.8, 0.4) minv(1.5, 0.75);
 
     &[data-selected] {
-      background-color: var(--tmd-accent, $active-color);
+      background-color: $active-color;
       color: white;
 
       &:hover {
@@ -55,7 +55,7 @@
   gap: minv(1, 0.5);
   width: 25%;
   min-width: 250px;
-  background-color: var(--tmd-element, lightgray);
+  background-color: $background-color;
   border-radius: var(--deeplib-border-radius);
   padding: minv(1.8, 0.6);
   box-shadow: minv(0.2, 0.1) minv(0.2, 0.1) minv(0.4, 0.2) black;
@@ -112,7 +112,7 @@
       }
 
       &[data-selected] {
-        background-color: var(--tmd-accent, $active-color);
+        background-color: $active-color;
         color: white;
 
         .rsp-behaviors-item-info {
@@ -251,7 +251,7 @@
   flex-direction: column;
   gap: minv(1.5, 0.75);
   flex: 1;
-  background-color: var(--tmd-element, lightgray);
+  background-color: $background-color;
   border-radius: var(--deeplib-border-radius);
   padding: minv(1.8, 0.6);
   box-shadow: minv(0.2, 0.1) minv(0.2, 0.1) minv(0.4, 0.2) black;
@@ -407,7 +407,7 @@
   align-items: center;
   gap: var(--gap);
   padding: minv(1, 0.5);
-  background-color: var(--tmd-element, lightgray);
+  background-color: $active-color;
   border-radius: var(--deeplib-border-radius);
   box-shadow: minv(0.2, 0.1) minv(0.2, 0.1) minv(0.4, 0.2) black;
 
@@ -438,7 +438,7 @@
   flex: 1;
   min-height: 0;
   padding: minv(1, 0.5);
-  background-color: var(--tmd-element, lightgray);
+  background-color: $background-color;
   border-radius: var(--deeplib-border-radius);
 }
 
@@ -470,7 +470,7 @@
 .rsp-debugger-badge {
   padding: minv(0.4, 0.2) minv(0.8, 0.4);
   border-radius: var(--deeplib-border-radius);
-  background-color: var(--tmd-accent, $active-color);
+  background-color: $active-color;
   color: white;
   font-size: 0.85em;
 }

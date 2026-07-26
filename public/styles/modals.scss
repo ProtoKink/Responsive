@@ -43,7 +43,7 @@
       height: fit-content;
 
       &[data-selected] {
-        background-color: var(--tmd-accent, $active-color);
+        background-color: $active-color;
         color: var(--tmd-text, white);
 
         &:hover {
@@ -54,13 +54,13 @@
   }
 
   .rsp-selector-search-input {
-    border-color: color-mix(in srgb, var(--tmd-accent, $active-color) 30%, transparent);
+    border-color: color-mix(in srgb, $active-color 30%, transparent);
     font-size: inherit;
     transition: border-color 0.2s ease;
 
     &:focus {
       outline: none;
-      border-color: var(--tmd-accent, $active-color);
+      border-color: $active-color;
     }
   }
 }
@@ -82,22 +82,22 @@
     }
 
     .button {
-      border: var(--border-width) solid color-mix(in srgb, var(--tmd-accent, $active-color) 30%, transparent);
+      border: var(--border-width) solid color-mix(in srgb, $active-color 30%, transparent);
       transition: background-color 0.2s ease,
         border-color 0.2s ease;
 
       &:hover {
-        background-color: color-mix(in srgb, var(--tmd-accent, $active-color) 20%, transparent);
-        border-color: color-mix(in srgb, var(--tmd-accent, $active-color) 50%, transparent);
+        background-color: color-mix(in srgb, $active-color 20%, transparent);
+        border-color: color-mix(in srgb, $active-color 50%, transparent);
       }
 
       &[data-selected] {
-        background-color: color-mix(in srgb, var(--tmd-accent, $active-color) 50%, transparent);
-        border-color: var(--tmd-accent, $active-color);
+        background-color: color-mix(in srgb, $active-color 50%, transparent);
+        border-color: $active-color;
         color: var(--tmd-text, white);
 
         &:hover {
-          background-color: color-mix(in srgb, var(--tmd-accent, $active-color) 70%, transparent);
+          background-color: color-mix(in srgb, $active-color 70%, transparent);
         }
       }
     }
@@ -112,14 +112,14 @@
     width: 100%;
     padding: minv(0.8, 0.4) minv(1.5, 0.75);
     box-sizing: border-box;
-    border: var(--border-width) solid color-mix(in srgb, var(--tmd-accent, $active-color) 30%, transparent);
+    border: var(--border-width) solid color-mix(in srgb, $active-color 30%, transparent);
     border-radius: var(--border-radius, 4px);
     font-size: inherit;
     transition: border-color 0.2s ease;
 
     &:focus {
       outline: none;
-      border-color: var(--tmd-accent, $active-color);
+      border-color: $active-color;
     }
 
     &::placeholder {
@@ -147,21 +147,21 @@
       white-space: nowrap;
       text-overflow: ellipsis;
       overflow: clip;
-      border: var(--border-width) solid color-mix(in srgb, var(--tmd-accent, $active-color) 30%, transparent);
+      border: var(--border-width) solid color-mix(in srgb, $active-color 30%, transparent);
       transition: background-color 0.2s ease, border-color 0.2s ease;
 
       &:hover {
-        background-color: color-mix(in srgb, var(--tmd-accent, $active-color) 20%, transparent);
-        border-color: color-mix(in srgb, var(--tmd-accent, $active-color) 50%, transparent);
+        background-color: color-mix(in srgb, $active-color 20%, transparent);
+        border-color: color-mix(in srgb, $active-color 50%, transparent);
       }
 
       &[data-selected] {
-        background-color: color-mix(in srgb, var(--tmd-accent, $active-color) 50%, transparent);
-        border-color: var(--tmd-accent, $active-color);
+        background-color: color-mix(in srgb, $active-color 50%, transparent);
+        border-color: $active-color;
         color: var(--tmd-text, white);
 
         &:hover {
-          background-color: color-mix(in srgb, var(--tmd-accent, $active-color) 70%, transparent);
+          background-color: color-mix(in srgb, $active-color 70%, transparent);
         }
       }
     }
@@ -188,7 +188,7 @@
       transition: background-color 0.2s ease;
 
       &:hover {
-        background-color: color-mix(in srgb, var(--tmd-accent, $active-color) 20%, transparent);
+        background-color: color-mix(in srgb, $active-color 20%, transparent);
       }
     }
   }
@@ -241,8 +241,8 @@
       display: grid;
       grid-template-columns: minv(4, 2) 1fr 1fr 1fr;
       gap: var(--gap);
-      background-color: color-mix(in srgb, var(--tmd-accent, $active-color) 20%, transparent);
-      border-bottom: var(--border-width) solid color-mix(in srgb, var(--tmd-accent, $active-color) 30%, transparent);
+      background-color: color-mix(in srgb, $active-color 20%, transparent);
+      border-bottom: var(--border-width) solid color-mix(in srgb, $active-color 30%, transparent);
       padding: minv(0.8, 0.4) minv(1, 0.5);
 
       .rsp-member-grid-header-cell {
@@ -266,16 +266,16 @@
         grid-template-columns: minv(4, 2) 1fr 1fr 1fr;
         gap: var(--gap);
         padding: minv(0.6, 0.3) minv(1, 0.5);
-        border-bottom: var(--border-width) solid color-mix(in srgb, var(--tmd-accent, $active-color) 15%, transparent);
+        border-bottom: var(--border-width) solid color-mix(in srgb, $active-color 15%, transparent);
         transition: background-color 0.2s ease;
         align-items: center;
 
         &:hover {
-          background-color: color-mix(in srgb, var(--tmd-accent, $active-color) 10%, transparent);
+          background-color: color-mix(in srgb, $active-color 10%, transparent);
         }
 
         &.rsp-member-row-selected {
-          background-color: color-mix(in srgb, var(--tmd-accent, $active-color) 30%, transparent);
+          background-color: color-mix(in srgb, $active-color 30%, transparent);
         }
       }
     }
@@ -329,7 +329,7 @@
       min-height: 2em;
       max-height: minv(20, 10);
       padding: minv(0.8, 0.4) minv(1, 0.5);
-      border: var(--border-width) solid color-mix(in srgb, var(--tmd-accent, $active-color) 30%, transparent);
+      border: var(--border-width) solid color-mix(in srgb, $active-color 30%, transparent);
       border-radius: var(--deeplib-border-radius);
       font-size: 0.8em;
       resize: vertical;
@@ -338,7 +338,7 @@
 
       &:focus {
         outline: none;
-        border-color: var(--tmd-accent, $active-color);
+        border-color: $active-color;
       }
     }
 
@@ -369,12 +369,12 @@
           padding: minv(0.6, 0.3) minv(1.2, 0.6);
           white-space: nowrap;
           font-size: 0.85em;
-          border: var(--border-width) solid color-mix(in srgb, var(--tmd-accent, $active-color) 30%, transparent);
+          border: var(--border-width) solid color-mix(in srgb, $active-color 30%, transparent);
           transition: background-color 0.2s ease, border-color 0.2s ease;
 
           &:hover {
-            background-color: color-mix(in srgb, var(--tmd-accent, $active-color) 20%, transparent);
-            border-color: color-mix(in srgb, var(--tmd-accent, $active-color) 50%, transparent);
+            background-color: color-mix(in srgb, $active-color 20%, transparent);
+            border-color: color-mix(in srgb, $active-color 50%, transparent);
           }
         }
       }
@@ -399,12 +399,12 @@
       box-sizing: border-box;
 
       &[data-selected] {
-        background-color: var(--tmd-accent, $active-color);
+        background-color: $active-color;
         color: var(--tmd-text, white);
       }
 
       &:hover {
-        background-color: color-mix(in srgb, var(--tmd-accent, $active-color) 20%, transparent);
+        background-color: color-mix(in srgb, $active-color 20%, transparent);
       }
 
       img {

@@ -8,4 +8,5 @@ $roomPresence-color: #3498db;
 $constraint-color: #f39c12;
 $delete-color: #B22222;
 $delete-hover-color: #8B0000;
-$active-color: #4a90e2;
+$active-color: var(--tmd-accent, #ffff00);
+$background-color: var(--tmd-element, #ffffff);
