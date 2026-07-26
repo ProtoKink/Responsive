@@ -11,9 +11,6 @@ importers:
       bc-deeplib:
         specifier: ^5.0.1
         version: 5.0.1(sass-embedded@1.93.3)
-      bondage-club-mod-sdk:
-        specifier: ^1.2.0
-        version: 1.2.0
       sass:
         specifier: ^1.102.0
         version: 1.102.0
@@ -42,6 +39,9 @@ importers:
       bc-stubs:
         specifier: ~130.0.0
         version: 130.0.0
+      bondage-club-mod-sdk:
+        specifier: ^1.2.0
+        version: 1.2.0
       eslint:
         specifier: ^10.8.0
         version: 10.8.0
