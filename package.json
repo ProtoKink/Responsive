@@ -26,24 +26,24 @@
   },
   "homepage": "https://github.com/dDeepLb/BC-Responsive#readme",
   "dependencies": {
-    "bc-deeplib": "^3.0.0",
+    "bc-deeplib": "^5.0.1",
     "bondage-club-mod-sdk": "^1.2.0",
-    "sass": "^1.94.2",
-    "uuid": "^13.0.0",
-    "zod": "^4.1.13"
+    "sass": "^1.102.0",
+    "uuid": "^14.0.1",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.1",
-    "@stylistic/eslint-plugin": "^5.6.1",
+    "@eslint/js": "^10.0.1",
+    "@stylistic/eslint-plugin": "^5.10.0",
     "@types/core-js": "^2.5.8",
-    "@types/lz-string": "1.3.34",
-    "@types/node": "^17.0.45",
-    "bc-stubs": "~124.0.0",
-    "eslint": "^9.39.1",
-    "globals": "^16.5.0",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.48.0",
-    "vitest": "^4.0.16"
+    "@types/lz-string": "1.5.0",
+    "@types/node": "^26.1.1",
+    "bc-stubs": "~130.0.0",
+    "eslint": "^10.8.0",
+    "globals": "^17.8.0",
+    "typescript": "^7.0.2",
+    "typescript-eslint": "^8.65.0",
+    "vitest": "^4.1.10"
   },
   "packageManager": "pnpm@10.2.1+sha512.398035c7bd696d0ba0b10a688ed558285329d27ea994804a52bad9167d8e3a72bcb993f9699585d3ca25779ac64949ef422757a6c31102c12ab932e5cbe5cc92"
 }
