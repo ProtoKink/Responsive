@@ -772,8 +772,7 @@ export class GuiAnimatronikka extends BaseSubscreen {
     if (!animation) return;
     this.settings.animations[animation.id] = animation;
     this.selectedAnimationId = animation.id;
-    this.buildListItems();
-    this.buildEditorPanel();
+		this.render();
   }
 
   async handleExportAnimation(animation: Animation): Promise<void> {
