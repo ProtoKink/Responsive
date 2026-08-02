@@ -16,15 +16,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dDeepLb/BC-Responsive.git"
+    "url": "git+https://github.com/ProtoKink/Responsive.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/dDeepLb/BC-Responsive/issues"
+    "url": "https://github.com/ProtoKink/Responsive/issues"
   },
-  "homepage": "https://github.com/dDeepLb/BC-Responsive#readme",
+  "homepage": "https://github.com/ProtoKink/Responsive#readme",
   "dependencies": {
     "bc-deeplib": "^5.0.1",
     "sass": "^1.102.0",

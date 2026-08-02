@@ -42,7 +42,7 @@ initMod({
     })
   },
   mainMenuOptions: {
-    wikiLink: 'https://github.com/dDeepLb/BC-Responsive/wiki',
+    wikiLink: 'https://github.com/ProtoKink/Responsive/wiki',
     importExportSubscreen: new GuiImportExport({
       customFileExtension: 'bcrsp'
     }),
