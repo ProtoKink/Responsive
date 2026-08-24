@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       bc-deeplib:
-        specifier: ^5.0.1
-        version: 5.0.1(sass-embedded@1.93.3)
+        specifier: ^6.0.0
+        version: 6.0.0(sass-embedded@1.93.3)
       sass:
         specifier: ^1.102.0
         version: 1.102.0
@@ -931,8 +931,8 @@ packages:
     resolution: {integrity: sha512-BLrgEcRTwX2o6gGxGOCNyMvGSp35YofuYzw9h1IMTRmKqttAZZVU67bdb9Pr2vUHA8+j3i2tJfjO6C6+4myGTA==}
     engines: {node: 18 || 20 || >=22}
 
-  bc-deeplib@5.0.1:
-    resolution: {integrity: sha512-jKAjiebU+Hv/ObCKv1xwKzRfnmFfvUYZPuJiLqMl12DSBuQS9mWf3PVOep498c3EoPmQd2zkPIJH936DnCxFjQ==}
+  bc-deeplib@6.0.0:
+    resolution: {integrity: sha512-raMH1OWe3bs7V07ZfETd+z3NyvW7m4XRDyixalxoWYFeBQFZBFX2BGcpvgX/FdzSOhX16Nzn+57nIm+8cn0Jww==}
     hasBin: true
 
   bc-stubs@130.0.0:
@@ -2425,7 +2425,7 @@ snapshots:
 
   balanced-match@4.0.4: {}
 
-  bc-deeplib@5.0.1(sass-embedded@1.93.3):
+  bc-deeplib@6.0.0(sass-embedded@1.93.3):
     dependencies:
       chokidar: 5.0.0
       commander: 14.0.3
