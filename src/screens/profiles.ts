@@ -1,5 +1,5 @@
 import { advElement, BaseSubscreen, getText, layout, Modal, modLogger, SubscreenOptions } from 'bc-deeplib/deeplib';
-import { ProfileEntryModel, ProfilesSettingsModel } from '../models/profiles';
+import { ProfileEntryModel, ProfileId, ProfilesSettingsModel } from '../models/profiles';
 import { BehaviorsSettingsModel } from '../models/behaviors';
 import { GlobalSettingsModel } from '../models/base';
 import { modStorage } from '../utilities/data';
@@ -29,9 +29,11 @@ export class GuiProfiles extends BaseSubscreen {
       parent: layout.getSubscreen()
     });
 
-    for (let i = 0; i < 3; i++) {
-      const profileId = i + 1;
-      const profileName = this.settings[profileId].name || getText('profiles.text.profile') + ` ${profileId}`;
+    for (const profileId of ['1', '2', '3'] as ProfileId[]) {
+			const isValidId = this.isValidProfileId(profileId);
+			if (!isValidId) continue;
+			const profile = this.settings[profileId] as ProfileEntryModel | undefined;
+      const profileName = profile?.name || getText('profiles.text.profile') + ` ${profileId}`;
 
       const profileElement = ElementCreate({
         tag: 'div',
@@ -88,7 +90,7 @@ export class GuiProfiles extends BaseSubscreen {
     super.resize(onLoad);
   }
 
-  private async handleProfilesSaving(profileId: number): Promise<void> {
+  private async handleProfilesSaving(profileId: ProfileId): Promise<void> {
     if (!this.profileCanBeSaved(profileId)) return;
 
     const name = await Modal.prompt(getText('profiles.prompt'));
@@ -116,7 +118,7 @@ export class GuiProfiles extends BaseSubscreen {
     this.updateProfileButtons(profileId);
   }
 
-  private handleProfilesLoading(profileId: number): void {
+  private handleProfilesLoading(profileId: ProfileId): void {
     if (!this.profileExists(profileId)) {
       ToastManager.error(`${getText('profiles.text.profile')} ${profileId} ${getText('profiles.text.doesnt_exist')}`);
       return;
@@ -136,7 +138,7 @@ export class GuiProfiles extends BaseSubscreen {
 
   }
 
-  private handleProfilesDeleting(profileId: number): void {
+  private handleProfilesDeleting(profileId: ProfileId): void {
     if (!this.profileExists(profileId)) {
       ToastManager.info(`${getText('profiles.text.profile')} ${profileId} ${getText('profiles.text.doesnt_exist')}`);
       return;
@@ -156,7 +158,7 @@ export class GuiProfiles extends BaseSubscreen {
     this.updateProfileButtons(profileId);
   }
 
-  private updateProfileButtons(profileId: number): void {
+  private updateProfileButtons(profileId: ProfileId): void {
     const profileSaveButton = ElementWrap(`rsp-profiles-profile-save-${profileId}`) as HTMLButtonElement;
     const profileLoadButton = ElementWrap(`rsp-profiles-profile-load-${profileId}`) as HTMLButtonElement;
     const profileDeleteButton = ElementWrap(`rsp-profiles-profile-delete-${profileId}`) as HTMLButtonElement;
@@ -168,7 +170,7 @@ export class GuiProfiles extends BaseSubscreen {
     profileDeleteButton.disabled = !this.profileExists(profileId);
   }
 
-  private updateProfileLabel(profileId: number): void {
+  private updateProfileLabel(profileId: ProfileId): void {
     const name = this.settings[profileId].name;
     const display = name ? name : `${getText('profiles.text.profile')} ${profileId}`;
     const profileLabel = ElementWrap(`rsp-profile-label-${profileId}`);
@@ -176,8 +178,8 @@ export class GuiProfiles extends BaseSubscreen {
     profileLabel.textContent = display;
   }
 
-  private isValidProfileId(id: number): boolean {
-    if (id < 1 || id > 3) {
+  private isValidProfileId(id: ProfileId): boolean {
+    if (!['1', '2', '3'].includes(id)) {
       modLogger.warn(`Invalid profile id ${id}`);
       return false;
     }
@@ -185,13 +187,13 @@ export class GuiProfiles extends BaseSubscreen {
     return true;
   }
 
-  private profileCanBeSaved(profileId: number): boolean {
+  private profileCanBeSaved(profileId: ProfileId): boolean {
     if (!this.isValidProfileId(profileId)) return false;
 
     return true;
   }
 
-  private profileExists(profileId: number): boolean {
+  private profileExists(profileId: ProfileId): boolean {
     if (!this.isValidProfileId(profileId)) return false;
 
     const data = this.settings[profileId]?.data || {};

@@ -2,9 +2,7 @@ import { BaseSettingsModel } from 'bc-deeplib/deeplib';
 import { GlobalSettingsModel } from './base';
 import { BehaviorsSettingsModel } from './behaviors';
 
-export type ProfilesSettingsModel = BaseSettingsModel & {
-  [index: number]: ProfileEntryModel;
-};
+export type ProfilesSettingsModel = BaseSettingsModel & Record<ProfileId, ProfileEntryModel>;
 
 export type ProfileEntryModel = {
   name: string;
@@ -16,3 +14,4 @@ export type ProfileSaveModel = {
   BehaviorsModule: BehaviorsSettingsModel;
 };
 
+export type ProfileId = '1' | '2' | '3';
