@@ -1,71 +1,72 @@
 import { BaseSettingsModel } from 'bc-deeplib/deeplib';
-import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
 
-export const KeyframeTypeSchema = z.enum(['expression', 'pose', 'restraint', 'appearance']);
-export type KeyframeType = z.infer<typeof KeyframeTypeSchema>;
+export const keyframeTypes = ['expression', 'pose', 'restraint', 'appearance'] as const;
+export type KeyframeType = (typeof keyframeTypes)[number];
 
-const KeyframeBaseSchema = z.object({
-  id: z.string().default(() => uuidv4()),
-  type: KeyframeTypeSchema,
-  durationMs: z.number().min(0).default(500),
-});
+type KeyframeBase = {
+  id: string;
+  durationMs: number;
+};
 
-export const ExpressionKeyframeSchema = KeyframeBaseSchema.extend({
-  type: z.literal('expression'),
-  group: z.string(),
-  expression: z.string().nullable().optional(),
-  color: z.union([z.string(), z.array(z.string())]).optional(),
-});
-export type ExpressionKeyframe = z.infer<typeof ExpressionKeyframeSchema>;
+type KeyframeAsset = {
+  name: string;
+  color?: ItemColor;
+  property?: Record<string, any>;
+};
 
-export const PoseKeyframeSchema = KeyframeBaseSchema.extend({
-  type: z.literal('pose'),
-  poseName: z.string(),
-});
-export type PoseKeyframe = z.infer<typeof PoseKeyframeSchema>;
+export type ExpressionKeyframe = KeyframeBase & {
+  type: 'expression';
+  group: string;
+  expression?: string | null;
+  color?: ItemColor;
+};
 
-export const RestraintKeyframeSchema = KeyframeBaseSchema.extend({
-  type: z.literal('restraint'),
-  group: z.string(),
-  asset: z.object({
-    name: z.string(),
-    color: z.union([z.string(), z.array(z.string())]).optional(),
-    property: z.record(z.string(), z.any()).optional(),
-  }),
-});
-export type RestraintKeyframe = z.infer<typeof RestraintKeyframeSchema>;
+export type PoseKeyframe = KeyframeBase & {
+  type: 'pose';
+  poseName: string;
+};
 
-export const AppearanceKeyframeSchema = KeyframeBaseSchema.extend({
-  type: z.literal('appearance'),
-  group: z.string(),
-  asset: z.object({
-    name: z.string(),
-    color: z.union([z.string(), z.array(z.string())]).optional(),
-    property: z.record(z.string(), z.any()).optional(),
-  })
-});
-export type AppearanceKeyframe = z.infer<typeof AppearanceKeyframeSchema>;
+export type RestraintKeyframe = KeyframeBase & {
+  type: 'restraint';
+  group: string;
+  asset: KeyframeAsset;
+};
 
-export const KeyframeSchema = z.discriminatedUnion('type', [
-  ExpressionKeyframeSchema,
-  PoseKeyframeSchema,
-  RestraintKeyframeSchema,
-  AppearanceKeyframeSchema,
-]);
-export type Keyframe = z.infer<typeof KeyframeSchema>;
+export type AppearanceKeyframe = KeyframeBase & {
+  type: 'appearance';
+  group: string;
+  asset: KeyframeAsset;
+};
 
-export const AnimationSchema = z.object({
-  id: z.string().default(() => uuidv4()),
-  name: z.string().default('New Animation'),
-  keyframes: z.array(KeyframeSchema).default([]),
-  tags: z.array(z.string()).default([]),
-  loopCount: z.number().int().min(0).default(1),
-});
-export type Animation = z.infer<typeof AnimationSchema>;
+export type Keyframe = ExpressionKeyframe | PoseKeyframe | RestraintKeyframe | AppearanceKeyframe;
 
-export const AnimationInputSchema = AnimationSchema.partial({ id: true, name: true });
-export type AnimationInput = z.infer<typeof AnimationInputSchema>;
+export type Animation = {
+  id: string;
+  name: string;
+  keyframes: Keyframe[];
+  tags: string[];
+  loopCount: number;
+};
+
+export type AnimationInput = Omit<Animation, 'id' | 'name'> & {
+  id?: string;
+  name?: string;
+};
+
+export function applyAnimationDefaults(input: AnimationInput): Animation {
+  return {
+    id: input.id ?? uuidv4(),
+    name: input.name ?? 'New Animation',
+    keyframes: (input.keyframes ?? []).map(keyframe => ({
+      ...keyframe,
+      id: keyframe.id ?? uuidv4(),
+      durationMs: keyframe.durationMs ?? 500,
+    })),
+    tags: input.tags ?? [],
+    loopCount: input.loopCount ?? 1,
+  };
+}
 
 export type AnimatronikkaSettingsModel = BaseSettingsModel & {
   animations: Record<string, Animation>;

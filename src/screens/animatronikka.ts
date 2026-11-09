@@ -1,7 +1,7 @@
 import { advElement, BaseSubscreen, exportToGlobal, getText, layout, Modal, SettingElement, SubscreenOptions } from 'bc-deeplib/deeplib';
 import { v4 as uuidv4 } from 'uuid';
 import { animationGroups, AnimatronikkaModule } from '../modules/animatronikka';
-import { Animation, AnimatronikkaSettingsModel, Keyframe, KeyframeType, KeyframeTypeSchema } from '../models/animations';
+import { Animation, AnimatronikkaSettingsModel, Keyframe, KeyframeType, keyframeTypes } from '../models/animations';
 import { buildContentListSection, createInputField, createNumberInputField } from '../utilities/fields';
 import { bodyPartSelectorModal, expressionSelectorModal, itemSelectorModal } from '../utilities/selectorModals';
 import { assertNever, easeOutBack, lerp } from '@/utilities/other';
@@ -903,7 +903,7 @@ export class GuiAnimatronikka extends BaseSubscreen {
 
   async selectKeyframeType(): Promise<KeyframeType | null> {
     const selected = await itemSelectorModal({
-      buttons: (KeyframeTypeSchema.options).map(type => ({
+      buttons: keyframeTypes.map(type => ({
         label: getText(`animatronikka.keyframe.${type}`),
         value: type,
       })),
@@ -949,7 +949,7 @@ export class GuiAnimatronikka extends BaseSubscreen {
           durationMs,
           group,
           expression: expression?.[0] ?? null,
-          color: this.parseColor(colorInput),
+          color: CommonIsColor(colorInput) ? colorInput : undefined,
         };
       }
       case 'pose': {

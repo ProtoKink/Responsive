@@ -28,8 +28,7 @@
   "dependencies": {
     "bc-deeplib": "^6.0.0",
     "sass": "^1.102.0",
-    "uuid": "^14.0.1",
-    "zod": "^4.4.3"
+    "uuid": "^14.0.1"
   },
   "devDependencies": {
     "bondage-club-mod-sdk": "^1.2.0",

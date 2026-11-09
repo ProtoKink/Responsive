@@ -1,5 +1,5 @@
 import { modLogger } from 'bc-deeplib/deeplib';
-import { TriggerConstraint, MessageData, ConstraintMode, TriggerType, Behavior, TriggerTypeSchema, MessageDataSchema, TriggerConstraintSchema, ConstraintModeSchema, Trigger, TriggerSpeech, MatchMode, SourceConstraint, TargetConstraint, PlayerConstraint, RoomConstraint, IncludeExcludeRule } from '../models/behaviors';
+import { TriggerConstraint, MessageData, ConstraintMode, TriggerType, Behavior, Trigger, TriggerSpeech, MatchMode, SourceConstraint, TargetConstraint, PlayerConstraint, RoomConstraint, IncludeExcludeRule } from '../models/behaviors';
 import { BehaviorsModule } from '../modules/behaviors';
 import { assertNever } from './other';
 import { replaceTemplate } from './chat_messages';
@@ -214,14 +214,6 @@ function evaluateAllConstraints(constraints: TriggerConstraint, data: MessageDat
 }
 
 export function processTrigger(type: TriggerType, messageData: MessageData): { behavior: Behavior; trigger: Trigger } | undefined {
-  try {
-    type = TriggerTypeSchema.parse(type);
-    messageData = MessageDataSchema.parse(messageData) as MessageData;
-  } catch (e) {
-    modLogger.error(e);
-    return undefined;
-  }
-
   const enabledBehaviors = Object.values(BehaviorsModule.instance.settings.behaviors)
     .filter(b => b.enabled);
 
@@ -257,15 +249,6 @@ export function processTrigger(type: TriggerType, messageData: MessageData): { b
 }
 
 export function processTriggerConstraint(triggerConstraint: TriggerConstraint, mode: ConstraintMode, messageData: MessageData): boolean {
-  try {
-    triggerConstraint = TriggerConstraintSchema.parse(triggerConstraint ?? {});
-    mode = ConstraintModeSchema.parse(mode);
-    messageData = MessageDataSchema.parse(messageData) as MessageData;
-  } catch (e) {
-    modLogger.error(e);
-    return false;
-  }
-
   const results = evaluateAllConstraints(triggerConstraint, messageData);
 
   const allResults: boolean[] = [];

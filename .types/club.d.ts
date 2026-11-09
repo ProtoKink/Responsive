@@ -15,3 +15,7 @@ type ActivityInfo = {
 };
 
 type $AssetGroupItemName = AssetGroupItemName | 'ItemPenis' | 'ItemGlans';
+
+type WithOptional<T, K extends keyof T> = T extends unknown
+  ? Prettify<Optional<T, K & keyof T>>
+  : never;

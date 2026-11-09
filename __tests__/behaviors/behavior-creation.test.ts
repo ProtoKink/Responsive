@@ -93,17 +93,6 @@ describe('Behavior Creation', () => {
     });
   });
 
-  describe('createBehavior - negative cases', () => {
-    it('should return undefined for invalid input', () => {
-      const input: any = {
-        enabled: 'not a boolean',
-      };
-
-      const result = BehaviorsModule.createBehavior(input);
-
-      expect(result).toBeUndefined();
-    });
-  });
 });
 
 describe('Trigger Creation', () => {
@@ -278,28 +267,6 @@ describe('Trigger Creation', () => {
     });
   });
 
-  describe('createTrigger - negative cases', () => {
-    it('should return undefined for invalid trigger input', () => {
-      const input: any = {
-        type: 'speech',
-        speechType: 'invalid',
-      };
-
-      const result = BehaviorsModule.createTrigger(input);
-
-      expect(result).toBeUndefined();
-    });
-
-    it('should return undefined for missing required fields', () => {
-      const input: any = {
-        type: 'speech',
-      };
-
-      const result = BehaviorsModule.createTrigger(input);
-
-      expect(result).toBeUndefined();
-    });
-  });
 });
 
 describe('Reaction Creation', () => {
@@ -385,28 +352,6 @@ describe('Reaction Creation', () => {
     });
   });
 
-  describe('createReaction - negative cases', () => {
-    it('should return undefined for invalid reaction input', () => {
-      const input: any = {
-        type: 'speech',
-        content: 123,
-      };
-
-      const result = BehaviorsModule.createReaction(input);
-
-      expect(result).toBeUndefined();
-    });
-
-    it('should return undefined for missing required fields', () => {
-      const input: any = {
-        type: 'speech',
-      };
-
-      const result = BehaviorsModule.createReaction(input);
-
-      expect(result).toBeUndefined();
-    });
-  });
 });
 
 describe('ID Generation', () => {

@@ -1,21 +1,11 @@
-import { modLogger, sendActionMessage } from 'bc-deeplib/deeplib';
-import { MessageData, MessageDataSchema, Reaction, ReactionMode, ReactionModeSchema, ReactionSchema } from '../models/behaviors';
+import { sendActionMessage } from 'bc-deeplib/deeplib';
+import { MessageData, Reaction, ReactionMode } from '../models/behaviors';
 import { AnimatronikkaModule } from '../modules/animatronikka';
 import { chatRoomAutoInterceptMessage, randomResponse, replaceTemplate } from './chat_messages';
 import { assertNever, getRandomInt } from './other';
 import { doesBcxAllowsTalking } from './handlers';
-import z from 'zod';
 
 export function processReactions(reactions: Reaction[], reactionMode: ReactionMode, messageData: MessageData): { success: boolean; executedReactionIds: string[] } {
-  try {
-    reactions = z.array(ReactionSchema).parse(reactions);
-    reactionMode = ReactionModeSchema.parse(reactionMode);
-    messageData = MessageDataSchema.parse(messageData) as MessageData;
-  } catch (e) {
-    modLogger.error(e);
-    return { success: false, executedReactionIds: [] };
-  }
-
   if (reactions.length === 0) {
     return { success: false, executedReactionIds: [] };
   }
@@ -48,14 +38,6 @@ export function processReactions(reactions: Reaction[], reactionMode: ReactionMo
 }
 
 function processReaction(reaction: Reaction, messageData: MessageData): boolean {
-  try {
-    reaction = ReactionSchema.parse(reaction);
-    messageData = MessageDataSchema.parse(messageData) as MessageData;
-  } catch (e) {
-    modLogger.error(e);
-    return false;
-  }
-
   switch (reaction.type) {
     case 'speech': {
       if (!doesBcxAllowsTalking()) return false;

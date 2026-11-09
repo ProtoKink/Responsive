@@ -1,6 +1,6 @@
 // #region SECTION Imports & Types
 import { advElement, BaseSubscreen, exportToGlobal, getText, layout, Modal, SettingElement, SubscreenOptions } from 'bc-deeplib/deeplib';
-import { BehaviorsSettingsModel, Behavior, Trigger, Reaction, ConstraintMode, MatchMode, SpeechType, OrgasmType, RoomPresenceEvent, ReactionMode, TriggerTypeSchema, ReactionTypeSchema, ReactionType, TriggerType, IncludeExcludeEntry, MatchContentEntry, SpeechTypeSchema, MatchModeSchema, OrgasmTypeSchema, RoomPresenceEventSchema, ReactionModeSchema, ConstraintModeSchema, IncludeExcludeEntrySchema } from '../models/behaviors';
+import { BehaviorsSettingsModel, Behavior, Trigger, Reaction, ConstraintMode, MatchMode, SpeechType, OrgasmType, RoomPresenceEvent, ReactionMode, triggerTypes, reactionTypes, ReactionType, TriggerType, IncludeExcludeEntry, MatchContentEntry, speechTypes, matchModes, orgasmTypes, roomPresenceEvents, reactionModes, constraintModes, includeExcludeModes } from '../models/behaviors';
 import { BehaviorsModule } from '../modules/behaviors';
 import { assertNever } from '../utilities/other';
 import { activitySelectorModal, animationSelectorModal, bodyPartSelectorModal, itemSelectorModal, memberNumberSelectorModal, textReactionSelectorModal } from '@/utilities/selectorModals';
@@ -843,7 +843,7 @@ export class GuiBehaviors extends BaseSubscreen {
       id: `${behavior.id}-reaction-mode`,
       labelKey: 'behaviors.field.reaction_mode',
       value: behavior.reactionMode,
-      options: Object.values(ReactionModeSchema.options),
+      options: reactionModes,
       onChange: (val) => behavior.reactionMode = val as ReactionMode
     });
     elements.push(reactionModeField);
@@ -881,7 +881,7 @@ export class GuiBehaviors extends BaseSubscreen {
     });
     elements.push(nameField);
 
-    const typeOptions = TriggerTypeSchema.options;
+    const typeOptions = triggerTypes;
     const typeField = createDropdownField({
       id: `${trigger.id}-type`,
       labelKey: 'behaviors.field.type',
@@ -924,7 +924,7 @@ export class GuiBehaviors extends BaseSubscreen {
     });
     elements.push(nameField);
 
-    const typeOptions = ReactionTypeSchema.options;
+    const typeOptions = reactionTypes;
     const typeField = createDropdownField({
       id: `${reaction.id}-type`,
       labelKey: 'behaviors.field.type',
@@ -1087,7 +1087,7 @@ export class GuiBehaviors extends BaseSubscreen {
           id: `${trigger.id}-speech-type`,
           labelKey: 'behaviors.field.speech_type',
           value: trigger.speechType,
-          options: Object.values(SpeechTypeSchema.options),
+          options: speechTypes,
           onChange: (val) => trigger.speechType = val as SpeechType
         });
         elements.push(speechTypeField);
@@ -1188,7 +1188,7 @@ export class GuiBehaviors extends BaseSubscreen {
           id: `${trigger.id}-orgasm-type`,
           labelKey: 'behaviors.field.orgasm_type',
           value: trigger.orgasmType,
-          options: Object.values(OrgasmTypeSchema.options),
+          options: orgasmTypes,
           onChange: (val) => trigger.orgasmType = val as OrgasmType
         });
         elements.push(orgasmTypeField);
@@ -1199,7 +1199,7 @@ export class GuiBehaviors extends BaseSubscreen {
           id: `${trigger.id}-room-presence-event`,
           labelKey: 'behaviors.field.room_presence_event',
           value: trigger.event,
-          options: Object.values(RoomPresenceEventSchema.options),
+          options: roomPresenceEvents,
           onChange: (val) => trigger.event = val as RoomPresenceEvent
         });
         elements.push(roomPresenceField);
@@ -1257,7 +1257,7 @@ export class GuiBehaviors extends BaseSubscreen {
       id: `${trigger.id}-constraint-mode`,
       labelKey: 'behaviors.field.constraint_mode',
       value: trigger.constraintMode || 'all',
-      options: Object.values(ConstraintModeSchema.options),
+      options: constraintModes,
       onChange: (val) => trigger.constraintMode = val as ConstraintMode,
       replace: false
     });
@@ -1972,7 +1972,7 @@ export class GuiBehaviors extends BaseSubscreen {
             id: `${id}-entry-${originalIndex}-match-mode`,
             labelKey: '',
             value: entry.matchMode ?? 'contains',
-            options: Object.values(MatchModeSchema.options),
+            options: matchModes,
             onChange: (val) => {
               entries[originalIndex].matchMode = val as MatchMode;
               onChange(entries);
@@ -2088,7 +2088,7 @@ export class GuiBehaviors extends BaseSubscreen {
             id: `${id}-entry-${originalIndex}-mode`,
             labelKey: '',
             value: entry.mode,
-            options: Object.values(IncludeExcludeEntrySchema.shape.mode.options),
+            options: includeExcludeModes,
             onChange: (val) => {
               entries[originalIndex].mode = val as 'include' | 'exclude';
               onChange(entries);

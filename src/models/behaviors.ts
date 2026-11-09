@@ -1,264 +1,252 @@
 import { BaseSettingsModel } from 'bc-deeplib/deeplib';
-import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
 
 // #region Misc
 
-export const OrgasmTypeSchema = z.enum(['any', 'normal', 'resisted', 'ruinedResisted', 'ruinedTimeout', 'ruinedSurrendered']);
-export type OrgasmType = z.infer<typeof OrgasmTypeSchema>;
+export const orgasmTypes = ['any', 'normal', 'resisted', 'ruinedResisted', 'ruinedTimeout', 'ruinedSurrendered'] as const;
+export type OrgasmType = (typeof orgasmTypes)[number];
+export type TriggerOrgasmType = Exclude<OrgasmType, 'any'>;
 
-export const TriggerOrgasmTypeSchema = OrgasmTypeSchema.exclude(['any']);
-export type TriggerOrgasmType = z.infer<typeof TriggerOrgasmTypeSchema>;
+export const constraintModes = ['any', 'all'] as const;
+export type ConstraintMode = (typeof constraintModes)[number];
 
-export const ConstraintModeSchema = z.enum(['any', 'all']);
-export type ConstraintMode = z.infer<typeof ConstraintModeSchema>;
+export const speechTypes = ['any', 'normal', 'whisper'] as const;
+export type SpeechType = (typeof speechTypes)[number];
 
-export const SpeechTypeSchema = z.enum(['any', 'normal', 'whisper']);
-export type SpeechType = z.infer<typeof SpeechTypeSchema>;
+export const reactionModes = ['all', 'random'] as const;
+export type ReactionMode = (typeof reactionModes)[number];
 
-export const ReactionModeSchema = z.enum(['all', 'random']);
-export type ReactionMode = z.infer<typeof ReactionModeSchema>;
+export const matchModes = ['startsWith', 'contains', 'endsWith', 'exact', 'regex'] as const;
+export type MatchMode = (typeof matchModes)[number];
 
-export const MatchModeSchema = z.enum(['startsWith', 'contains', 'endsWith', 'exact', 'regex']);
-export type MatchMode = z.infer<typeof MatchModeSchema>;
+export const roomPresenceEvents = ['leave', 'join', 'leashed'] as const;
+export type RoomPresenceEvent = (typeof roomPresenceEvents)[number];
 
-export const RoomPresenceEventSchema = z.enum(['leave', 'join', 'leashed']);
-export type RoomPresenceEvent = z.infer<typeof RoomPresenceEventSchema>;
+export const reactionTypes = ['speech', 'emote', 'action', 'activity', 'animation'] as const;
+export type ReactionType = (typeof reactionTypes)[number];
 
-export const ReactionTypeSchema = z.enum(['speech', 'emote', 'action', 'activity', 'animation']);
-export type ReactionType = z.infer<typeof ReactionTypeSchema>;
+export const triggerTypes = ['speech', 'emote', 'action', 'activity', 'orgasm', 'roomPresence'] as const;
+export type TriggerType = (typeof triggerTypes)[number];
 
-export const TriggerTypeSchema = z.enum(['speech', 'emote', 'action', 'activity', 'orgasm', 'roomPresence']);
-export type TriggerType = z.infer<typeof TriggerTypeSchema>;
+export const includeExcludeModes = ['include', 'exclude'] as const;
 
-export const IncludeExcludeEntrySchema = z.object({
-  value: z.coerce.string<string>(),
-  mode: z.enum(['include', 'exclude'])
-});
-export type IncludeExcludeEntry = z.infer<typeof IncludeExcludeEntrySchema>;
+export type IncludeExcludeEntry = {
+  value: string;
+  mode: (typeof includeExcludeModes)[number];
+};
 
-export const MatchContentEntrySchema = z.object({
-  value: z.coerce.string<string>(),
-  matchMode: MatchModeSchema.default('contains')
-});
-export type MatchContentEntry = z.infer<typeof MatchContentEntrySchema>;
+export type MatchContentEntry = {
+  value: string;
+  matchMode: MatchMode;
+};
 
-export const IncludeExcludeRuleSchema = z.object({
-  entries: z.array(IncludeExcludeEntrySchema)
-});
-export type IncludeExcludeRule = z.infer<typeof IncludeExcludeRuleSchema>;
+export type IncludeExcludeRule = {
+  entries: IncludeExcludeEntry[];
+};
 
-export const SourceConstraintSchema = z.object({
-  memberNumber: IncludeExcludeRuleSchema.optional(),
-  restrained: z.boolean().optional(),
-  gagged: z.boolean().optional(),
-  blinded: z.boolean().optional(),
-  deafened: z.boolean().optional(),
-  arousalMin: z.number().optional(),
-  arousalMax: z.number().optional(),
-});
-export type SourceConstraint = z.infer<typeof SourceConstraintSchema>;
+export type SourceConstraint = {
+  memberNumber?: IncludeExcludeRule;
+  restrained?: boolean;
+  gagged?: boolean;
+  blinded?: boolean;
+  deafened?: boolean;
+  arousalMin?: number;
+  arousalMax?: number;
+};
 
-export const TargetConstraintSchema = z.object({
-  memberNumber: IncludeExcludeRuleSchema.optional(),
-  restrained: z.boolean().optional(),
-  gagged: z.boolean().optional(),
-  blinded: z.boolean().optional(),
-  deafened: z.boolean().optional(),
-  arousalMin: z.number().optional(),
-  arousalMax: z.number().optional(),
-});
-export type TargetConstraint = z.infer<typeof TargetConstraintSchema>;
+export type TargetConstraint = {
+  memberNumber?: IncludeExcludeRule;
+  restrained?: boolean;
+  gagged?: boolean;
+  blinded?: boolean;
+  deafened?: boolean;
+  arousalMin?: number;
+  arousalMax?: number;
+};
 
-export const PlayerConstraintSchema = z.object({
-  restrained: z.boolean().optional(),
-  gagged: z.boolean().optional(),
-  blinded: z.boolean().optional(),
-  deafened: z.boolean().optional(),
-  arousalMin: z.number().optional(),
-  arousalMax: z.number().optional(),
-});
-export type PlayerConstraint = z.infer<typeof PlayerConstraintSchema>;
+export type PlayerConstraint = {
+  restrained?: boolean;
+  gagged?: boolean;
+  blinded?: boolean;
+  deafened?: boolean;
+  arousalMin?: number;
+  arousalMax?: number;
+};
 
-export const RoomConstraintSchema = z.object({
-  inRoomWithMembers: IncludeExcludeRuleSchema.optional(),
-  inRoomNamed: IncludeExcludeRuleSchema.optional(),
-});
-export type RoomConstraint = z.infer<typeof RoomConstraintSchema>;
+export type RoomConstraint = {
+  inRoomWithMembers?: IncludeExcludeRule;
+  inRoomNamed?: IncludeExcludeRule;
+};
 
-export const TriggerConstraintSchema = z.object({
-  source: SourceConstraintSchema.optional(),
-  target: TargetConstraintSchema.optional(),
-  player: PlayerConstraintSchema.optional(),
-  room: RoomConstraintSchema.optional(),
-});
-export type TriggerConstraint = z.infer<typeof TriggerConstraintSchema>;
+export type TriggerConstraint = {
+  source?: SourceConstraint;
+  target?: TargetConstraint;
+  player?: PlayerConstraint;
+  room?: RoomConstraint;
+};
 
-export const MessageDataSchema = z.object({
-  source: z.looseObject({}).optional(),
-  target: z.looseObject({}).optional(),
-  messageContent: z.string().optional(),
-  message: z.string().optional(),
-  activityName: z.string().optional(),
-  groupName: z.string().optional(),
-  orgasmType: OrgasmTypeSchema.optional(),
-  roomPrecenseEvent: RoomPresenceEventSchema.optional(),
-  speechType: SpeechTypeSchema.optional()
-});
-export type MessageData = Prettify<Omit<z.infer<typeof MessageDataSchema>, 'source' | 'target' | 'activityName' | 'groupName'> & {
+export type MessageData = {
   source?: Character;
   target?: Character;
+  messageContent?: string;
+  message?: string;
   activityName?: ActivityName;
   groupName?: AssetGroupItemName;
-}>;
+  orgasmType?: OrgasmType;
+  roomPrecenseEvent?: RoomPresenceEvent;
+  speechType?: SpeechType;
+};
 
 // #endregion Misc
 
 // #region Reactions
 
-const BaseReactionSchema = z.object({
-  id: z.string().default(() => uuidv4()),
-  name: z.string().default('New Reaction'),
-  type: ReactionTypeSchema
-});
-export type BaseReaction = z.infer<typeof BaseReactionSchema>;
+export type BaseReaction = {
+  id: string;
+  name: string;
+  type: ReactionType;
+};
 
-const ReactionSpeechSchema = BaseReactionSchema.extend({
-  type: z.literal('speech'),
-  content: z.array(z.string())
-});
-export type ReactionSpeech = z.infer<typeof ReactionSpeechSchema>;
+export type ReactionSpeech = BaseReaction & {
+  type: 'speech';
+  content: string[];
+};
 
-const ReactionEmoteSchema = BaseReactionSchema.extend({
-  type: z.literal('emote'),
-  content: z.array(z.string())
-});
-export type ReactionEmote = z.infer<typeof ReactionEmoteSchema>;
+export type ReactionEmote = BaseReaction & {
+  type: 'emote';
+  content: string[];
+};
 
-const ReactionActionSchema = BaseReactionSchema.extend({
-  type: z.literal('action'),
-  content: z.array(z.string())
-});
-export type ReactionAction = z.infer<typeof ReactionActionSchema>;
+export type ReactionAction = BaseReaction & {
+  type: 'action';
+  content: string[];
+};
 
-const ReactionActivitySchema = BaseReactionSchema.extend({
-  type: z.literal('activity'),
-  activityName: z.string(),
-  groupName: z.string()
-});
-export type ReactionActivity = Prettify<Omit<z.infer<typeof ReactionActivitySchema>, 'groupName'> & {
-  groupName: AssetGroupItemName;
-}>;
+export type ReactionActivity = BaseReaction & {
+  type: 'activity';
+  activityName: string;
+  groupName: string;
+};
 
-const ReactionAnimationSchema = BaseReactionSchema.extend({
-  type: z.literal('animation'),
-  animationId: z.string(),
-  interrupt: z.boolean().optional(),
-  priority: z.number().optional(),
-});
-export type ReactionAnimation = z.infer<typeof ReactionAnimationSchema>;
+export type ReactionAnimation = BaseReaction & {
+  type: 'animation';
+  animationId: string;
+  interrupt?: boolean;
+  priority?: number;
+};
 
-export const ReactionSchema = z.union([ReactionSpeechSchema, ReactionEmoteSchema, ReactionActionSchema, ReactionActivitySchema, ReactionAnimationSchema]);
-export type Reaction = z.infer<typeof ReactionSchema>;
+export type Reaction = ReactionSpeech | ReactionEmote | ReactionAction | ReactionActivity | ReactionAnimation;
 
-export const ReactionInputSchema = z.discriminatedUnion('type', [
-  ReactionSpeechSchema.partial({ id: true, name: true }),
-  ReactionEmoteSchema.partial({ id: true, name: true }),
-  ReactionActionSchema.partial({ id: true, name: true }),
-  ReactionActivitySchema.partial({ id: true, name: true }),
-  ReactionAnimationSchema.partial({ id: true, name: true })
-]);
-export type ReactionInput = z.infer<typeof ReactionInputSchema>;
+export type ReactionInput = WithOptional<Reaction, 'id' | 'name'>;
+
+export function applyReactionDefaults(input: ReactionInput): Reaction {
+  return {
+    ...input,
+    id: input.id ?? uuidv4(),
+    name: input.name ?? 'New Reaction',
+  } as Reaction;
+}
 
 // #endregion Reactions
 
 // #region Triggers
 
-const BaseTriggerSchema = z.object({
-  id: z.string().default(() => uuidv4()),
-  name: z.string().default('New Trigger'),
-  type: TriggerTypeSchema,
-  constraintMode: ConstraintModeSchema.optional(),
-  constraints: TriggerConstraintSchema.optional(),
-});
-export type BaseTrigger = z.infer<typeof BaseTriggerSchema>;
+export type BaseTrigger = {
+  id: string;
+  name: string;
+  type: TriggerType;
+  constraintMode?: ConstraintMode;
+  constraints?: TriggerConstraint;
+};
 
-export const TriggerSpeechSchema = BaseTriggerSchema.extend({
-  type: z.literal('speech'),
-  speechType: SpeechTypeSchema,
-  content: z.array(MatchContentEntrySchema)
-});
-export type TriggerSpeech = z.infer<typeof TriggerSpeechSchema>;
+export type TriggerSpeech = BaseTrigger & {
+  type: 'speech';
+  speechType: SpeechType;
+  content: MatchContentEntry[];
+};
 
-export const TriggerEmoteSchema = BaseTriggerSchema.extend({
-  type: z.literal('emote'),
-  content: z.array(MatchContentEntrySchema)
-});
-export type TriggerEmote = z.infer<typeof TriggerEmoteSchema>;
+export type TriggerEmote = BaseTrigger & {
+  type: 'emote';
+  content: MatchContentEntry[];
+};
 
-export const TriggerActionSchema = BaseTriggerSchema.extend({
-  type: z.literal('action'),
-  content: z.array(MatchContentEntrySchema)
-});
-export type TriggerAction = z.infer<typeof TriggerActionSchema>;
+export type TriggerAction = BaseTrigger & {
+  type: 'action';
+  content: MatchContentEntry[];
+};
 
-export const TriggerActivitySchema = BaseTriggerSchema.extend({
-  type: z.literal('activity'),
-  activityName: z.array(z.string()),
-  groupName: z.array(z.string())
-});
-export type TriggerActivity = z.infer<typeof TriggerActivitySchema>;
+export type TriggerActivity = BaseTrigger & {
+  type: 'activity';
+  activityName: string[];
+  groupName: string[];
+};
 
-export const TriggerOrgasmSchema = BaseTriggerSchema.extend({
-  type: z.literal('orgasm'),
-  orgasmType: OrgasmTypeSchema
-});
-export type TriggerOrgasm = z.infer<typeof TriggerOrgasmSchema>;
+export type TriggerOrgasm = BaseTrigger & {
+  type: 'orgasm';
+  orgasmType: OrgasmType;
+};
 
-export const TriggerRoomPresenceSchema = BaseTriggerSchema.extend({
-  type: z.literal('roomPresence'),
-  event: RoomPresenceEventSchema
-});
-export type TriggerRoomPresence = z.infer<typeof TriggerRoomPresenceSchema>;
+export type TriggerRoomPresence = BaseTrigger & {
+  type: 'roomPresence';
+  event: RoomPresenceEvent;
+};
 
-export const TriggerSchema = z.discriminatedUnion('type', [
-  TriggerSpeechSchema,
-  TriggerEmoteSchema,
-  TriggerActionSchema,
-  TriggerActivitySchema,
-  TriggerOrgasmSchema,
-  TriggerRoomPresenceSchema
-]);
-export type Trigger = z.infer<typeof TriggerSchema>;
+export type Trigger = TriggerSpeech | TriggerEmote | TriggerAction | TriggerActivity | TriggerOrgasm | TriggerRoomPresence;
 
-export const TriggerInputSchema = z.discriminatedUnion('type', [
-  TriggerSpeechSchema.partial({ id: true, name: true }),
-  TriggerEmoteSchema.partial({ id: true, name: true }),
-  TriggerActionSchema.partial({ id: true, name: true }),
-  TriggerActivitySchema.partial({ id: true, name: true }),
-  TriggerOrgasmSchema.partial({ id: true, name: true }),
-  TriggerRoomPresenceSchema.partial({ id: true, name: true })
-]);
-export type TriggerInput = z.infer<typeof TriggerInputSchema>;
+export type TriggerInput = WithOptional<Trigger, 'id' | 'name'>;
+
+export function applyTriggerDefaults(input: TriggerInput): Trigger {
+  const id = input.id ?? uuidv4();
+  const name = input.name ?? 'New Trigger';
+
+  switch (input.type) {
+    case 'speech':
+    case 'emote':
+    case 'action':
+      return {
+        ...input,
+        id,
+        name,
+        content: input.content.map(entry => ({
+          ...entry,
+          matchMode: entry.matchMode ?? 'contains',
+        })),
+      };
+    case 'activity':
+    case 'orgasm':
+    case 'roomPresence':
+      return { ...input, id, name };
+  }
+}
 
 // #endregion Triggers
 
 
 // #region Main
 
-export const BehaviorSchema = z.object({
-  id: z.string().default(() => uuidv4()),
-  name: z.string().default('New Behavior'),
-  enabled: z.boolean().default(true),
-  triggers: z.array(z.string()).default([]),
-  reactionMode: ReactionModeSchema.default('random'),
-  reactions: z.array(z.string()).default([]),
-  cooldownSec: z.number().optional(),
-});
-export type Behavior = z.infer<typeof BehaviorSchema>;
+export type Behavior = {
+  id: string;
+  name: string;
+  enabled: boolean;
+  triggers: string[];
+  reactionMode: ReactionMode;
+  reactions: string[];
+  cooldownSec?: number;
+};
 
-export const BehaviorInputSchema = BehaviorSchema.partial();
-export type BehaviorInput = z.infer<typeof BehaviorInputSchema>;
+export type BehaviorInput = Partial<Behavior>;
+
+export function applyBehaviorDefaults(input: BehaviorInput): Behavior {
+  return {
+    id: input.id ?? uuidv4(),
+    name: input.name ?? 'New Behavior',
+    enabled: input.enabled ?? true,
+    triggers: input.triggers ?? [],
+    reactionMode: input.reactionMode ?? 'random',
+    reactions: input.reactions ?? [],
+    cooldownSec: input.cooldownSec,
+  };
+}
 
 export type BehaviorsSettingsModel = BaseSettingsModel & {
   behaviors: Record<string, Behavior>;

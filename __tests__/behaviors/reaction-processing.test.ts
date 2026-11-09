@@ -8,12 +8,16 @@ const mockDoesBcxAllowsTalking = vi.fn(() => true);
 const mockSendActionMessage = vi.fn();
 const mockGetRandomInt = vi.fn((max: number) => Math.floor(Math.random() * max));
 
-vi.mock('bc-deeplib/deeplib', () => ({
-  modLogger: {
-    error: vi.fn(),
-  },
-  sendActionMessage: () => mockSendActionMessage(),
-}));
+vi.mock('bc-deeplib/deeplib', async () => {
+  const actual = await vi.importActual<Record<string, unknown>>('bc-deeplib/deeplib');
+  return {
+    ...actual,
+    modLogger: {
+      error: vi.fn(),
+    },
+    sendActionMessage: () => mockSendActionMessage(),
+  };
+});
 
 vi.mock('@/utilities/chat_messages', () => ({
   chatRoomAutoInterceptMessage: (msg: string) => mockChatRoomAutoInterceptMessage(msg),
@@ -283,7 +287,7 @@ describe('processReactions', () => {
   });
 
   describe('invalid reaction mode', () => {
-    it('should handle invalid reaction mode gracefully', () => {
+    it('should throw on invalid reaction mode', () => {
       const reactions: Reaction[] = [
         {
           id: 'reaction1',
@@ -297,9 +301,7 @@ describe('processReactions', () => {
 
       expect(() => {
         processReactions(reactions, 'invalid' as ReactionMode, messageData);
-      }).not.toThrow();
-      
-      expect(mockChatRoomAutoInterceptMessage).not.toHaveBeenCalled();
+      }).toThrow('Unexpected case: invalid');
     });
   });
 });

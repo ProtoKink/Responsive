@@ -96,7 +96,7 @@ interface DropdownFieldOptions {
   id: string;
   labelKey: string;
   value?: string;
-  options: string[];
+  options: readonly string[];
   onChange: (value: string) => void;
   replace?: boolean;
 }

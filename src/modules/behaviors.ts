@@ -1,6 +1,6 @@
-import { BaseModule, Subscreen, exportToGlobal, getModule, modLogger, sdk } from 'bc-deeplib/deeplib';
+import { BaseModule, Subscreen, exportToGlobal, getModule, sdk } from 'bc-deeplib/deeplib';
 import { areBehaviorsEnabled } from '../utilities/handlers';
-import { Behavior, BehaviorsSettingsModel, Reaction, Trigger, MessageData, TriggerType, TriggerOrgasmType, BehaviorSchema, TriggerSchema, ReactionSchema, TriggerTypeSchema, MessageDataSchema, BehaviorInput, TriggerInput, ReactionInput, SpeechType } from '../models/behaviors';
+import { Behavior, BehaviorsSettingsModel, Reaction, Trigger, MessageData, TriggerType, TriggerOrgasmType, BehaviorInput, TriggerInput, ReactionInput, SpeechType, applyBehaviorDefaults, applyTriggerDefaults, applyReactionDefaults } from '../models/behaviors';
 import { GuiBehaviors } from '../screens/behaviors';
 import { HookPriority, ModuleCategory } from '../utilities/sdk';
 import { processTrigger } from '../utilities/triggers';
@@ -212,25 +212,16 @@ export class BehaviorsModule extends BaseModule {
     return this.settings.reactions[id];
   }
 
-  static createBehavior(behavior: BehaviorInput): Behavior | undefined {
-    const ret = BehaviorSchema.safeParse(behavior);
-    if (!ret.success) return modLogger.error(ret.error), undefined;
-
-    return ret.data;
+  static createBehavior(behavior: BehaviorInput): Behavior {
+    return applyBehaviorDefaults(behavior);
   }
 
-  static createTrigger(trigger: TriggerInput): Trigger | undefined {
-    const ret = TriggerSchema.safeParse(trigger);
-    if (!ret.success) return modLogger.error(ret.error), undefined;
-
-    return ret.data;
+  static createTrigger(trigger: TriggerInput): Trigger {
+    return applyTriggerDefaults(trigger);
   }
 
-  static createReaction(reaction: ReactionInput): Reaction | undefined {
-    const ret = ReactionSchema.safeParse(reaction);
-    if (!ret.success) return modLogger.error(ret.error), undefined;
-    
-    return ret.data;
+  static createReaction(reaction: ReactionInput): Reaction {
+    return applyReactionDefaults(reaction);
   }
 
   static clearDebugHistory(): void {
@@ -264,9 +255,6 @@ export class BehaviorsModule extends BaseModule {
   }
 
   static processBehavior(type: TriggerType, messageData: MessageData): Behavior | undefined {
-    type = TriggerTypeSchema.parse(type);
-    messageData = MessageDataSchema.parse(messageData) as MessageData;
-
     const triggerResult = processTrigger(type, messageData);
 
     if (!triggerResult) return undefined;

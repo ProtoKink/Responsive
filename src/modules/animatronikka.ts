@@ -1,5 +1,5 @@
-import { BaseModule, Subscreen, exportToGlobal, modLogger } from 'bc-deeplib/deeplib';
-import { Animation, AnimationInput, AnimationSchema, AnimatronikkaSettingsModel, Keyframe } from '../models/animations';
+import { BaseModule, Subscreen, exportToGlobal } from 'bc-deeplib/deeplib';
+import { Animation, AnimationInput, AnimatronikkaSettingsModel, Keyframe, applyAnimationDefaults } from '../models/animations';
 import { GuiAnimatronikka } from '../screens/animatronikka';
 import { assertNever } from '@/utilities/other';
 
@@ -50,10 +50,8 @@ export class AnimatronikkaModule extends BaseModule {
     AnimatronikkaModule.instance = this;
   }
 
-  static createAnimation(animation: AnimationInput): Animation | undefined {
-    const result = AnimationSchema.safeParse(animation);
-    if (!result.success) return modLogger.error(result.error), undefined;
-    return result.data;
+  static createAnimation(animation: AnimationInput): Animation {
+    return applyAnimationDefaults(animation);
   }
 
   getAnimation(id: string): Animation | undefined {
@@ -73,7 +71,7 @@ export class AnimatronikkaModule extends BaseModule {
 
     const run: AnimationRun = {
       id: animationId,
-      animation: AnimationSchema.parse(animation),
+      animation: applyAnimationDefaults(animation),
       target,
       loopsRemaining: this.getLoopsRemaining(animation, options?.loopCount),
       priority: options?.priority ?? 0,
