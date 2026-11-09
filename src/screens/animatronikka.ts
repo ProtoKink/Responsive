@@ -124,6 +124,10 @@ export class GuiAnimatronikka extends BaseSubscreen {
   }
 
   exit(): void {
+		if (this.selectedAnimationId) {
+			this.goBackToAnimationList();
+			return;
+		}
     GuiAnimatronikka.instance.deleteMode = false;
     GuiAnimatronikka.instance.selectedAnimationId = null;
     GuiAnimatronikka.instance.searchQuery = '';
