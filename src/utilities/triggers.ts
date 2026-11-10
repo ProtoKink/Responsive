@@ -1,14 +1,14 @@
 import { modLogger } from 'bc-deeplib/deeplib';
-import { TriggerConstraint, MessageData, ConstraintMode, TriggerType, Behavior, Trigger, TriggerSpeech, MatchMode, SourceConstraint, TargetConstraint, PlayerConstraint, RoomConstraint, IncludeExcludeRule } from '../models/behaviors';
+import { TriggerConstraint, MessageData, ConstraintMode, TriggerType, Behavior, Trigger, MatchMode, SourceConstraint, TargetConstraint, PlayerConstraint, RoomConstraint, IncludeExcludeRule } from '../models/behaviors';
 import { BehaviorsModule } from '../modules/behaviors';
 import { assertNever } from './other';
 import { replaceTemplate } from './chat_messages';
 
 type ConstraintResults = {
-	source?: Record<string, boolean>;
-	target?: Record<string, boolean>;
-	player?: Record<string, boolean>;
-	room?: Record<string, boolean>;
+	source?: Record<keyof SourceConstraint, boolean>;
+	target?: Record<keyof TargetConstraint, boolean>;
+	player?: Record<keyof PlayerConstraint, boolean>;
+	room?: Record<keyof RoomConstraint, boolean>;
 };
 
 type TriggerPredicate = (trigger: Trigger, data: MessageData) => boolean;
@@ -41,11 +41,9 @@ const messageContentPredicate: TriggerPredicate = (trigger, data) => {
 		return false;
 	}
 
-	const typedTrigger = trigger;
-
 	if (!data.message) return false;
 
-	return typedTrigger.content.some(entry => {
+	return trigger.content.some(entry => {
 		const templatedMessage = replaceTemplate(entry.value, data.target, data.source);
 		if (!data.message) return false;
 		return matchText(data.message, templatedMessage, entry.matchMode);
@@ -55,11 +53,9 @@ const messageContentPredicate: TriggerPredicate = (trigger, data) => {
 const speechTypePredicate: TriggerPredicate = (trigger, data) => {
 	if (trigger.type !== 'speech') return true;
 
-	const typedTrigger = trigger as TriggerSpeech;
+	if (trigger.speechType === 'any') return true;
 
-	if (typedTrigger.speechType === 'any') return true;
-
-	return typedTrigger.speechType === data.speechType;
+	return trigger.speechType === data.speechType;
 };
 
 const activityPredicate: TriggerPredicate = (trigger, data) => {
@@ -88,9 +84,7 @@ const roomPresencePredicate: TriggerPredicate = (trigger, data) => {
 const triggerPredicates: TriggerPredicatesMap = new Map();
 
 registerPredicate(['emote', 'speech', 'action'], messageContentPredicate);
-
 registerPredicate(['speech'], speechTypePredicate);
-
 registerPredicate(['activity'], activityPredicate);
 registerPredicate(['orgasm'], orgasmPredicate);
 registerPredicate(['roomPresence'], roomPresencePredicate);
@@ -156,19 +150,19 @@ function evaluateCharacterConstraints(
 	return results;
 }
 
-function evaluateSourceConstraints(constraints: SourceConstraint, data: MessageData): Record<string, boolean> {
+function evaluateSourceConstraints(constraints: SourceConstraint, data: MessageData): Record<keyof SourceConstraint, boolean> {
 	return evaluateCharacterConstraints(constraints, data.source);
 }
 
-function evaluateTargetConstraints(constraints: TargetConstraint, data: MessageData): Record<string, boolean> {
+function evaluateTargetConstraints(constraints: TargetConstraint, data: MessageData): Record<keyof TargetConstraint, boolean> {
 	return evaluateCharacterConstraints(constraints, data.target);
 }
 
-function evaluatePlayerConstraints(constraints: PlayerConstraint, _data: MessageData): Record<string, boolean> {
+function evaluatePlayerConstraints(constraints: PlayerConstraint, _data: MessageData): Record<keyof PlayerConstraint, boolean> {
 	return evaluateCharacterConstraints(constraints, Player);
 }
 
-function evaluateRoomConstraints(constraints: RoomConstraint, _data: MessageData): Record<string, boolean> {
+function evaluateRoomConstraints(constraints: RoomConstraint, _data: MessageData): Record<keyof RoomConstraint, boolean> {
 	const results: Record<string, boolean> = {};
 
 	if (constraints.inRoomNamed !== undefined) {
@@ -249,27 +243,29 @@ export function processTrigger(type: TriggerType, messageData: MessageData): { b
 }
 
 export function processTriggerConstraint(triggerConstraint: TriggerConstraint, mode: ConstraintMode, messageData: MessageData): boolean {
-	const results = evaluateAllConstraints(triggerConstraint, messageData);
-
-	const allResults: boolean[] = [];
-	for (const entityKey in results) {
-		const entityResults = results[entityKey as keyof ConstraintResults];
-		if (entityResults) {
-			for (const constraintKey in entityResults) {
-				allResults.push(entityResults[constraintKey]);
-			}
-		}
+	function collect<T extends Record<keyof T, boolean>>(results: T | undefined): boolean[] {
+		if (!results) return [];
+		return CommonEntries(results).map(([, passed]) => passed);
 	}
+
+	const results = evaluateAllConstraints(triggerConstraint, messageData);
+	const allResults = [
+		...collect(results.source),
+		...collect(results.target),
+		...collect(results.player),
+		...collect(results.room),
+	];
 
 	if (allResults.length === 0) return true;
 
-	if (mode === 'any') {
-		return allResults.some(result => result === true);
-	} else if (mode === 'all') {
-		return allResults.every(result => result === true);
+	switch (mode) {
+		case 'any':
+			return allResults.some(result => result);
+		case 'all':
+			return allResults.every(result => result);
+		default:
+			assertNever(mode);
 	}
-
-	return true;
 }
 
 export function triggerHasAnyConstraints(trigger: Trigger): boolean {

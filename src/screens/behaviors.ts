@@ -1328,7 +1328,7 @@ export class GuiBehaviors extends BaseSubscreen {
 
 		const constraintElements: HTMLElement[] = [];
 
-		if ((entity === 'source' || entity === 'target') && 'memberNumber' in entityConstraints && entityConstraints.memberNumber) {
+		if ('memberNumber' in entityConstraints && entityConstraints.memberNumber) {
 			const renderMemberNumber = (replace?: boolean) => this.buildIncludeExcludeField(
 				`${trigger.id}-${entity}-memberNumber`,
 				'behaviors.field.constraint_member_number',
