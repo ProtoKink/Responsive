@@ -5,8 +5,6 @@ import tseslint from 'typescript-eslint';
 import { defineConfig } from 'eslint/config';
 
 export default defineConfig(
-  eslint.configs.recommended,
-  tseslint.configs.recommended,
   {
     ignores: ['dist/']
   },
@@ -31,5 +29,6 @@ export default defineConfig(
       'eqeqeq': ['warn', 'always'],
     },
     languageOptions: { globals: { ...globals.browser } },
+    extends: [eslint.configs.recommended, tseslint.configs.recommended],
   },
 );
