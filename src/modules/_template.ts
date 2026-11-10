@@ -1,7 +1,7 @@
 import { BaseModule } from 'bc-deeplib/deeplib';
 
 export class TempModule extends BaseModule {
-  load(): void {}
+	load(): void {}
 
-  run(): void {}
+	run(): void {}
 }

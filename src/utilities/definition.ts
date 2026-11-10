@@ -7,9 +7,9 @@ import { CommandsModule } from '../modules/commands';
 import { AnimatronikkaModule } from '../modules/animatronikka';
 
 export const MSG_TIMER = {
-  CHANGELOG: 30,
-  INFO: 15,
-  COMMANDS: 20
+	CHANGELOG: 30,
+	INFO: 15,
+	COMMANDS: 20
 };
 
 export const CMD_BCR = 'bcr';
@@ -19,12 +19,12 @@ export const CMD_VERSION = 'version';
 export const CMD_DEBUG_DATA = 'debug-data';
 
 declare module 'bc-deeplib/deeplib' {
-  interface ModulesList { 
-    GlobalModule: GlobalModule;
-    BehaviorsModule: BehaviorsModule;
-    ProfilesModule: ProfilesModule;
-    CharTalkModule: CharTalkModule;
-    CommandsModule: CommandsModule;
-    AnimatronikkaModule: AnimatronikkaModule;
-  }
+	interface ModulesList { 
+		GlobalModule: GlobalModule;
+		BehaviorsModule: BehaviorsModule;
+		ProfilesModule: ProfilesModule;
+		CharTalkModule: CharTalkModule;
+		CommandsModule: CommandsModule;
+		AnimatronikkaModule: AnimatronikkaModule;
+	}
 }

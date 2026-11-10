@@ -8,31 +8,31 @@ import { AnimatronikkaSettingsModel } from '../models/animations';
 export const modStorage = new ModStorage<SettingsModel>('Responsive');
 
 export function dataErase(doResetSettings: boolean, doResetResponses: boolean, doResetProfiles: boolean) {
-  const data = modStorage.playerStorage;
-  if (doResetSettings) {
-    data.GlobalModule = <GlobalSettingsModel>{};
-  }
+	const data = modStorage.playerStorage;
+	if (doResetSettings) {
+		data.GlobalModule = <GlobalSettingsModel>{};
+	}
 
-  if (doResetResponses) {
-    data.BehaviorsModule = <BehaviorsSettingsModel>{};
-    data.AnimatronikkaModule = <AnimatronikkaSettingsModel>{};
-  }
+	if (doResetResponses) {
+		data.BehaviorsModule = <BehaviorsSettingsModel>{};
+		data.AnimatronikkaModule = <AnimatronikkaSettingsModel>{};
+	}
 
-  if (doResetProfiles) {
-    data.ProfilesModule = <ProfileEntryModel[]>{};
-  }
-  modStorage.save();
+	if (doResetProfiles) {
+		data.ProfilesModule = <ProfileEntryModel[]>{};
+	}
+	modStorage.save();
 }
 
 export function dataResetForManual() {
-  const data = modStorage.playerStorage;
-  data.BehaviorsModule = {
-    behaviors: {},
-    triggers: {},
-    reactions: {}
-  } as BehaviorsSettingsModel;
-  data.AnimatronikkaModule = {
-    animations: {}
-  } as AnimatronikkaSettingsModel;
-  modStorage.save();
+	const data = modStorage.playerStorage;
+	data.BehaviorsModule = {
+		behaviors: {},
+		triggers: {},
+		reactions: {}
+	} as BehaviorsSettingsModel;
+	data.AnimatronikkaModule = {
+		animations: {}
+	} as AnimatronikkaSettingsModel;
+	modStorage.save();
 }

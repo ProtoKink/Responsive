@@ -6,88 +6,88 @@ import { assertNever, getRandomInt } from './other';
 import { doesBcxAllowsTalking } from './handlers';
 
 export function processReactions(reactions: Reaction[], reactionMode: ReactionMode, messageData: MessageData): { success: boolean; executedReactionIds: string[] } {
-  if (reactions.length === 0) {
-    return { success: false, executedReactionIds: [] };
-  }
+	if (reactions.length === 0) {
+		return { success: false, executedReactionIds: [] };
+	}
   
-  switch (reactionMode) {
-    case 'random': {
-      const reaction = reactions[getRandomInt(reactions.length)];
+	switch (reactionMode) {
+		case 'random': {
+			const reaction = reactions[getRandomInt(reactions.length)];
 
-      const success = processReaction(reaction, messageData);
-      return {
-        success,
-        executedReactionIds: success ? [reaction.id] : [],
-      };
-    }
-    case 'all':
-    {
-      const executedReactionIds: string[] = [];
-      const success = reactions.every(reaction => {
-        const processed = processReaction(reaction, messageData);
-        if (processed) executedReactionIds.push(reaction.id);
-        return processed;
-      });
+			const success = processReaction(reaction, messageData);
+			return {
+				success,
+				executedReactionIds: success ? [reaction.id] : [],
+			};
+		}
+		case 'all':
+		{
+			const executedReactionIds: string[] = [];
+			const success = reactions.every(reaction => {
+				const processed = processReaction(reaction, messageData);
+				if (processed) executedReactionIds.push(reaction.id);
+				return processed;
+			});
 
-      return { success, executedReactionIds };
-    }
+			return { success, executedReactionIds };
+		}
 
-    default:
-      assertNever(reactionMode);
-  }
+		default:
+			assertNever(reactionMode);
+	}
 }
 
 function processReaction(reaction: Reaction, messageData: MessageData): boolean {
-  switch (reaction.type) {
-    case 'speech': {
-      if (!doesBcxAllowsTalking()) return false;
-      const response = randomResponse(reaction.content);
-      const templatedResponse = replaceTemplate(response, messageData.source).trim();
-      chatRoomAutoInterceptMessage(templatedResponse);
+	switch (reaction.type) {
+		case 'speech': {
+			if (!doesBcxAllowsTalking()) return false;
+			const response = randomResponse(reaction.content);
+			const templatedResponse = replaceTemplate(response, messageData.source).trim();
+			chatRoomAutoInterceptMessage(templatedResponse);
 
-      return true;
-    }
-    case 'emote': {
-      const response = randomResponse(reaction.content);
-      const templatedResponse = replaceTemplate(response, messageData.source).trim();
-      // add ** to make emote not send player's name
-      ChatRoomSendEmote('**' + templatedResponse);
+			return true;
+		}
+		case 'emote': {
+			const response = randomResponse(reaction.content);
+			const templatedResponse = replaceTemplate(response, messageData.source).trim();
+			// add ** to make emote not send player's name
+			ChatRoomSendEmote('**' + templatedResponse);
 
-      return true;
-    }
-    case 'action': {
-      const response = randomResponse(reaction.content);
-      const templatedResponse = replaceTemplate(response, messageData.source).trim();
-      sendActionMessage(templatedResponse);
+			return true;
+		}
+		case 'action': {
+			const response = randomResponse(reaction.content);
+			const templatedResponse = replaceTemplate(response, messageData.source).trim();
+			sendActionMessage(templatedResponse);
 
-      return true;
-    }
-    case 'activity': {
-      const activity = AssetGetActivity('Female3DCG', reaction.activityName);
-      const group = AssetGroupGet('Female3DCG', reaction.groupName as AssetGroupItemName);
-      const character = messageData.source;
+			return true;
+		}
+		case 'activity': {
+			const activity = AssetGetActivity('Female3DCG', reaction.activityName);
+			const group = AssetGroupGet('Female3DCG', reaction.groupName as AssetGroupItemName);
+			const character = messageData.source;
 
-      if (!activity || !group || !character) return false;
+			if (!activity || !group || !character) return false;
 
-      if (!ActivityCanBeDone(character, activity.Name, group.Name)) return false;
+			if (!ActivityCanBeDone(character, activity.Name, group.Name)) return false;
 
-      ActivityRun(Player, character, group, { Activity: activity, Group: group.Name });
+			ActivityRun(Player, character, group, { Activity: activity, Group: group.Name });
 
-      return true;
-    }
-    case 'animation': {
-      const module = AnimatronikkaModule.instance;
-      if (!module || !reaction.animationId) return false;
+			return true;
+		}
+		case 'animation': {
+			const module = AnimatronikkaModule.instance;
+			if (!module || !reaction.animationId) return false;
 
-      const success = module.playAnimation(reaction.animationId, {
-        interrupt: reaction.interrupt,
-        priority: reaction.priority,
-        target: Player,
-      });
+			const success = module.playAnimation(reaction.animationId, {
+				interrupt: reaction.interrupt,
+				priority: reaction.priority,
+				target: Player,
+			});
 
-      return success;
-    }
-    default:
-      assertNever(reaction);
-  }
+			return success;
+		}
+		default:
+			assertNever(reaction);
+	}
 }

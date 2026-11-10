@@ -19,23 +19,23 @@
 // ==/UserScript==
 
 (function () {
-  'use strict';
-  const ending = 'main.js';
-  const prodPath = 'https://protokink.github.io/Responsive/';
-  const devPath = `${prodPath}dev/`;
-  const localPath = 'http://localhost:45000/';
+	'use strict';
+	const ending = 'main.js';
+	const prodPath = 'https://protokink.github.io/Responsive/';
+	const devPath = `${prodPath}dev/`;
+	const localPath = 'http://localhost:45000/';
 
-  const isDev = window.location.search.toLowerCase().includes('rsp=dev');
-  const isLocal = window.location.search.toLowerCase().includes('rsp=local');
-  const isPublic = isDev || !isLocal;
+	const isDev = window.location.search.toLowerCase().includes('rsp=dev');
+	const isLocal = window.location.search.toLowerCase().includes('rsp=local');
+	const isPublic = isDev || !isLocal;
 
-  let modLink = prodPath;
-  if (isDev) modLink = devPath;
-  else if (isLocal) modLink = localPath;
+	let modLink = prodPath;
+	if (isDev) modLink = devPath;
+	else if (isLocal) modLink = localPath;
 
-  const script = document.createElement('script');
-  script.type = 'module';
-  script.setAttribute('crossorigin', 'anonymous');
-  script.src = `${modLink}${ending}${isPublic ? '?' + Date.now() : ''}`;
-  document.head.appendChild(script);
+	const script = document.createElement('script');
+	script.type = 'module';
+	script.setAttribute('crossorigin', 'anonymous');
+	script.src = `${modLink}${ending}${isPublic ? '?' + Date.now() : ''}`;
+	document.head.appendChild(script);
 })();

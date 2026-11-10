@@ -3,23 +3,23 @@ import { ProfilesSettingsModel } from '../models/profiles';
 import { GuiProfiles } from '../screens/profiles';
 
 export class ProfilesModule extends BaseModule {
-  get settings(): ProfilesSettingsModel {
-    return super.settings as ProfilesSettingsModel;
-  }
+	get settings(): ProfilesSettingsModel {
+		return super.settings as ProfilesSettingsModel;
+	}
 
-  set settings(val: ProfilesSettingsModel) {
-    super.settings = val;
-  }
+	set settings(val: ProfilesSettingsModel) {
+		super.settings = val;
+	}
 
-  get settingsScreen(): Subscreen | null {
-    return GuiProfiles;
-  }
+	get settingsScreen(): Subscreen | null {
+		return GuiProfiles;
+	}
 
-  get defaultSettings() {
-    return <ProfilesSettingsModel>{};
-  }
+	get defaultSettings() {
+		return <ProfilesSettingsModel>{};
+	}
 
-  load(): void {}
+	load(): void {}
 
-  run(): void {}
+	run(): void {}
 }

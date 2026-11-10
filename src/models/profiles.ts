@@ -5,13 +5,13 @@ import { BehaviorsSettingsModel } from './behaviors';
 export type ProfilesSettingsModel = BaseSettingsModel & Record<ProfileId, ProfileEntryModel>;
 
 export type ProfileEntryModel = {
-  name: string;
-  data: ProfileSaveModel;
+	name: string;
+	data: ProfileSaveModel;
 };
 
 export type ProfileSaveModel = {
-  GlobalModule: GlobalSettingsModel;
-  BehaviorsModule: BehaviorsSettingsModel;
+	GlobalModule: GlobalSettingsModel;
+	BehaviorsModule: BehaviorsSettingsModel;
 };
 
 export type ProfileId = '1' | '2' | '3';

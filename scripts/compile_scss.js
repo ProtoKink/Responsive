@@ -12,16 +12,16 @@ const outputDir = path.join(__dirname, '../dist/public/styles');
 fs.mkdirSync(outputDir, { recursive: true });
 
 function compileSassAll() {
-  const scssFiles = fs
-    .readdirSync(inputDir)
-    .filter((file) => file.endsWith('.scss'));
+	const scssFiles = fs
+		.readdirSync(inputDir)
+		.filter((file) => file.endsWith('.scss'));
   
-  scssFiles.forEach((file) => {
-    const inputPath = path.join(inputDir, file);
-    const outputPath = path.join(outputDir, file);
+	scssFiles.forEach((file) => {
+		const inputPath = path.join(inputDir, file);
+		const outputPath = path.join(outputDir, file);
 
-    compileSassOne(inputPath, outputPath);
-  });
+		compileSassOne(inputPath, outputPath);
+	});
 }
 
 /**
@@ -29,17 +29,17 @@ function compileSassAll() {
  * @param {string} outputPath 
  */
 function compileSassOne(inputPath, outputPath) {
-  const scssFile = fs.readFileSync(inputPath, 'utf8');
-  const result = sass.compileString(scssFile, {
-    sourceMap: true,
-    style: 'expanded',
-    syntax: 'scss',
-    loadPaths: [inputDir],
-  });
-  const cssWithMap = result.css + `\n/*# sourceMappingURL=${path.basename(outputPath).replace(/\.scss$/, '.css.map')} */\n`;
+	const scssFile = fs.readFileSync(inputPath, 'utf8');
+	const result = sass.compileString(scssFile, {
+		sourceMap: true,
+		style: 'expanded',
+		syntax: 'scss',
+		loadPaths: [inputDir],
+	});
+	const cssWithMap = result.css + `\n/*# sourceMappingURL=${path.basename(outputPath).replace(/\.scss$/, '.css.map')} */\n`;
 
-  fs.writeFileSync(outputPath.replace(/\.scss$/, '.css'), cssWithMap);
-  fs.writeFileSync(outputPath.replace(/\.scss$/, '.css.map'), JSON.stringify(result.sourceMap));
+	fs.writeFileSync(outputPath.replace(/\.scss$/, '.css'), cssWithMap);
+	fs.writeFileSync(outputPath.replace(/\.scss$/, '.css.map'), JSON.stringify(result.sourceMap));
 }
 
 compileSassAll();
