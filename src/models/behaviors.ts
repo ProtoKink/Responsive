@@ -10,6 +10,21 @@ export type TriggerOrgasmType = Exclude<OrgasmType, 'any'>;
 export const constraintModes = ['any', 'all'] as const;
 export type ConstraintMode = (typeof constraintModes)[number];
 
+export const constraintEntities = ['source', 'target', 'player', 'room'] as const;
+export type ConstraintEntity = (typeof constraintEntities)[number];
+
+export const constraintDetailsPlayer = ['restrained', 'gagged', 'blinded', 'deafened', 'arousalMin', 'arousalMax'] as const;
+export type ConstraintDetailPlayer = (typeof constraintDetailsPlayer)[number];
+
+export const constraintDetailsSource = ['memberNumber', ...constraintDetailsPlayer] as const;
+export type ConstraintDetailSource = (typeof constraintDetailsSource)[number];
+
+export const constraintDetailsTarget = constraintDetailsSource;
+export type ConstraintDetailTarget = (typeof constraintDetailsTarget)[number];
+
+export const constraintDetailsRoom = ['inRoomWithMembers', 'inRoomNamed'] as const;
+export type ConstraintDetailRoom = (typeof constraintDetailsRoom)[number];
+
 export const speechTypes = ['any', 'normal', 'whisper'] as const;
 export type SpeechType = (typeof speechTypes)[number];
 
@@ -44,39 +59,27 @@ export type IncludeExcludeRule = {
 	entries: IncludeExcludeEntry[];
 };
 
-export type SourceConstraint = {
-	memberNumber?: IncludeExcludeRule;
-	restrained?: boolean;
-	gagged?: boolean;
-	blinded?: boolean;
-	deafened?: boolean;
-	arousalMin?: number;
-	arousalMax?: number;
+type ConstraintFieldValue = {
+	memberNumber: IncludeExcludeRule;
+	restrained: boolean;
+	gagged: boolean;
+	blinded: boolean;
+	deafened: boolean;
+	arousalMin: number;
+	arousalMax: number;
+	inRoomWithMembers: IncludeExcludeRule;
+	inRoomNamed: IncludeExcludeRule;
+};
+export type ConstraintFieldKey = keyof ConstraintFieldValue;
+
+type ConstraintFrom<Details extends readonly (keyof ConstraintFieldValue)[]> = {
+	[Key in Details[number]]?: ConstraintFieldValue[Key];
 };
 
-export type TargetConstraint = {
-	memberNumber?: IncludeExcludeRule;
-	restrained?: boolean;
-	gagged?: boolean;
-	blinded?: boolean;
-	deafened?: boolean;
-	arousalMin?: number;
-	arousalMax?: number;
-};
-
-export type PlayerConstraint = {
-	restrained?: boolean;
-	gagged?: boolean;
-	blinded?: boolean;
-	deafened?: boolean;
-	arousalMin?: number;
-	arousalMax?: number;
-};
-
-export type RoomConstraint = {
-	inRoomWithMembers?: IncludeExcludeRule;
-	inRoomNamed?: IncludeExcludeRule;
-};
+export type SourceConstraint = ConstraintFrom<typeof constraintDetailsSource>;
+export type TargetConstraint = ConstraintFrom<typeof constraintDetailsTarget>;
+export type PlayerConstraint = ConstraintFrom<typeof constraintDetailsPlayer>;
+export type RoomConstraint = ConstraintFrom<typeof constraintDetailsRoom>;
 
 export type TriggerConstraint = {
 	source?: SourceConstraint;

@@ -1,5 +1,5 @@
 import { modLogger } from 'bc-deeplib/deeplib';
-import { TriggerConstraint, MessageData, ConstraintMode, TriggerType, Behavior, Trigger, MatchMode, SourceConstraint, TargetConstraint, PlayerConstraint, RoomConstraint, IncludeExcludeRule } from '../models/behaviors';
+import { TriggerConstraint, MessageData, ConstraintMode, TriggerType, Behavior, Trigger, MatchMode, SourceConstraint, TargetConstraint, PlayerConstraint, RoomConstraint, IncludeExcludeRule, ConstraintEntity, ConstraintFieldKey } from '../models/behaviors';
 import { BehaviorsModule } from '../modules/behaviors';
 import { assertNever } from './other';
 import { replaceTemplate } from './chat_messages';
@@ -88,6 +88,69 @@ registerPredicate(['speech'], speechTypePredicate);
 registerPredicate(['activity'], activityPredicate);
 registerPredicate(['orgasm'], orgasmPredicate);
 registerPredicate(['roomPresence'], roomPresencePredicate);
+
+type ConstraintPrerequisite = (trigger: Trigger) => boolean;
+
+type ConstraintPrerequisiteEntry = {
+	keys?: readonly ConstraintFieldKey[];
+	predicate: ConstraintPrerequisite;
+};
+
+const constraintPrerequisites: Map<ConstraintEntity, ConstraintPrerequisiteEntry[]> = new Map();
+
+function registerConstraintPrerequisite(entity: ConstraintEntity, predicate: ConstraintPrerequisite, keys?: readonly ConstraintFieldKey[]): void {
+	let entry = constraintPrerequisites.get(entity);
+	if (!entry) {
+		entry = [];
+		constraintPrerequisites.set(entity, entry);
+	}
+
+	entry.push({ keys, predicate });
+}
+
+export function isConstraintCompatible(trigger: Trigger, entity: ConstraintEntity, key?: ConstraintFieldKey): boolean {
+	const entry = constraintPrerequisites.get(entity);
+	if (!entry) return true;
+	return entry.every(entry => {
+		if (key === undefined) {
+			if (entry.keys !== undefined) return true;
+			return entry.predicate(trigger);
+		}
+		if (entry.keys !== undefined && !entry.keys.includes(key)) return true;
+		return entry.predicate(trigger);
+	});
+}
+
+function constraintKeys<T extends object>(obj: T): (T extends unknown ? keyof T : never)[] {
+	return CommonKeys(obj) as (T extends unknown ? keyof T : never)[];
+}
+
+function applicableConstraints(trigger: Trigger): TriggerConstraint | undefined {
+	const constraints = trigger.constraints;
+	if (!constraints) return undefined;
+
+	const result: TriggerConstraint = {};
+
+	(constraintKeys(constraints)).forEach(entity => {
+		if (!isConstraintCompatible(trigger, entity)) return;
+		const stored = constraints[entity];
+		if (!stored) return;
+
+		const filtered: Record<string, unknown> = {};
+		for (const key of constraintKeys(stored)) {
+			if (!isConstraintCompatible(trigger, entity, key)) continue;
+			const value = (stored as Record<string, unknown>)[key];
+			if (value === undefined) continue;
+			filtered[key] = value;
+		}
+
+		if (CommonKeys(filtered).length > 0) {
+			(result as Record<string, unknown>)[entity] = filtered;
+		}
+	});
+
+	return CommonKeys(result).length > 0 ? result : undefined;
+}
 
 function checkTriggerPredicates(trigger: Trigger, data: MessageData): boolean {
 	const predicates = triggerPredicates.get(trigger.type);
@@ -226,7 +289,8 @@ export function processTrigger(type: TriggerType, messageData: MessageData): { b
 			let isConstraintMet = true;
 
 			if (trigger.constraints && trigger.constraintMode) {
-				isConstraintMet = processTriggerConstraint(trigger.constraints, trigger.constraintMode, messageData);
+				const applicable = applicableConstraints(trigger);
+				isConstraintMet = !applicable || processTriggerConstraint(applicable, trigger.constraintMode, messageData);
 			}
 
 			if (!isConstraintMet) return false;
@@ -269,22 +333,18 @@ export function processTriggerConstraint(triggerConstraint: TriggerConstraint, m
 }
 
 export function triggerHasAnyConstraints(trigger: Trigger): boolean {
-	if (!trigger.constraints) return false;
-
-	return trigger.constraints.source !== undefined ||
-    trigger.constraints.target !== undefined ||
-    trigger.constraints.player !== undefined ||
-    trigger.constraints.room !== undefined;
+	return applicableConstraints(trigger) !== undefined;
 }
 
-export function triggerHasConstraint(trigger: Trigger, entity: 'source' | 'target' | 'player' | 'room', constraintKey?: string): boolean {
+export function triggerHasConstraint(trigger: Trigger, entity: 'source' | 'target' | 'player' | 'room', constraintKey?: ConstraintFieldKey): boolean {
 	if (!trigger.constraints) return false;
+	if (!isConstraintCompatible(trigger, entity, constraintKey)) return false;
 
 	const entityConstraints = trigger.constraints[entity];
 	if (!entityConstraints) return false;
 
 	if (constraintKey === undefined) {
-		return Object.keys(entityConstraints).length > 0;
+		return constraintKeys(entityConstraints).some(key => isConstraintCompatible(trigger, entity, key));
 	}
 
 	const value = (entityConstraints as any)[constraintKey];

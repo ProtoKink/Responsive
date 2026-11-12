@@ -17,6 +17,7 @@ export function setupGameGlobals(): void {
 	(global as any).ChatRoomSendChat = gameGlobals.ChatRoomSendChat;
 	(global as any).ChatRoomSendChatMessage = gameGlobals.ChatRoomSendChatMessage;
 	(global as any).CommonKeys = gameGlobals.CommonKeys;
+	(global as any).CommonEntries = gameGlobals.CommonEntries;
 	(global as any).CommonGenerateUniqueID = gameGlobals.CommonGenerateUniqueID;
 	(global as any).ActivityCanBeDone = gameGlobals.ActivityCanBeDone;
 }

@@ -81,6 +81,10 @@ export function CommonKeys(obj: any): string[] {
 	return Object.keys(obj);
 }
 
+export function CommonEntries(obj: any): [string, any][] {
+	return Object.entries(obj);
+}
+
 export function CommonGenerateUniqueID(): string {
 	return 'unique-id-' + Math.random().toString(36).slice(2, 11);
 }

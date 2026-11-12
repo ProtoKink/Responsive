@@ -1,10 +1,10 @@
 // #region SECTION Imports & Types
 import { advElement, BaseSubscreen, exportToGlobal, getText, layout, Modal, SettingElement, SubscreenOptions } from 'bc-deeplib/deeplib';
-import { BehaviorsSettingsModel, Behavior, Trigger, Reaction, ConstraintMode, MatchMode, SpeechType, OrgasmType, RoomPresenceEvent, ReactionMode, triggerTypes, reactionTypes, ReactionType, TriggerType, IncludeExcludeEntry, MatchContentEntry, speechTypes, matchModes, orgasmTypes, roomPresenceEvents, reactionModes, constraintModes, includeExcludeModes } from '../models/behaviors';
+import { BehaviorsSettingsModel, Behavior, Trigger, Reaction, ConstraintMode, MatchMode, SpeechType, OrgasmType, RoomPresenceEvent, ReactionMode, triggerTypes, reactionTypes, ReactionType, TriggerType, IncludeExcludeEntry, MatchContentEntry, speechTypes, matchModes, orgasmTypes, roomPresenceEvents, reactionModes, constraintModes, includeExcludeModes, ConstraintEntity, ConstraintFieldKey } from '../models/behaviors';
 import { BehaviorsModule } from '../modules/behaviors';
 import { assertNever } from '../utilities/other';
 import { activitySelectorModal, animationSelectorModal, bodyPartSelectorModal, itemSelectorModal, memberNumberSelectorModal, textReactionSelectorModal } from '@/utilities/selectorModals';
-import { triggerHasAnyConstraints } from '@/utilities/triggers';
+import { isConstraintCompatible, triggerHasAnyConstraints, triggerHasConstraint } from '@/utilities/triggers';
 import { buildCollapsibleSection, buildContentListSection, createDropdownField, createInputField, createNumberInputField } from '@/utilities/fields';
 import { AnimatronikkaModule } from '@/modules/animatronikka';
 import { DebugStorage, BehaviorExecutionEntry } from '@/utilities/debugStorage';
@@ -1265,16 +1265,16 @@ export class GuiBehaviors extends BaseSubscreen {
 
 		trigger.constraints ??= {};
 
-		if (trigger.constraints.source) {
+		if (triggerHasConstraint(trigger, 'source')) {
 			elements.push(this.buildEntityConstraintSection(trigger, 'source', onChange));
 		}
-		if (trigger.constraints.target) {
+		if (triggerHasConstraint(trigger, 'target')) {
 			elements.push(this.buildEntityConstraintSection(trigger, 'target', onChange));
 		}
-		if (trigger.constraints.player) {
+		if (triggerHasConstraint(trigger, 'player')) {
 			elements.push(this.buildEntityConstraintSection(trigger, 'player', onChange));
 		}
-		if (trigger.constraints.room) {
+		if (triggerHasConstraint(trigger, 'room')) {
 			elements.push(this.buildEntityConstraintSection(trigger, 'room', onChange));
 		}
 
@@ -1299,14 +1299,16 @@ export class GuiBehaviors extends BaseSubscreen {
 	}
 
 	async showEntitySelector(trigger: Trigger): Promise<void> {
-		const entities = [
+		const entities: { value: ConstraintEntity; label: string }[] = [
 			{ value: 'source', label: getText('behaviors.entity.source') },
 			{ value: 'target', label: getText('behaviors.entity.target') },
 			{ value: 'player', label: getText('behaviors.entity.player') },
 			{ value: 'room', label: getText('behaviors.entity.room') }
 		];
+		const available = entities.filter(entity => isConstraintCompatible(trigger, entity.value));
+		if (available.length === 0) return;
 
-		const selected = await itemSelectorModal({ buttons: entities.map(e => ({ label: e.label, value: e.value })) });
+		const selected = await itemSelectorModal({ buttons: available.map(e => ({ label: e.label, value: e.value })) });
 		if (selected === null || selected.length === 0) return;
 		for (const entity of selected) {
 			await this.showConstraintTypeSelector(trigger, entity as 'source' | 'target' | 'player' | 'room');
@@ -1315,7 +1317,7 @@ export class GuiBehaviors extends BaseSubscreen {
 
 	buildEntityConstraintSection(trigger: Trigger, entity: 'source' | 'target' | 'player' | 'room', onChange: () => void): HTMLElement {
 		const entityConstraints = trigger.constraints?.[entity];
-		if (!entityConstraints) {
+		if (!entityConstraints || !isConstraintCompatible(trigger, entity)) {
 			return ElementCreate({ tag: 'div' });
 		}
 
@@ -1328,7 +1330,7 @@ export class GuiBehaviors extends BaseSubscreen {
 
 		const constraintElements: HTMLElement[] = [];
 
-		if ('memberNumber' in entityConstraints && entityConstraints.memberNumber) {
+		if ('memberNumber' in entityConstraints && entityConstraints.memberNumber && isConstraintCompatible(trigger, entity, 'memberNumber')) {
 			const renderMemberNumber = (replace?: boolean) => this.buildIncludeExcludeField(
 				`${trigger.id}-${entity}-memberNumber`,
 				'behaviors.field.constraint_member_number',
@@ -1375,6 +1377,7 @@ export class GuiBehaviors extends BaseSubscreen {
 
 		const booleanConstraints = ['restrained', 'gagged', 'blinded', 'deafened'] as const;
 		for (const constraintKey of booleanConstraints) {
+			if (!isConstraintCompatible(trigger, entity, constraintKey)) continue;
 			if (constraintKey in entityConstraints && entityConstraints[constraintKey as keyof typeof entityConstraints] !== undefined) {
 				const value = (entityConstraints as any)[constraintKey] as boolean;
 				const field = createDropdownField({
@@ -1421,6 +1424,7 @@ export class GuiBehaviors extends BaseSubscreen {
 
 		const numericConstraints = ['arousalMin', 'arousalMax'] as const;
 		for (const constraintKey of numericConstraints) {
+			if (!isConstraintCompatible(trigger, entity, constraintKey)) continue;
 			if (constraintKey in entityConstraints && entityConstraints[constraintKey as keyof typeof entityConstraints] !== undefined) {
 				const value = (entityConstraints as any)[constraintKey] as number;
 				const field = createNumberInputField({
@@ -1467,7 +1471,7 @@ export class GuiBehaviors extends BaseSubscreen {
 		}
 
 		if (entity === 'room') {
-			if ('inRoomWithMembers' in entityConstraints && entityConstraints.inRoomWithMembers) {
+			if ('inRoomWithMembers' in entityConstraints && entityConstraints.inRoomWithMembers && isConstraintCompatible(trigger, entity, 'inRoomWithMembers')) {
 				const renderInRoomWithMembers = (replace?: boolean) => this.buildIncludeExcludeField(
 					`${trigger.id}-room-inRoomWithMembers`,
 					'behaviors.field.constraint_in_room_with_members',
@@ -1512,7 +1516,7 @@ export class GuiBehaviors extends BaseSubscreen {
 				constraintElements.push(renderInRoomWithMembers(false));
 			}
 
-			if ('inRoomNamed' in entityConstraints && entityConstraints.inRoomNamed) {
+			if ('inRoomNamed' in entityConstraints && entityConstraints.inRoomNamed && isConstraintCompatible(trigger, entity, 'inRoomNamed')) {
 				const renderInRoomNamed = (replace?: boolean) => this.buildIncludeExcludeField(
 					`${trigger.id}-room-inRoomNamed`,
 					'behaviors.field.constraint_in_room_named',
@@ -1580,9 +1584,9 @@ export class GuiBehaviors extends BaseSubscreen {
 
 	async showConstraintTypeSelector(trigger: Trigger, entity: 'source' | 'target' | 'player' | 'room'): Promise<void> {
 		trigger.constraints ??= {};
-		const entityConstraints = (trigger.constraints[entity] ?? {}) as any;
+		const entityConstraints = trigger.constraints[entity] ?? {};
 
-		const availableConstraints: Array<{ key: string; label: string }> = [];
+		const availableConstraints: Array<{ key: ConstraintFieldKey; label: string }> = [];
 
 		if (entity === 'source' || entity === 'target') {
 			if (!('memberNumber' in entityConstraints && entityConstraints.memberNumber)) {
@@ -1620,11 +1624,12 @@ export class GuiBehaviors extends BaseSubscreen {
 			}
 		}
 
-		if (availableConstraints.length === 0) {
+		const compatibleConstraints = availableConstraints.filter(constraint => isConstraintCompatible(trigger, entity, constraint.key));
+		if (compatibleConstraints.length === 0) {
 			return;
 		}
 
-		const selected = await itemSelectorModal({ buttons: availableConstraints.map(c => ({ label: c.label, value: c.key })) });
+		const selected = await itemSelectorModal({ buttons: compatibleConstraints.map(c => ({ label: c.label, value: c.key })) });
 		if (selected === null || selected.length === 0) return;
 
 		if (!trigger.constraints) {
