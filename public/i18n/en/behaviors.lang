@@ -77,6 +77,7 @@ behaviors.field.activity_names = Activity Names
 behaviors.field.group_names = Group Names
 behaviors.field.orgasm_type = Orgasm Type
 behaviors.field.room_presence_event = Room Presence Event
+behaviors.field.arousal_limit = Arousal Limit
 behaviors.field.animation = Animation
 behaviors.field.animation_interrupt = Interrupt Active Animation
 behaviors.field.animation_priority = Animation Priority
@@ -111,6 +112,7 @@ behaviors.trigger_type.action = Action
 behaviors.trigger_type.activity = Activity
 behaviors.trigger_type.orgasm = Orgasm
 behaviors.trigger_type.roomPresence = Room Presence
+behaviors.trigger_type.arousal = Arousal
 
 # Reaction Types
 behaviors.reaction_type.speech = Speech
@@ -149,4 +151,5 @@ behaviors.option.action = Action
 behaviors.option.activity = Activity
 behaviors.option.orgasm = Orgasm
 behaviors.option.roomPresence = Room Presence
+behaviors.option.arousal = Arousal
 behaviors.option.animation = Animation

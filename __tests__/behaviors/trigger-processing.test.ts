@@ -2,6 +2,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { processTrigger, processTriggerConstraint } from '@/utilities/triggers';
 import type { Behavior, Trigger, MessageData, TriggerConstraint, Reaction } from '@/models/behaviors';
 import { BehaviorsModule } from '@/modules/behaviors';
+import { AnimatronikkaModule } from '@/modules/animatronikka';
+import { chatRoomAutoInterceptMessage } from '@/utilities/chat_messages';
 import * as gg from '../mocks/game-globals';
 import { setMockTime, advanceMockTime } from '../mocks/game-globals';
 
@@ -70,6 +72,14 @@ vi.mock('@/utilities/handlers', () => ({
 	areBehaviorsEnabled: vi.fn(() => true),
 }));
 
+vi.mock('@/modules/animatronikka', () => ({
+	AnimatronikkaModule: {
+		instance: {
+			playAnimation: vi.fn(() => true),
+		},
+	},
+}));
+
 global.AssetGetActivity = vi.fn(() => ({ Name: 'TestActivity', Group: 'TestGroup' } as any));
 global.AssetGroupGet = vi.fn(() => ({ Name: 'TestGroup' } as any));
 
@@ -88,6 +98,7 @@ describe('processTrigger', () => {
 		BehaviorsModule.instance.settings.triggers = mockTriggers;
 		BehaviorsModule.instance.settings.reactions = mockReactions;
 		BehaviorsModule.instance.behaviorExecutionMap.clear();
+		BehaviorsModule.instance.activeRankedKeys = {};
 		setMockTime(1000000);
 	});
 
@@ -538,6 +549,128 @@ describe('processTrigger', () => {
 
 			const result = processTrigger('roomPresence', messageData);
 			expect(result).toBeUndefined();
+		});
+	});
+
+	describe('arousal triggers', () => {
+		const playAnimation = AnimatronikkaModule.instance.playAnimation as ReturnType<typeof vi.fn>;
+
+		function addArousalBehavior(id: string, limit: number, reaction: Reaction): void {
+			mockTriggers[`${id}-trigger`] = {
+				id: `${id}-trigger`,
+				name: id,
+				type: 'arousal',
+				limit,
+			};
+			mockReactions[reaction.id] = reaction;
+			mockBehaviors[id] = {
+				id,
+				name: id,
+				enabled: true,
+				triggers: [`${id}-trigger`],
+				reactions: [reaction.id],
+				reactionMode: 'all',
+			};
+		}
+
+		beforeEach(() => {
+			vi.mocked(chatRoomAutoInterceptMessage).mockClear();
+			playAnimation.mockClear();
+		});
+
+		it('matches only at or above the limit and prefers the higher limit', () => {
+			addArousalBehavior('low', 80, {
+				id: 'speech-low',
+				name: 'Low',
+				type: 'speech',
+				content: ['low'],
+			});
+			addArousalBehavior('high', 90, {
+				id: 'speech-high',
+				name: 'High',
+				type: 'speech',
+				content: ['high'],
+			});
+
+			gg.Player.ArousalSettings.Progress = 79;
+			expect(processTrigger('arousal', {})).toBeUndefined();
+
+			gg.Player.ArousalSettings.Progress = 80;
+			expect(processTrigger('arousal', {})?.behavior.id).toBe('low');
+
+			gg.Player.ArousalSettings.Progress = 95;
+			expect(processTrigger('arousal', {})?.behavior.id).toBe('high');
+		});
+
+		it('fires the winning band once, then the lower band when arousal drops', () => {
+			addArousalBehavior('low', 80, {
+				id: 'speech-low',
+				name: 'Low',
+				type: 'speech',
+				content: ['low'],
+			});
+			addArousalBehavior('high', 90, {
+				id: 'anim-high',
+				name: 'High',
+				type: 'animation',
+				animationId: 'anim-90',
+				priority: 0,
+			});
+			addArousalBehavior('low-anim', 80, {
+				id: 'anim-low',
+				name: 'Low anim',
+				type: 'animation',
+				animationId: 'anim-80',
+			});
+
+			gg.Player.ArousalSettings.Progress = 85;
+			BehaviorsModule.processBehavior('arousal', {});
+			expect(chatRoomAutoInterceptMessage).toHaveBeenCalledTimes(1);
+			expect(chatRoomAutoInterceptMessage).toHaveBeenCalledWith('low');
+			expect(playAnimation).toHaveBeenCalledTimes(1);
+			expect(playAnimation).toHaveBeenCalledWith('anim-80', expect.objectContaining({ interrupt: true }));
+
+			BehaviorsModule.processBehavior('arousal', {});
+			expect(chatRoomAutoInterceptMessage).toHaveBeenCalledTimes(1);
+			expect(playAnimation).toHaveBeenCalledTimes(1);
+
+			gg.Player.ArousalSettings.Progress = 95;
+			BehaviorsModule.processBehavior('arousal', {});
+			expect(chatRoomAutoInterceptMessage).toHaveBeenCalledTimes(1);
+			expect(playAnimation).toHaveBeenCalledTimes(2);
+			expect(playAnimation).toHaveBeenLastCalledWith('anim-90', expect.objectContaining({ interrupt: true }));
+
+			gg.Player.ArousalSettings.Progress = 89;
+			BehaviorsModule.processBehavior('arousal', {});
+			expect(chatRoomAutoInterceptMessage).toHaveBeenCalledTimes(2);
+			expect(chatRoomAutoInterceptMessage).toHaveBeenLastCalledWith('low');
+			expect(playAnimation).toHaveBeenLastCalledWith('anim-80', expect.objectContaining({ interrupt: true }));
+		});
+
+		it('re-fires a lower reaction of the same type when a higher one drops out', () => {
+			addArousalBehavior('low', 80, {
+				id: 'speech-low',
+				name: 'Low',
+				type: 'speech',
+				content: ['low'],
+			});
+			addArousalBehavior('high', 90, {
+				id: 'speech-high',
+				name: 'High',
+				type: 'speech',
+				content: ['high'],
+			});
+
+			gg.Player.ArousalSettings.Progress = 95;
+			BehaviorsModule.processBehavior('arousal', {});
+			BehaviorsModule.processBehavior('arousal', {});
+			expect(chatRoomAutoInterceptMessage).toHaveBeenCalledTimes(1);
+			expect(chatRoomAutoInterceptMessage).toHaveBeenCalledWith('high');
+
+			gg.Player.ArousalSettings.Progress = 85;
+			BehaviorsModule.processBehavior('arousal', {});
+			expect(chatRoomAutoInterceptMessage).toHaveBeenCalledTimes(2);
+			expect(chatRoomAutoInterceptMessage).toHaveBeenLastCalledWith('low');
 		});
 	});
 

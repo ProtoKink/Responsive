@@ -208,6 +208,11 @@
               color: white;
             }
 
+            &.type-arousal {
+              background-color: $arousal-color;
+              color: white;
+            }
+
             &.type-roomPresence {
               background-color: $roomPresence-color;
               color: white;
@@ -347,6 +352,11 @@
 
       &.type-orgasm {
         background-color: $orgasm-color;
+        color: white;
+      }
+
+      &.type-arousal {
+        background-color: $arousal-color;
         color: white;
       }
 

@@ -232,7 +232,7 @@ export function buildCollapsibleSection({ id, headerKey, content, expanded = fal
 	const contentDiv = ElementCreate({
 		tag: 'div',
 		classList: [selector.collapsibleContent],
-		children: CommonUnwrapThunk(content)
+		children: CommonUnwrapThunk<HTMLElement[]>(content)
 	});
 
 	const section = ElementCreate({

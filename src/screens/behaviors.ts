@@ -1194,6 +1194,21 @@ export class GuiBehaviors extends BaseSubscreen {
 				elements.push(orgasmTypeField);
 				break;
 			}
+			case 'arousal': {
+				const limitField = createNumberInputField({
+					id: `${trigger.id}-arousal-limit`,
+					labelKey: 'behaviors.field.arousal_limit',
+					value: trigger.limit.toString(),
+					onChange: (val) => {
+						const parsed = parseFloat(val);
+						trigger.limit = CommonIsNonNegativeInteger(parsed) ? parsed : 0;
+					},
+					min: '0',
+					max: '100'
+				});
+				elements.push(limitField);
+				break;
+			}
 			case 'roomPresence': {
 				const roomPresenceField = createDropdownField({
 					id: `${trigger.id}-room-presence-event`,
@@ -2394,6 +2409,15 @@ export class GuiBehaviors extends BaseSubscreen {
 					name: trigger.name || getText('behaviors.text.new_trigger'),
 					type: 'orgasm',
 					orgasmType: 'any',
+					constraintMode: trigger.constraintMode,
+					constraints: trigger.constraints
+				});
+				break;
+			case 'arousal':
+				newTrigger = BehaviorsModule.createTrigger({
+					name: trigger.name || getText('behaviors.text.new_trigger'),
+					type: 'arousal',
+					limit: 0,
 					constraintMode: trigger.constraintMode,
 					constraints: trigger.constraints
 				});

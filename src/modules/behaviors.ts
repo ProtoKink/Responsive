@@ -3,7 +3,7 @@ import { areBehaviorsEnabled } from '../utilities/handlers';
 import { Behavior, BehaviorsSettingsModel, Reaction, Trigger, MessageData, TriggerType, TriggerOrgasmType, BehaviorInput, TriggerInput, ReactionInput, SpeechType, applyBehaviorDefaults, applyTriggerDefaults, applyReactionDefaults } from '../models/behaviors';
 import { GuiBehaviors } from '../screens/behaviors';
 import { HookPriority, ModuleCategory } from '../utilities/sdk';
-import { processTrigger } from '../utilities/triggers';
+import { collectTriggers, hasTriggerRank, triggerRank } from '../utilities/triggers';
 import { processReactions } from '../utilities/reactions';
 import { DebugStorage } from '../utilities/debugStorage';
 
@@ -24,6 +24,7 @@ export class BehaviorsModule extends BaseModule {
 
 	leashedLeave: boolean = false;
 	behaviorExecutionMap: Map<string, number> = new Map();
+	activeRankedKeys: Partial<Record<TriggerType, string | undefined>> = {};
 
 	get settings(): BehaviorsSettingsModel {
 		return super.settings as BehaviorsSettingsModel;
@@ -198,6 +199,34 @@ export class BehaviorsModule extends BaseModule {
 			},
 			ModuleCategory.Global
 		);
+
+		sdk.hookFunction(
+			'ActivityProgressCharacter',
+			HookPriority.Observe,
+			(args, next) => {
+				if (!areBehaviorsEnabled()) return next(args);
+				if (!ServerPlayerIsInChatRoom()) return next(args);
+
+				const ret = next(args);
+				BehaviorsModule.handleArousalTick(args[0]);
+				return ret;
+			},
+			ModuleCategory.Global
+		);
+
+		sdk.hookFunction(
+			'ActivityDecayCharacter',
+			HookPriority.Observe,
+			(args, next) => {
+				if (!areBehaviorsEnabled()) return next(args);
+				if (!ServerPlayerIsInChatRoom()) return next(args);
+
+				const ret = next(args);
+				BehaviorsModule.handleArousalTick(args[0]);
+				return ret;
+			},
+			ModuleCategory.Global
+		);
 	}
 
 	getBehavior(id: string): Behavior | undefined {
@@ -254,16 +283,55 @@ export class BehaviorsModule extends BaseModule {
 		});
 	}
 
+	static handleArousalTick(character: Character | undefined): void {
+		if (!areBehaviorsEnabled()) return;
+		if (!character || character.MemberNumber !== Player.MemberNumber) return;
+		BehaviorsModule.processBehavior('arousal', { source: character });
+	}
+
 	static processBehavior(type: TriggerType, messageData: MessageData): Behavior | undefined {
-		const triggerResult = processTrigger(type, messageData);
+		const matches = collectTriggers(type, messageData);
+		if (hasTriggerRank(type)) return BehaviorsModule.runTopRanked(type, matches, messageData);
 
-		if (!triggerResult) return undefined;
+		const match = matches[0];
+		if (!match) return undefined;
+		return BehaviorsModule.runBehavior(match.behavior, match.trigger, messageData);
+	}
 
-		const { behavior, trigger } = triggerResult;
+	private static runTopRanked(type: TriggerType, matches: ReturnType<typeof collectTriggers>, messageData: MessageData): Behavior | undefined {
+		const active = BehaviorsModule.instance.activeRankedKeys ??= {};
+		let maxRank = -1;
+		const top: { behavior: Behavior; trigger: Trigger }[] = [];
 
+		for (const match of matches) {
+			const rank = triggerRank(match.trigger);
+			if (rank > maxRank) {
+				maxRank = rank;
+				top.length = 0;
+				top.push(match);
+			} else if (rank === maxRank) {
+				top.push(match);
+			}
+		}
+
+		// signature of the active ranked triggers. sorted so match order does not matter, joined with a null byte so different id sets cannot collide
+		const key = top.length ? top.map(match => match.trigger.id).sort().join('\0') : undefined;
+		if (active[type] === key) return undefined;
+		active[type] = key;
+		if (!key) return undefined;
+
+		let last: Behavior | undefined;
+		for (const match of top) {
+			last = BehaviorsModule.runBehavior(match.behavior, match.trigger, messageData);
+		}
+		return last;
+	}
+
+	private static runBehavior(behavior: Behavior, trigger: Trigger, messageData: MessageData): Behavior {
 		const reactions = behavior.reactions
 			.map(r => BehaviorsModule.instance.getReaction(r))
-			.filter(r => r !== undefined);
+			.filter(r => r !== undefined)
+			.map(r => hasTriggerRank(trigger.type) && r.type === 'animation' ? { ...r, interrupt: true } : r);
 
 		const reactionResult = processReactions(reactions, behavior.reactionMode, messageData);
 
@@ -272,7 +340,7 @@ export class BehaviorsModule extends BaseModule {
 			behaviorId: behavior.id,
 			triggerId: trigger.id,
 			reactionIds: reactionResult.executedReactionIds,
-			triggerType: type,
+			triggerType: trigger.type,
 			messageData: {
 				sourceMemberNumber: messageData.source?.MemberNumber,
 				targetMemberNumber: messageData.target?.MemberNumber,
@@ -285,7 +353,7 @@ export class BehaviorsModule extends BaseModule {
 			}
 		});
 
-		if (reactionResult.success && behavior.cooldownSec) {
+		if (reactionResult.success && behavior.cooldownSec && !hasTriggerRank(trigger.type)) {
 			BehaviorsModule.instance.behaviorExecutionMap.set(behavior.id, CommonTime());
 		}
 

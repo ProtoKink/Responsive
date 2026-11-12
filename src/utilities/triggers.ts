@@ -12,8 +12,14 @@ type ConstraintResults = {
 };
 
 type TriggerPredicate = (trigger: Trigger, data: MessageData) => boolean;
+type TriggerRank = (trigger: Trigger) => number;
 
 type TriggerPredicatesMap = Map<TriggerType, TriggerPredicate[]>;
+/**
+ * Map of trigger types to their rank function.
+ * Rank is used to determine the best trigger to execute.
+ */
+type TriggerRanksMap = Map<TriggerType, TriggerRank>;
 
 function matchText(text: string, pattern: string, matchMode: MatchMode): boolean {
 	switch (matchMode) {
@@ -34,6 +40,18 @@ function registerPredicate(types: TriggerType[], predicate: TriggerPredicate): v
 		}
 		triggerPredicates.get(type)!.push(predicate);
 	});
+}
+
+function registerRank(types: TriggerType[], rank: TriggerRank): void {
+	types.forEach(type => triggerRanks.set(type, rank));
+}
+
+export function triggerRank(trigger: Trigger): number {
+	return triggerRanks.get(trigger.type)?.(trigger) ?? 0;
+}
+
+export function hasTriggerRank(type: TriggerType): boolean {
+	return triggerRanks.has(type);
 }
 
 const messageContentPredicate: TriggerPredicate = (trigger, data) => {
@@ -75,6 +93,12 @@ const orgasmPredicate: TriggerPredicate = (trigger, data) => {
 	return trigger.orgasmType === data.orgasmType;
 };
 
+const arousalPredicate: TriggerPredicate = (trigger) => {
+	if (trigger.type !== 'arousal') return false;
+
+	return (Player.ArousalSettings?.Progress ?? 0) >= trigger.limit;
+};
+
 const roomPresencePredicate: TriggerPredicate = (trigger, data) => {
 	if (trigger.type !== 'roomPresence') return false;
 
@@ -82,12 +106,16 @@ const roomPresencePredicate: TriggerPredicate = (trigger, data) => {
 };
 
 const triggerPredicates: TriggerPredicatesMap = new Map();
+const triggerRanks: TriggerRanksMap = new Map();
 
 registerPredicate(['emote', 'speech', 'action'], messageContentPredicate);
 registerPredicate(['speech'], speechTypePredicate);
 registerPredicate(['activity'], activityPredicate);
 registerPredicate(['orgasm'], orgasmPredicate);
 registerPredicate(['roomPresence'], roomPresencePredicate);
+registerPredicate(['arousal'], arousalPredicate);
+
+registerRank(['arousal'], (trigger) => trigger.type === 'arousal' ? trigger.limit : 0);
 
 type ConstraintPrerequisite = (trigger: Trigger) => boolean;
 
@@ -120,6 +148,12 @@ export function isConstraintCompatible(trigger: Trigger, entity: ConstraintEntit
 		return entry.predicate(trigger);
 	});
 }
+
+const excludeOnArousal: ConstraintPrerequisite = (trigger) => trigger.type !== 'arousal';
+
+registerConstraintPrerequisite('source', excludeOnArousal);
+registerConstraintPrerequisite('target', excludeOnArousal);
+registerConstraintPrerequisite('player', excludeOnArousal, ['arousalMin', 'arousalMax']);
 
 function constraintKeys<T extends object>(obj: T): (T extends unknown ? keyof T : never)[] {
 	return CommonKeys(obj) as (T extends unknown ? keyof T : never)[];
@@ -270,11 +304,19 @@ function evaluateAllConstraints(constraints: TriggerConstraint, data: MessageDat
 	return results;
 }
 
-export function processTrigger(type: TriggerType, messageData: MessageData): { behavior: Behavior; trigger: Trigger } | undefined {
+function isTriggerMet(trigger: Trigger, messageData: MessageData): boolean {
+	if (trigger.constraints && trigger.constraintMode) {
+		const applicable = applicableConstraints(trigger);
+		if (applicable && !processTriggerConstraint(applicable, trigger.constraintMode, messageData)) return false;
+	}
+
+	return checkTriggerPredicates(trigger, messageData);
+}
+
+export function collectTriggers(type: TriggerType, messageData: MessageData): { behavior: Behavior; trigger: Trigger }[] {
 	const enabledBehaviors = Object.values(BehaviorsModule.instance.settings.behaviors)
 		.filter(b => b.enabled);
-
-	if (enabledBehaviors.length === 0) return undefined;
+	const matches: { behavior: Behavior; trigger: Trigger }[] = [];
 
 	for (const behavior of enabledBehaviors) {
 		const last = BehaviorsModule.instance.behaviorExecutionMap.get(behavior.id);
@@ -285,25 +327,23 @@ export function processTrigger(type: TriggerType, messageData: MessageData): { b
 		const triggers = behavior.triggers.map(t => BehaviorsModule.instance.getTrigger(t));
 		const triggersOfType = triggers.filter(t => t?.type === type).filter(t => t !== undefined);
 
-		const metTrigger = triggersOfType.find(trigger => {
-			let isConstraintMet = true;
-
-			if (trigger.constraints && trigger.constraintMode) {
-				const applicable = applicableConstraints(trigger);
-				isConstraintMet = !applicable || processTriggerConstraint(applicable, trigger.constraintMode, messageData);
-			}
-
-			if (!isConstraintMet) return false;
-
-			return checkTriggerPredicates(trigger, messageData);
-		});
-
-		if (metTrigger) {
-			return { behavior, trigger: metTrigger };
+		let best: Trigger | undefined;
+		for (const trigger of triggersOfType) {
+			if (!isTriggerMet(trigger, messageData)) continue;
+			if (!best || triggerRank(trigger) > triggerRank(best)) best = trigger;
 		}
+
+		if (best) matches.push({ behavior, trigger: best });
 	}
 
-	return undefined;
+	return matches;
+}
+
+export function processTrigger(type: TriggerType, messageData: MessageData): { behavior: Behavior; trigger: Trigger } | undefined {
+	return collectTriggers(type, messageData).reduce<{ behavior: Behavior; trigger: Trigger } | undefined>((best, entry) => {
+		if (!best || triggerRank(entry.trigger) > triggerRank(best.trigger)) return entry;
+		return best;
+	}, undefined);
 }
 
 export function processTriggerConstraint(triggerConstraint: TriggerConstraint, mode: ConstraintMode, messageData: MessageData): boolean {
