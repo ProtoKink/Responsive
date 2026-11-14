@@ -771,6 +771,13 @@ export class GuiBehaviors extends BaseSubscreen {
 		if (data.speechType) {
 			messageFields.push(this.buildDebuggerField('behaviors.field.speech_type', data.speechType));
 		}
+		if (data.buttonId) {
+			const buttonTrigger = this.module.getTrigger(data.buttonId);
+			const buttonLabel = buttonTrigger?.type === 'button'
+				? buttonTrigger.name
+				: data.buttonId;
+			messageFields.push(this.buildDebuggerField('behaviors.field.button_label', buttonLabel));
+		}
 
 		const messageSection = buildCollapsibleSection({
 			headerKey: 'behaviors.debugger.message_data',
@@ -1218,6 +1225,16 @@ export class GuiBehaviors extends BaseSubscreen {
 					onChange: (val) => trigger.event = val as RoomPresenceEvent
 				});
 				elements.push(roomPresenceField);
+				break;
+			}
+			case 'button': {
+				elements.push(advElement.createLabel({
+					id: null,
+					label: getText('behaviors.text.button_trigger_hint'),
+					htmlOptions: {
+						classList: ['rsp-behaviors-field-hint']
+					}
+				}));
 				break;
 			}
 		}
@@ -2427,6 +2444,14 @@ export class GuiBehaviors extends BaseSubscreen {
 					name: trigger.name || getText('behaviors.text.new_trigger'),
 					type: 'roomPresence',
 					event: 'join',
+					constraintMode: trigger.constraintMode,
+					constraints: trigger.constraints
+				});
+				break;
+			case 'button':
+				newTrigger = BehaviorsModule.createTrigger({
+					name: trigger.name || getText('behaviors.text.new_trigger'),
+					type: 'button',
 					constraintMode: trigger.constraintMode,
 					constraints: trigger.constraints
 				});

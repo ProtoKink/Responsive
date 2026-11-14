@@ -40,7 +40,7 @@ export type RoomPresenceEvent = (typeof roomPresenceEvents)[number];
 export const reactionTypes = ['speech', 'emote', 'action', 'activity', 'animation'] as const;
 export type ReactionType = (typeof reactionTypes)[number];
 
-export const triggerTypes = ['speech', 'emote', 'action', 'activity', 'orgasm', 'arousal', 'roomPresence'] as const;
+export const triggerTypes = ['speech', 'emote', 'action', 'activity', 'orgasm', 'arousal', 'roomPresence', 'button'] as const;
 export type TriggerType = (typeof triggerTypes)[number];
 
 export const includeExcludeModes = ['include', 'exclude'] as const;
@@ -98,6 +98,7 @@ export type MessageData = {
 	orgasmType?: OrgasmType;
 	roomPrecenseEvent?: RoomPresenceEvent;
 	speechType?: SpeechType;
+	buttonId?: string;
 };
 
 // #endregion Misc
@@ -199,7 +200,11 @@ export type TriggerRoomPresence = BaseTrigger & {
 	event: RoomPresenceEvent;
 };
 
-export type Trigger = TriggerSpeech | TriggerEmote | TriggerAction | TriggerActivity | TriggerOrgasm | TriggerArousal | TriggerRoomPresence;
+export type TriggerButton = BaseTrigger & {
+	type: 'button';
+};
+
+export type Trigger = TriggerSpeech | TriggerEmote | TriggerAction | TriggerActivity | TriggerOrgasm | TriggerArousal | TriggerRoomPresence | TriggerButton;
 
 export type TriggerInput = WithOptional<Trigger, 'id' | 'name'>;
 
@@ -224,6 +229,7 @@ export function applyTriggerDefaults(input: TriggerInput): Trigger {
 		case 'orgasm':
 		case 'arousal':
 		case 'roomPresence':
+		case 'button':
 			return { ...input, id, name };
 	}
 }

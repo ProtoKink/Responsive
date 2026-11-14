@@ -42,6 +42,7 @@ behaviors.text.no_reactions_available = No reactions available. Create a reactio
 behaviors.text.do_not_show_this_again_until_leaving_this_screen = Do not show this again until leaving this screen
 behaviors.text.no_constraints = No constraints added
 behaviors.text.select_constraint_type = Select Constraint Type
+behaviors.text.button_trigger_hint = Adds a button to the chat room behaviors menu. Clicking it runs behaviors that use this trigger.
 
 # Debugger
 behaviors.debugger.title = Execution History
@@ -78,6 +79,7 @@ behaviors.field.group_names = Group Names
 behaviors.field.orgasm_type = Orgasm Type
 behaviors.field.room_presence_event = Room Presence Event
 behaviors.field.arousal_limit = Arousal Limit
+behaviors.field.button_label = Button Label
 behaviors.field.animation = Animation
 behaviors.field.animation_interrupt = Interrupt Active Animation
 behaviors.field.animation_priority = Animation Priority
@@ -113,6 +115,7 @@ behaviors.trigger_type.activity = Activity
 behaviors.trigger_type.orgasm = Orgasm
 behaviors.trigger_type.roomPresence = Room Presence
 behaviors.trigger_type.arousal = Arousal
+behaviors.trigger_type.button = Button
 
 # Reaction Types
 behaviors.reaction_type.speech = Speech
@@ -153,3 +156,4 @@ behaviors.option.orgasm = Orgasm
 behaviors.option.roomPresence = Room Presence
 behaviors.option.arousal = Arousal
 behaviors.option.animation = Animation
+behaviors.option.button = Button

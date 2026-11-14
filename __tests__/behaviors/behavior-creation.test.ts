@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { BehaviorsModule } from '@/modules/behaviors';
-import type { BehaviorInput, TriggerInput, ReactionInput, TriggerRoomPresence, TriggerActivity, TriggerOrgasm, TriggerAction, TriggerEmote, TriggerSpeech, ReactionEmote, ReactionSpeech, ReactionAction, ReactionActivity } from '@/models/behaviors';
+import type { BehaviorInput, TriggerInput, ReactionInput, TriggerRoomPresence, TriggerActivity, TriggerOrgasm, TriggerAction, TriggerEmote, TriggerSpeech, TriggerButton, ReactionEmote, ReactionSpeech, ReactionAction, ReactionActivity } from '@/models/behaviors';
 
 vi.mock('bc-deeplib/deeplib', async () => {
 	const actual = await vi.importActual('bc-deeplib/deeplib');
@@ -212,6 +212,20 @@ describe('Trigger Creation', () => {
 			expect(result?.type).toBe('roomPresence');
 			expect(result?.name).toBe('Test Room Presence Trigger');
 			expect(result?.event).toBe('join');
+			expect(result?.id).toBeDefined();
+		});
+
+		it('should create a button trigger', () => {
+			const input: TriggerInput = {
+				type: 'button',
+				name: 'Wave',
+			};
+
+			const result = BehaviorsModule.createTrigger(input) as TriggerButton;
+
+			expect(result).toBeDefined();
+			expect(result?.type).toBe('button');
+			expect(result?.name).toBe('Wave');
 			expect(result?.id).toBeDefined();
 		});
 

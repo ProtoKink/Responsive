@@ -105,6 +105,12 @@ const roomPresencePredicate: TriggerPredicate = (trigger, data) => {
 	return trigger.event === data.roomPrecenseEvent;
 };
 
+const buttonPredicate: TriggerPredicate = (trigger, data) => {
+	if (trigger.type !== 'button') return false;
+
+	return trigger.id === data.buttonId;
+};
+
 const triggerPredicates: TriggerPredicatesMap = new Map();
 const triggerRanks: TriggerRanksMap = new Map();
 
@@ -114,6 +120,7 @@ registerPredicate(['activity'], activityPredicate);
 registerPredicate(['orgasm'], orgasmPredicate);
 registerPredicate(['roomPresence'], roomPresencePredicate);
 registerPredicate(['arousal'], arousalPredicate);
+registerPredicate(['button'], buttonPredicate);
 
 registerRank(['arousal'], (trigger) => trigger.type === 'arousal' ? trigger.limit : 0);
 
@@ -150,6 +157,10 @@ export function isConstraintCompatible(trigger: Trigger, entity: ConstraintEntit
 }
 
 const excludeOnArousal: ConstraintPrerequisite = (trigger) => trigger.type !== 'arousal';
+const excludeOnButton: ConstraintPrerequisite = (trigger) => trigger.type !== 'button';
+
+registerConstraintPrerequisite('source', excludeOnButton);
+registerConstraintPrerequisite('target', excludeOnButton);
 
 registerConstraintPrerequisite('source', excludeOnArousal);
 registerConstraintPrerequisite('target', excludeOnArousal);

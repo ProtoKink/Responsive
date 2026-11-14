@@ -552,6 +552,55 @@ describe('processTrigger', () => {
 		});
 	});
 
+	describe('button triggers', () => {
+		it('should match the button that was clicked', () => {
+			const trigger: Trigger = {
+				id: 'trigger1',
+				name: 'Wave',
+				type: 'button',
+			};
+
+			const behavior: Behavior = {
+				id: 'behavior1',
+				name: 'Test Behavior',
+				enabled: true,
+				triggers: ['trigger1'],
+				reactions: [],
+				reactionMode: 'random',
+			};
+
+			mockTriggers['trigger1'] = trigger;
+			mockBehaviors['behavior1'] = behavior;
+
+			const result = processTrigger('button', { buttonId: 'trigger1' });
+			expect(result?.behavior).toEqual(behavior);
+			expect(result?.trigger).toEqual(trigger);
+		});
+
+		it('should not match a different button', () => {
+			const trigger: Trigger = {
+				id: 'trigger1',
+				name: 'Wave',
+				type: 'button',
+			};
+
+			const behavior: Behavior = {
+				id: 'behavior1',
+				name: 'Test Behavior',
+				enabled: true,
+				triggers: ['trigger1'],
+				reactions: [],
+				reactionMode: 'random',
+			};
+
+			mockTriggers['trigger1'] = trigger;
+			mockBehaviors['behavior1'] = behavior;
+
+			const result = processTrigger('button', { buttonId: 'other-button' });
+			expect(result).toBeUndefined();
+		});
+	});
+
 	describe('arousal triggers', () => {
 		const playAnimation = AnimatronikkaModule.instance.playAnimation as ReturnType<typeof vi.fn>;
 

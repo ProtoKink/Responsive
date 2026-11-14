@@ -218,6 +218,11 @@
               color: white;
             }
 
+            &.type-button {
+              background-color: $button-color;
+              color: white;
+            }
+
             &.has-constraints {
               background-color: $constraint-color;
               color: white;
@@ -265,6 +270,11 @@
     text-align: center;
     padding: minv(5, 2.5);
     opacity: 0.6;
+  }
+
+  .rsp-behaviors-field-hint {
+    opacity: 0.75;
+    font-size: 0.9em;
   }
 
   .rsp-behaviors-content-list {
@@ -362,6 +372,11 @@
 
       &.type-roomPresence {
         background-color: $roomPresence-color;
+        color: white;
+      }
+
+      &.type-button {
+        background-color: $button-color;
         color: white;
       }
 
@@ -519,3 +534,73 @@
 }
 
 // #endregion !SECTION Debugger
+
+// #region SECTION Chat room buttons
+
+.rsp-chatroom-buttons {
+	position: fixed;
+  z-index: 50;
+  overflow: visible;
+  box-sizing: border-box;
+
+  .rsp-chatroom-button-main {
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+    touch-action: none;
+  }
+
+  &[data-dragging] .rsp-chatroom-button-main {
+    cursor: grabbing;
+  }
+}
+
+.rsp-chatroom-button-grid {
+  display: grid;
+  position: absolute;
+  top: calc(100% + var(--half-gap));
+  right: 0;
+  box-sizing: border-box;
+  width: min(70dvw, calc(var(--rsp-button-columns, 1) * 10rem), var(--rsp-grid-max-width, 70dvw));
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  grid-template-columns: repeat(var(--rsp-button-columns, 1), minmax(0, 1fr));
+  gap: var(--half-gap);
+  padding: 0 var(--half-gap);
+  background-color: rgb(28 28 28 / 70%);
+  border: var(--border-width) solid rgb(255 255 255 / 20%);
+  transition: max-height 0.15s ease, opacity 0.15s ease, padding 0.15s ease;
+
+  &[data-open] {
+    max-height: min(60dvh, var(--rsp-grid-max-height, 60dvh));
+    padding: var(--half-gap);
+    opacity: 1;
+    overflow: auto;
+    pointer-events: auto;
+    box-shadow: 0 var(--half-gap) var(--gap) rgb(0 0 0 / 35%);
+  }
+
+  &.align-start {
+    right: auto;
+    left: 0;
+  }
+
+  &.open-up {
+    top: auto;
+    bottom: calc(100% + var(--half-gap));
+  }
+}
+
+.rsp-chatroom-button {
+  width: 100%;
+	padding-block: var(--half-gap);
+	display: initial;
+
+  .button-label {
+		background-color: unset !important;
+    max-width: 100%;
+  }
+}
+
+// #endregion !SECTION Chat room buttons

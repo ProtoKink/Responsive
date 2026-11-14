@@ -1,6 +1,7 @@
 import { BaseModule, Subscreen, exportToGlobal, getModule, sdk } from 'bc-deeplib/deeplib';
 import { areBehaviorsEnabled } from '../utilities/handlers';
-import { Behavior, BehaviorsSettingsModel, Reaction, Trigger, MessageData, TriggerType, TriggerOrgasmType, BehaviorInput, TriggerInput, ReactionInput, SpeechType, applyBehaviorDefaults, applyTriggerDefaults, applyReactionDefaults } from '../models/behaviors';
+import { modStorage } from '../utilities/data';
+import { Behavior, BehaviorsSettingsModel, Reaction, Trigger, MessageData, TriggerType, TriggerOrgasmType, BehaviorInput, TriggerInput, ReactionInput, SpeechType, TriggerButton, applyBehaviorDefaults, applyTriggerDefaults, applyReactionDefaults } from '../models/behaviors';
 import { GuiBehaviors } from '../screens/behaviors';
 import { HookPriority, ModuleCategory } from '../utilities/sdk';
 import { collectTriggers, hasTriggerRank, triggerRank } from '../utilities/triggers';
@@ -19,11 +20,31 @@ const orgasmTypesFromMessage = (msg: string): TriggerOrgasmType | undefined => {
 	return undefined;
 };
 
+const selec = Object.freeze({
+	chatRoomButtonsId: 'rsp-chatroom-buttons',
+});
+
+const CHAT_ROOM_BUTTON_POSITION_KEY = 'CHAT_ROOM_BUTTON_POSITION';
+const CHAT_ROOM_BUTTON_SIZE = 64;
+const CHAT_ROOM_BUTTON_DRAG_THRESHOLD = 6;
+
+type ChatRoomButtonAnchor = { x: number; y: number };
+type ChatRoomButtonDrag = {
+	pointerId: number;
+	originX: number;
+	originY: number;
+	startLeft: number;
+	startTop: number;
+	moved: boolean;
+};
+
 export class BehaviorsModule extends BaseModule {
 	static instance: BehaviorsModule;
 
-	leashedLeave: boolean = false;
+	private leashedLeave: boolean = false;
 	behaviorExecutionMap: Map<string, number> = new Map();
+	private static chatRoomButtonDrag: ChatRoomButtonDrag | null = null;
+	private static suppressChatRoomButtonToggle = false;
 	activeRankedKeys: Partial<Record<TriggerType, string | undefined>> = {};
 
 	get settings(): BehaviorsSettingsModel {
@@ -227,6 +248,38 @@ export class BehaviorsModule extends BaseModule {
 			},
 			ModuleCategory.Global
 		);
+
+		sdk.hookFunction(
+			'ChatRoomLoad',
+			HookPriority.Observe,
+			async (args, next) => {
+				const ret = await next(args);
+				BehaviorsModule.syncChatRoomButtons();
+				return ret;
+			},
+			ModuleCategory.Global
+		);
+
+		sdk.hookFunction(
+			'ChatRoomResize',
+			HookPriority.Observe,
+			(args, next) => {
+				const ret = next(args);
+				BehaviorsModule.positionChatRoomButtons();
+				return ret;
+			},
+			ModuleCategory.Global
+		);
+
+		sdk.hookFunction(
+			'ChatRoomUnload',
+			HookPriority.Observe,
+			(args, next) => {
+				BehaviorsModule.clearChatRoomButtons();
+				return next(args);
+			},
+			ModuleCategory.Global
+		);
 	}
 
 	getBehavior(id: string): Behavior | undefined {
@@ -287,6 +340,228 @@ export class BehaviorsModule extends BaseModule {
 		if (!areBehaviorsEnabled()) return;
 		if (!character || character.MemberNumber !== Player.MemberNumber) return;
 		BehaviorsModule.processBehavior('arousal', { source: character });
+	}
+
+	static syncChatRoomButtons(): void {
+		BehaviorsModule.clearChatRoomButtons();
+		if (!areBehaviorsEnabled()) return;
+
+		const triggers = BehaviorsModule.chatRoomButtonTriggers();
+		if (triggers.length === 0) return;
+
+		const buttons = triggers.map(trigger => {
+			return ElementButton.Create(
+				`rsp-chatroom-button-${trigger.id}`,
+				() => {
+					BehaviorsModule.processBehavior('button', {
+						buttonId: trigger.id,
+						source: Player,
+					});
+				},
+				{
+					label: trigger.name,
+					role: 'menuitem',
+					labelPosition: 'left'
+				},
+				{
+					button: {
+						classList: ['rsp-chatroom-button'],
+					},
+				}
+			);
+		});
+
+		const columns = CommonClamp(triggers.length, 1, 3);
+		const buttonMenu = ElementMenu.Create(
+			null,
+			buttons,
+			{ role: 'menu' },
+			{
+				menu: {
+					classList: ['rsp-chatroom-button-grid'],
+					style: { '--rsp-button-columns': String(columns) },
+				},
+			}
+		);
+
+		const mainButton = ElementButton.Create(
+			null,
+			function (this: HTMLButtonElement, ev: PointerEvent) {
+				if (BehaviorsModule.suppressChatRoomButtonToggle) {
+					BehaviorsModule.suppressChatRoomButtonToggle = false;
+					ev.preventDefault();
+					ev.stopPropagation();
+					return;
+				}
+				const open = this.getAttribute('aria-expanded') !== 'true';
+				this.setAttribute('aria-expanded', String(open));
+				buttonMenu.toggleAttribute('data-open', open);
+				BehaviorsModule.layoutChatRoomButtonGrid();
+			},
+			{
+				image: 'Icons/Arousal.png',
+				ariaHasPopup: 'menu',
+				ariaExpanded: 'false',
+			},
+			{
+				button: {
+					classList: ['rsp-chatroom-button-main'],
+				},
+			}
+		);
+
+		ElementCreate({
+			tag: 'div',
+			attributes: { id: selec.chatRoomButtonsId },
+			classList: ['rsp-chatroom-buttons'],
+			children: [mainButton, buttonMenu],
+			parent: document.body,
+		});
+		
+		mainButton.addEventListener('pointerdown', BehaviorsModule.onMenuPointerDown);
+		document.addEventListener('pointermove', BehaviorsModule.onMenuPointerMove);
+		document.addEventListener('pointerup', BehaviorsModule.onMenuPointerUp);
+	}
+
+	static positionChatRoomButtons(): void {
+		const menu = ElementWrap(selec.chatRoomButtonsId);
+		if (!menu) return;
+		const canvasSize = CHAT_ROOM_BUTTON_SIZE;
+
+		const maxX = Math.max(0, window.innerWidth - canvasSize);
+		const maxY = Math.max(0, window.innerHeight - canvasSize);
+		const anchor = BehaviorsModule.readMenuAnchor() ?? {
+			x: maxX === 0 ? 0 : Math.min(1, 16 / maxX),
+			y: maxY === 0 ? 0 : Math.min(1, 80 / maxY),
+		};
+		BehaviorsModule.placeMenu(menu, anchor.x * maxX, anchor.y * maxY);
+	}
+
+	static layoutChatRoomButtonGrid(): void {
+		const menu = ElementWrap(selec.chatRoomButtonsId);
+		const grid = menu?.querySelector<HTMLElement>('.rsp-chatroom-button-grid');
+		if (!menu || !grid) return;
+
+		const rect = menu.getBoundingClientRect();
+		const spaceRight = window.innerWidth - rect.left;
+		const spaceLeft = rect.right;
+		const spaceBelow = window.innerHeight - rect.bottom;
+		const spaceAbove = rect.top;
+		const alignStart = spaceRight >= spaceLeft;
+		const openUp = spaceBelow < 160 && spaceAbove > spaceBelow;
+		grid.classList.toggle('align-start', alignStart);
+		grid.classList.toggle('open-up', openUp);
+		grid.style.setProperty('--rsp-grid-max-width', `${Math.max(120, (alignStart ? spaceRight : spaceLeft) - 8)}px`);
+		grid.style.setProperty('--rsp-grid-max-height', `${Math.max(80, (openUp ? spaceAbove : spaceBelow) - 12)}px`);
+	}
+
+	static closeChatRoomButtonMenu(): void {
+		const menu = ElementWrap(selec.chatRoomButtonsId);
+		const mainButton = menu?.querySelector<HTMLButtonElement>('.rsp-chatroom-button-main');
+		mainButton?.setAttribute('aria-expanded', 'false');
+		menu?.querySelector('.rsp-chatroom-button-grid')?.removeAttribute('data-open');
+	}
+
+	static clearChatRoomButtons(): void {
+		document.removeEventListener('pointermove', BehaviorsModule.onMenuPointerMove);
+		document.removeEventListener('pointerup', BehaviorsModule.onMenuPointerUp);
+		BehaviorsModule.chatRoomButtonDrag = null;
+		ElementRemove(selec.chatRoomButtonsId);
+	}
+
+	private static placeMenu(menu: HTMLElement, left: number, top: number): void {
+		const canvasSize = CHAT_ROOM_BUTTON_SIZE;
+		const maxX = Math.max(0, window.innerWidth - canvasSize);
+		const maxY = Math.max(0, window.innerHeight - canvasSize);
+		const x = CommonClamp(left, 0, maxX);
+		const y = CommonClamp(top, 0, maxY);
+		menu.style.left = `${x}px`;
+		menu.style.top = `${y}px`;
+		menu.style.width = `${canvasSize}px`;
+		menu.style.height = `${canvasSize}px`;
+		BehaviorsModule.layoutChatRoomButtonGrid();
+	}
+
+	private static readMenuAnchor(): ChatRoomButtonAnchor | null {
+		const stored = modStorage.getLocalStorage(CHAT_ROOM_BUTTON_POSITION_KEY) as Partial<ChatRoomButtonAnchor> | null;
+		if (!stored || typeof stored.x !== 'number' || typeof stored.y !== 'number') return null;
+		if (!Number.isFinite(stored.x) || !Number.isFinite(stored.y)) return null;
+		return {
+			x: CommonClamp(stored.x, 0, 1),
+			y: CommonClamp(stored.y, 0, 1),
+		};
+	}
+
+	private static rememberMenuAnchor(left: number, top: number): void {
+		const canvasSize = CHAT_ROOM_BUTTON_SIZE;
+		const maxX = Math.max(0, window.innerWidth - canvasSize);
+		const maxY = Math.max(0, window.innerHeight - canvasSize);
+		modStorage.setLocalStorage(CHAT_ROOM_BUTTON_POSITION_KEY, {
+			x: maxX === 0 ? 0 : CommonClamp(left, 0, maxX) / maxX,
+			y: maxY === 0 ? 0 : CommonClamp(top, 0, maxY) / maxY,
+		});
+	}
+
+	private static onMenuPointerDown = (ev: PointerEvent): void => {
+		if (ev.button !== 0) return;
+		const menu = ElementWrap(selec.chatRoomButtonsId);
+		const mainButton = menu?.querySelector<HTMLButtonElement>('.rsp-chatroom-button-main');
+		if (!menu || !mainButton) return;
+		const target = ev.target;
+		if (!(target instanceof Node) || !mainButton.contains(target)) return;
+		if (target instanceof Element && target.closest('.rsp-chatroom-button-grid')) return;
+
+		const rect = menu.getBoundingClientRect();
+		BehaviorsModule.chatRoomButtonDrag = {
+			pointerId: ev.pointerId,
+			originX: ev.clientX,
+			originY: ev.clientY,
+			startLeft: rect.left,
+			startTop: rect.top,
+			moved: false,
+		};
+		mainButton.setPointerCapture(ev.pointerId);
+	};
+
+	private static onMenuPointerMove = (ev: PointerEvent): void => {
+		const drag = BehaviorsModule.chatRoomButtonDrag;
+		if (!drag || ev.pointerId !== drag.pointerId) return;
+		const menu = ElementWrap(selec.chatRoomButtonsId);
+		if (!menu) return;
+
+		const dx = ev.clientX - drag.originX;
+		const dy = ev.clientY - drag.originY;
+		if (!drag.moved && Math.hypot(dx, dy) < CHAT_ROOM_BUTTON_DRAG_THRESHOLD) return;
+		drag.moved = true;
+		BehaviorsModule.suppressChatRoomButtonToggle = true;
+		menu.setAttribute('data-dragging', '');
+		BehaviorsModule.placeMenu(menu, drag.startLeft + dx, drag.startTop + dy);
+	};
+
+	private static onMenuPointerUp = (ev: PointerEvent): void => {
+		const drag = BehaviorsModule.chatRoomButtonDrag;
+		if (!drag || ev.pointerId !== drag.pointerId) return;
+		BehaviorsModule.chatRoomButtonDrag = null;
+		const menu = ElementWrap(selec.chatRoomButtonsId);
+		menu?.removeAttribute('data-dragging');
+		if (!drag.moved || !menu) return;
+
+		BehaviorsModule.suppressChatRoomButtonToggle = true;
+		const rect = menu.getBoundingClientRect();
+		BehaviorsModule.rememberMenuAnchor(rect.left, rect.top);
+		setTimeout(() => {
+			BehaviorsModule.suppressChatRoomButtonToggle = false;
+		}, 0);
+	};
+
+	private static chatRoomButtonTriggers(): TriggerButton[] {
+		const behaviors = Object.values(BehaviorsModule.instance.settings.behaviors ?? {});
+		const ids = new Set(behaviors.filter(behavior => behavior.enabled).flatMap(behavior => behavior.triggers));
+
+		return [...ids].flatMap(id => {
+			const trigger = BehaviorsModule.instance.getTrigger(id);
+			return trigger?.type === 'button' ? [trigger] : [];
+		});
 	}
 
 	static processBehavior(type: TriggerType, messageData: MessageData): Behavior | undefined {
@@ -350,6 +625,7 @@ export class BehaviorsModule extends BaseModule {
 				orgasmType: messageData.orgasmType,
 				roomPrecenseEvent: messageData.roomPrecenseEvent,
 				speechType: messageData.speechType,
+				buttonId: messageData.buttonId,
 			}
 		});
 
