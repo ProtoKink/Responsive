@@ -57,3 +57,17 @@ animatronikka.prompt.duration_ms = Duration (ms)
 animatronikka.prompt.import_json = Paste animation JSON
 animatronikka.prompt.export_json = Animation JSON
 animatronikka.prompt.color_optional = Color (optional, comma for multiple)
+animatronikka.prompt.expression_group = Select expression group
+animatronikka.prompt.expression_name = Select expression name
+
+
+# Expression groups
+animatronikka.expression.Eyes = Both eyes
+animatronikka.expression.Eyes1 = Right eye
+animatronikka.expression.Eyes2 = Left eye
+animatronikka.expression.Eyebrows = Eyebrows
+animatronikka.expression.Mouth = Mouth
+animatronikka.expression.Fluids = Fluids
+animatronikka.expression.Emoticon = Emoticon
+animatronikka.expression.Blush = Blush
+animatronikka.expression.Pussy = Pussy

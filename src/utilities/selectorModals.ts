@@ -1,3 +1,4 @@
+import { animationGroups } from '@/modules/animatronikka';
 import { advElement, exportToGlobal, getText, Modal } from 'bc-deeplib/deeplib';
 
 export async function itemSelectorModal(options: { buttons?: { label: string, value: string, selected?: boolean }[], limit?: number, prompt?: string, showSearch?: boolean }): Promise<string[] | null> {
@@ -1034,7 +1035,76 @@ export async function textReactionSelectorModal(options?: { initialValue?: strin
 	});
 }
 
-export async function expressionSelectorModal(options: { group: ExpressionGroupName | 'Eyes1'; selectedExpressions?: ExpressionName[]; limit?: number }): Promise<ExpressionName[] | null> {
+export async function expressionGroupSelectorModal(options: { selectedGroups?: (ExpressionGroupName | 'Eyes1')[]; limit?: number }): Promise<(ExpressionGroupName | 'Eyes1')[] | null> {
+	const limit = options.limit ?? Infinity;
+	if (limit < 1) {
+		return [];
+	}
+  
+	const selectedGroups: Set<ExpressionGroupName | 'Eyes1'> = new Set(options.selectedGroups ?? []);
+	while (selectedGroups.size > limit) {
+		const oldest = selectedGroups.values().next().value;
+		if (oldest === undefined) {
+			break;
+		}
+		selectedGroups.delete(oldest);
+	}
+  
+	const buttonByValue = new Map<ExpressionGroupName | 'Eyes1', HTMLElement>();
+	const buttons = animationGroups.map(group => {
+		const isSelected = selectedGroups.has(group);
+		const realGroup = group === 'Eyes1' || group === 'Eyes2' ? 'Eyes' : group;
+		const buttonElement = advElement.createButton({
+			id: null,
+			onClick: function () {
+				const state = this.toggleAttribute('data-selected');
+				if (state) {
+					if (!selectedGroups.has(group)) {
+						if (selectedGroups.size >= limit) {
+							const oldest = selectedGroups.values().next().value;
+							if (oldest !== undefined) {
+								selectedGroups.delete(oldest);
+								buttonByValue.get(oldest)?.removeAttribute('data-selected');
+							}
+						}
+						selectedGroups.add(group);
+					}
+				} else {
+					selectedGroups.delete(group);
+				}
+			},
+			options: {
+				image: `Icons/Expressions/${realGroup}/Default.png`
+			},
+			htmlOptions: {
+				button: {
+					classList: ['rsp-expression-selector-button'],
+					dataAttributes: {
+						selected: isSelected ? '' : undefined
+					}
+				}
+			}
+		});
+		buttonByValue.set(group, buttonElement);
+		return buttonElement;
+	});
+
+	return await Modal.confirm([
+		advElement.createLabel({ id: null, label: getText('animatronikka.prompt.expression_group') }),
+		{
+			tag: 'div',
+			classList: ['rsp-expression-selector-buttons-container'],
+			children: buttons
+		}
+	], { modalClassList: ['rsp-modal', 'rsp-expression-selector-modal'] }).then((result) => {
+		if (!result) {
+			return null;
+		}
+		return Array.from(selectedGroups).filter(group => Boolean(group));
+	});
+}
+
+export async function expressionNameSelectorModal(options: { group: ExpressionGroupName | 'Eyes1'; selectedExpressions?: ExpressionName[]; limit?: number }): Promise<ExpressionName[] | null> {
 	const limit = options.limit ?? Infinity;
 	if (limit < 1) {
 		return [];
@@ -1061,7 +1131,11 @@ export async function expressionSelectorModal(options: { group: ExpressionGroupN
 	}
   
 	const buttonByValue = new Map<ExpressionName, HTMLElement>();
-	const buttons = allowedExpressions.map(expression => {
+	const buttons = allowedExpressions.sort((a, b) => {
+		if (a === null) return -1;
+		if (b === null) return 1;
+		return 0;
+	}).map(expression => {
 		const isSelected = selectedExpressions.has(expression);
 		const buttonElement = advElement.createButton({
 			id: null,
@@ -1083,7 +1157,7 @@ export async function expressionSelectorModal(options: { group: ExpressionGroupN
 				}
 			},
 			options: {
-				image: expression ? `Assets/Female3DCG/${realGroup}/${expression}/Icon.png` : `Assets/Female3DCG/${group}/Icon.png`
+				image: `Icons/Expressions/${group}/${expression ?? 'Default'}.png`
 			},
 			htmlOptions: {
 				button: {

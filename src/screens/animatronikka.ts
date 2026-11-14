@@ -1,9 +1,9 @@
 import { advElement, BaseSubscreen, exportToGlobal, getText, layout, Modal, SettingElement, SubscreenOptions } from 'bc-deeplib/deeplib';
 import { v4 as uuidv4 } from 'uuid';
-import { animationGroups, AnimatronikkaModule } from '../modules/animatronikka';
+import { AnimatronikkaModule } from '../modules/animatronikka';
 import { Animation, AnimatronikkaSettingsModel, Keyframe, KeyframeType, keyframeTypes } from '../models/animations';
 import { buildContentListSection, createInputField, createNumberInputField } from '../utilities/fields';
-import { bodyPartSelectorModal, expressionSelectorModal, itemSelectorModal } from '../utilities/selectorModals';
+import { bodyPartSelectorModal, expressionGroupSelectorModal, expressionNameSelectorModal, itemSelectorModal } from '../utilities/selectorModals';
 import { assertNever, easeOutBack, lerp } from '@/utilities/other';
 
 type PreviewMode = 'full' | 'face';
@@ -752,7 +752,7 @@ export class GuiAnimatronikka extends BaseSubscreen {
 	getKeyframeLabel(keyframe: Keyframe): string {
 		switch (keyframe.type) {
 			case 'expression':
-				return `${keyframe.group}: ${keyframe.expression ?? getText('animatronikka.text.none')} (${keyframe.durationMs}ms)`;
+				return `${getText(`animatronikka.expression.${keyframe.group}`)}: ${keyframe.expression ?? getText('animatronikka.text.none')} (${keyframe.durationMs}ms)`;
 			case 'pose':
 				return `${keyframe.poseName || getText('animatronikka.text.none')} (${keyframe.durationMs}ms)`;
 			case 'restraint': {
@@ -920,20 +920,15 @@ export class GuiAnimatronikka extends BaseSubscreen {
 	async promptKeyframe(type: KeyframeType, current?: Keyframe): Promise<Keyframe | null> {
 		switch (type) {
 			case 'expression': {
-				const group = (await itemSelectorModal({
-					buttons: animationGroups.map(group => ({
-						label: group,
-						value: group,
-						selected: current && current.type === 'expression' ? current.group === group : false,
-					})),
-					limit: 1,
-					prompt: getText('animatronikka.prompt.expression_group')
+				const group = (await expressionGroupSelectorModal({
+					selectedGroups: current && current.type === 'expression' ? [current.group as ExpressionGroupName | 'Eyes1'] : [],
+					limit: 1
 				}))?.[0];
 				if (!group) return null;
 				const realGroup = group === 'Eyes1' ? 'Eyes' : group;
 				const assetGroup = AssetGroupGet('Female3DCG', realGroup as ExpressionGroupName);
 				if (!assetGroup) return null;
-				const expression = await expressionSelectorModal({
+				const expression = await expressionNameSelectorModal({
 					group: assetGroup.Name as ExpressionGroupName,
 					selectedExpressions: current && current.type === 'expression' ? [current.expression as ExpressionName] : [],
 					limit: 1
