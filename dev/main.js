@@ -1,19 +1,11 @@
 "use strict";
 var Responsive = (() => {
-  var __create = Object.create;
   var __defProp = Object.defineProperty;
   var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
   var __getOwnPropNames = Object.getOwnPropertyNames;
-  var __getProtoOf = Object.getPrototypeOf;
   var __hasOwnProp = Object.prototype.hasOwnProperty;
   var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
   var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
-  var __esm = (fn, res) => function __init() {
-    return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
-  };
-  var __commonJS = (cb, mod) => function __require() {
-    return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
-  };
   var __export = (target, all) => {
     for (var name in all)
       __defProp(target, name, { get: all[name], enumerable: true });
@@ -26,197 +18,8 @@ var Responsive = (() => {
     }
     return to;
   };
-  var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
-    // If the importer is in node compatibility mode or this is not an ESM
-    // file that has been converted to a CommonJS file using a Babel-
-    // compatible transform (i.e. "__esModule" has not been set), then set
-    // "default" to the CommonJS "module.exports" for node compatibility.
-    isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
-    mod
-  ));
   var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
   var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-
-  // <define:LAST_COMMIT_HASH>
-  var init_define_LAST_COMMIT_HASH = __esm({
-    "<define:LAST_COMMIT_HASH>"() {
-    }
-  });
-
-  // node_modules/.pnpm/bondage-club-mod-sdk@1.2.0/node_modules/bondage-club-mod-sdk/dist/bcmodsdk.js
-  var require_bcmodsdk = __commonJS({
-    "node_modules/.pnpm/bondage-club-mod-sdk@1.2.0/node_modules/bondage-club-mod-sdk/dist/bcmodsdk.js"(exports) {
-      init_define_LAST_COMMIT_HASH();
-      var bcModSdk = function() {
-        "use strict";
-        const o = "1.2.0";
-        function e(o2) {
-          alert("Mod ERROR:\n" + o2);
-          const e2 = new Error(o2);
-          throw console.error(e2), e2;
-        }
-        __name(e, "e");
-        const t = new TextEncoder();
-        function n(o2) {
-          return !!o2 && "object" == typeof o2 && !Array.isArray(o2);
-        }
-        __name(n, "n");
-        function r(o2) {
-          const e2 = /* @__PURE__ */ new Set();
-          return o2.filter((o3) => !e2.has(o3) && e2.add(o3));
-        }
-        __name(r, "r");
-        const i = /* @__PURE__ */ new Map(), a = /* @__PURE__ */ new Set();
-        function c(o2) {
-          a.has(o2) || (a.add(o2), console.warn(o2));
-        }
-        __name(c, "c");
-        function s(o2) {
-          const e2 = [], t2 = /* @__PURE__ */ new Map(), n2 = /* @__PURE__ */ new Set();
-          for (const r3 of f.values()) {
-            const i3 = r3.patching.get(o2.name);
-            if (i3) {
-              e2.push(...i3.hooks);
-              for (const [e3, a2] of i3.patches.entries()) t2.has(e3) && t2.get(e3) !== a2 && c(`ModSDK: Mod '${r3.name}' is patching function ${o2.name} with same pattern that is already applied by different mod, but with different pattern:
-Pattern:
-${e3}
-Patch1:
-${t2.get(e3) || ""}
-Patch2:
-${a2}`), t2.set(e3, a2), n2.add(r3.name);
-            }
-          }
-          e2.sort((o3, e3) => e3.priority - o3.priority);
-          const r2 = function(o3, e3) {
-            if (0 === e3.size) return o3;
-            let t3 = o3.toString().replaceAll("\r\n", "\n");
-            for (const [n3, r3] of e3.entries()) t3.includes(n3) || c(`ModSDK: Patching ${o3.name}: Patch ${n3} not applied`), t3 = t3.replaceAll(n3, r3);
-            return (0, eval)(`(${t3})`);
-          }(o2.original, t2);
-          let i2 = /* @__PURE__ */ __name(function(e3) {
-            var t3, i3;
-            const a2 = null === (i3 = (t3 = m.errorReporterHooks).hookChainExit) || void 0 === i3 ? void 0 : i3.call(t3, o2.name, n2), c2 = r2.apply(this, e3);
-            return null == a2 || a2(), c2;
-          }, "i");
-          for (let t3 = e2.length - 1; t3 >= 0; t3--) {
-            const n3 = e2[t3], r3 = i2;
-            i2 = /* @__PURE__ */ __name(function(e3) {
-              var t4, i3;
-              const a2 = null === (i3 = (t4 = m.errorReporterHooks).hookEnter) || void 0 === i3 ? void 0 : i3.call(t4, o2.name, n3.mod), c2 = n3.hook.apply(this, [e3, (o3) => {
-                if (1 !== arguments.length || !Array.isArray(e3)) throw new Error(`Mod ${n3.mod} failed to call next hook: Expected args to be array, got ${typeof o3}`);
-                return r3.call(this, o3);
-              }]);
-              return null == a2 || a2(), c2;
-            }, "i");
-          }
-          return { hooks: e2, patches: t2, patchesSources: n2, enter: i2, final: r2 };
-        }
-        __name(s, "s");
-        function l(o2, e2 = false) {
-          let r2 = i.get(o2);
-          if (r2) e2 && (r2.precomputed = s(r2));
-          else {
-            let e3 = window;
-            const a2 = o2.split(".");
-            for (let t2 = 0; t2 < a2.length - 1; t2++) if (e3 = e3[a2[t2]], !n(e3)) throw new Error(`ModSDK: Function ${o2} to be patched not found; ${a2.slice(0, t2 + 1).join(".")} is not object`);
-            const c2 = e3[a2[a2.length - 1]];
-            if ("function" != typeof c2) throw new Error(`ModSDK: Function ${o2} to be patched not found`);
-            const l2 = function(o3) {
-              let e4 = -1;
-              for (const n2 of t.encode(o3)) {
-                let o4 = 255 & (e4 ^ n2);
-                for (let e5 = 0; e5 < 8; e5++) o4 = 1 & o4 ? -306674912 ^ o4 >>> 1 : o4 >>> 1;
-                e4 = e4 >>> 8 ^ o4;
-              }
-              return ((-1 ^ e4) >>> 0).toString(16).padStart(8, "0").toUpperCase();
-            }(c2.toString().replaceAll("\r\n", "\n")), d2 = { name: o2, original: c2, originalHash: l2 };
-            r2 = Object.assign(Object.assign({}, d2), { precomputed: s(d2), router: /* @__PURE__ */ __name(() => {
-            }, "router"), context: e3, contextProperty: a2[a2.length - 1] }), r2.router = /* @__PURE__ */ function(o3) {
-              return function(...e4) {
-                return o3.precomputed.enter.apply(this, [e4]);
-              };
-            }(r2), i.set(o2, r2), e3[r2.contextProperty] = r2.router;
-          }
-          return r2;
-        }
-        __name(l, "l");
-        function d() {
-          for (const o2 of i.values()) o2.precomputed = s(o2);
-        }
-        __name(d, "d");
-        function p() {
-          const o2 = /* @__PURE__ */ new Map();
-          for (const [e2, t2] of i) o2.set(e2, { name: e2, original: t2.original, originalHash: t2.originalHash, sdkEntrypoint: t2.router, currentEntrypoint: t2.context[t2.contextProperty], hookedByMods: r(t2.precomputed.hooks.map((o3) => o3.mod)), patchedByMods: Array.from(t2.precomputed.patchesSources) });
-          return o2;
-        }
-        __name(p, "p");
-        const f = /* @__PURE__ */ new Map();
-        function u(o2) {
-          f.get(o2.name) !== o2 && e(`Failed to unload mod '${o2.name}': Not registered`), f.delete(o2.name), o2.loaded = false, d();
-        }
-        __name(u, "u");
-        function g(o2, t2) {
-          o2 && "object" == typeof o2 || e("Failed to register mod: Expected info object, got " + typeof o2), "string" == typeof o2.name && o2.name || e("Failed to register mod: Expected name to be non-empty string, got " + typeof o2.name);
-          let r2 = `'${o2.name}'`;
-          "string" == typeof o2.fullName && o2.fullName || e(`Failed to register mod ${r2}: Expected fullName to be non-empty string, got ${typeof o2.fullName}`), r2 = `'${o2.fullName} (${o2.name})'`, "string" != typeof o2.version && e(`Failed to register mod ${r2}: Expected version to be string, got ${typeof o2.version}`), o2.repository || (o2.repository = void 0), void 0 !== o2.repository && "string" != typeof o2.repository && e(`Failed to register mod ${r2}: Expected repository to be undefined or string, got ${typeof o2.version}`), null == t2 && (t2 = {}), t2 && "object" == typeof t2 || e(`Failed to register mod ${r2}: Expected options to be undefined or object, got ${typeof t2}`);
-          const i2 = true === t2.allowReplace, a2 = f.get(o2.name);
-          a2 && (a2.allowReplace && i2 || e(`Refusing to load mod ${r2}: it is already loaded and doesn't allow being replaced.
-Was the mod loaded multiple times?`), u(a2));
-          const c2 = /* @__PURE__ */ __name((o3) => {
-            let e2 = g2.patching.get(o3.name);
-            return e2 || (e2 = { hooks: [], patches: /* @__PURE__ */ new Map() }, g2.patching.set(o3.name, e2)), e2;
-          }, "c"), s2 = /* @__PURE__ */ __name((o3, t3) => (...n2) => {
-            var i3, a3;
-            const c3 = null === (a3 = (i3 = m.errorReporterHooks).apiEndpointEnter) || void 0 === a3 ? void 0 : a3.call(i3, o3, g2.name);
-            g2.loaded || e(`Mod ${r2} attempted to call SDK function after being unloaded`);
-            const s3 = t3(...n2);
-            return null == c3 || c3(), s3;
-          }, "s"), p2 = { unload: s2("unload", () => u(g2)), hookFunction: s2("hookFunction", (o3, t3, n2) => {
-            "string" == typeof o3 && o3 || e(`Mod ${r2} failed to patch a function: Expected function name string, got ${typeof o3}`);
-            const i3 = l(o3), a3 = c2(i3);
-            "number" != typeof t3 && e(`Mod ${r2} failed to hook function '${o3}': Expected priority number, got ${typeof t3}`), "function" != typeof n2 && e(`Mod ${r2} failed to hook function '${o3}': Expected hook function, got ${typeof n2}`);
-            const s3 = { mod: g2.name, priority: t3, hook: n2 };
-            return a3.hooks.push(s3), d(), () => {
-              const o4 = a3.hooks.indexOf(s3);
-              o4 >= 0 && (a3.hooks.splice(o4, 1), d());
-            };
-          }), patchFunction: s2("patchFunction", (o3, t3) => {
-            "string" == typeof o3 && o3 || e(`Mod ${r2} failed to patch a function: Expected function name string, got ${typeof o3}`);
-            const i3 = l(o3), a3 = c2(i3);
-            n(t3) || e(`Mod ${r2} failed to patch function '${o3}': Expected patches object, got ${typeof t3}`);
-            for (const [n2, i4] of Object.entries(t3)) "string" == typeof i4 ? a3.patches.set(n2, i4) : null === i4 ? a3.patches.delete(n2) : e(`Mod ${r2} failed to patch function '${o3}': Invalid format of patch '${n2}'`);
-            d();
-          }), removePatches: s2("removePatches", (o3) => {
-            "string" == typeof o3 && o3 || e(`Mod ${r2} failed to patch a function: Expected function name string, got ${typeof o3}`);
-            const t3 = l(o3);
-            c2(t3).patches.clear(), d();
-          }), callOriginal: s2("callOriginal", (o3, t3, n2) => {
-            "string" == typeof o3 && o3 || e(`Mod ${r2} failed to call a function: Expected function name string, got ${typeof o3}`);
-            const i3 = l(o3);
-            return Array.isArray(t3) || e(`Mod ${r2} failed to call a function: Expected args array, got ${typeof t3}`), i3.original.apply(null != n2 ? n2 : globalThis, t3);
-          }), getOriginalHash: s2("getOriginalHash", (o3) => {
-            "string" == typeof o3 && o3 || e(`Mod ${r2} failed to get hash: Expected function name string, got ${typeof o3}`);
-            return l(o3).originalHash;
-          }) }, g2 = { name: o2.name, fullName: o2.fullName, version: o2.version, repository: o2.repository, allowReplace: i2, api: p2, loaded: true, patching: /* @__PURE__ */ new Map() };
-          return f.set(o2.name, g2), Object.freeze(p2);
-        }
-        __name(g, "g");
-        function h() {
-          const o2 = [];
-          for (const e2 of f.values()) o2.push({ name: e2.name, fullName: e2.fullName, version: e2.version, repository: e2.repository });
-          return o2;
-        }
-        __name(h, "h");
-        let m;
-        const y = void 0 === window.bcModSdk ? window.bcModSdk = function() {
-          const e2 = { version: o, apiVersion: 1, registerMod: g, getModsInfo: h, getPatchingInfo: p, errorReporterHooks: Object.seal({ apiEndpointEnter: null, hookEnter: null, hookChainExit: null }) };
-          return m = e2, Object.freeze(e2);
-        }() : (n(window.bcModSdk) || e("Failed to init Mod SDK: Name already in use"), 1 !== window.bcModSdk.apiVersion && e(`Failed to init Mod SDK: Different version already loaded ('1.2.0' vs '${window.bcModSdk.version}')`), window.bcModSdk.version !== o && alert(`Mod SDK warning: Loading different but compatible versions ('1.2.0' vs '${window.bcModSdk.version}')
-One of mods you are using is using an old version of SDK. It will work for now but please inform author to update`), window.bcModSdk);
-        return "undefined" != typeof exports && (Object.defineProperty(exports, "__esModule", { value: true }), exports.default = y), y;
-      }();
-    }
-  });
 
   // src/Responsive.ts
   var Responsive_exports = {};
@@ -224,13 +27,11 @@ One of mods you are using is using an old version of SDK. It will work for now b
     init: () => init,
     unload: () => unload
   });
-  init_define_LAST_COMMIT_HASH();
 
   // public/styles/main.css
   var main_default = ".ResponsiveMessageContent {\n  display: inline;\n}\n\n.ResponsiveVersion {\n  font-weight: bold;\n  color: rgb(203, 185, 23);\n}\n\n#TextAreaChatLog[data-colortheme='dark'] div.ChatMessage.ResponsiveMessage,\n#TextAreaChatLog[data-colortheme='dark2'] div.ChatMessage.ResponsiveMessage {\n  background-color: #111;\n  border: 2px solid #440171;\n  padding-left: 5px;\n  display: block;\n  white-space: normal;\n  color: #eee;\n}\n\n#TextAreaChatLog div.ChatMessage.ResponsiveMessage {\n  background-color: #eee;\n  border: 2px solid #440171;\n  padding-left: 5px;\n  display: block;\n  white-space: wrap;\n  color: #111;\n}\n\n#TextAreaChatLog[data-colortheme='dark'] a.ResponsiveText,\n#TextAreaChatLog[data-colortheme='dark2'] a.ResponsiveText {\n  cursor: pointer;\n  font-weight: bold;\n  color: #eee;\n}\n\n#TextAreaChatLog a.ResponsiveText {\n  cursor: pointer;\n  font-weight: bold;\n  color: #111;\n}\n\n#ResponsiveGratitude {\n  position: fixed;\n  width: 25%;\n  height: 50%;\n  top: 15%;\n  left: 50%;\n}\n\n.ResponsiveH {\n  font-size: 1em;\n  color: #333;\n}\n\n.ResponsiveP {\n  font-size: 0.6em;\n  color: #555;\n  line-height: 1.5;\n}\n\n.ResponsiveP:last-child {\n  font-size: 0.8em;\n  color: #ff69b4;\n}\n";
 
   // src/Base/Modules.ts
-  init_define_LAST_COMMIT_HASH();
   var modulesMap = /* @__PURE__ */ new Map();
   function modules() {
     return [...modulesMap.values()];
@@ -242,17 +43,7 @@ One of mods you are using is using an old version of SDK. It will work for now b
   }
   __name(registerModule, "registerModule");
 
-  // src/Base/SettingUtils.ts
-  init_define_LAST_COMMIT_HASH();
-
-  // src/Screens/MainMenu.ts
-  init_define_LAST_COMMIT_HASH();
-
-  // src/Base/BaseSetting.ts
-  init_define_LAST_COMMIT_HASH();
-
   // src/Translation.ts
-  init_define_LAST_COMMIT_HASH();
   var _Localization = class _Localization {
     static async load() {
       const lang = TranslationLanguage.toLowerCase();
@@ -262,7 +53,7 @@ One of mods you are using is using an old version of SDK. It will work for now b
       return this.Translation[srcTag] || srcTag || "";
     }
     static async fetchLanguageFile(lang) {
-      const response = await fetch(`${"https://ddeeplb.github.io/BC-Responsive/dev/public"}/i18n/${lang}.lang`);
+      const response = await fetch(`${"https://protokink.github.io/Responsive/dev/public"}/i18n/${lang}.lang`);
       if (lang != "en" && !response.ok) {
         return _Localization.fetchLanguageFile("en");
       }
@@ -283,15 +74,11 @@ One of mods you are using is using an old version of SDK. It will work for now b
     }
   };
   __name(_Localization, "Localization");
-  __publicField(_Localization, "Translation", new Object());
+  __publicField(_Localization, "Translation", {});
   var Localization = _Localization;
   var getText = /* @__PURE__ */ __name((string) => Localization.getText(string), "getText");
 
-  // src/Utilities/Data.ts
-  init_define_LAST_COMMIT_HASH();
-
   // src/Utilities/Definition.ts
-  init_define_LAST_COMMIT_HASH();
   var MT = {
     CHANGELOG: 30,
     INFO: 15,
@@ -305,12 +92,11 @@ One of mods you are using is using an old version of SDK. It will work for now b
   var CMD_DEBUG_DATA = `${cmdKeyword} debug-data`;
   var ModName = `Responsive`;
   var FullModName = `Bondage Club Responsive`;
-  var MOD_VERSION_CAPTION = true ? `${"0.6.5"} - ${"99dae1ad"}` : "0.6.5";
+  var MOD_VERSION_CAPTION = true ? `${"0.6.6"} - ${"f3f0b0ce"}` : "0.6.6";
   var ModRepository = `https://github.com/dDeepLb/BC-Responsive`;
   var DebugMode = false;
 
   // src/Utilities/String.ts
-  init_define_LAST_COMMIT_HASH();
   var __String = class __String {
     static encode(string) {
       return LZString.compressToBase64(JSON.stringify(string));
@@ -344,12 +130,12 @@ One of mods you are using is using an old version of SDK. It will work for now b
   var ExtensionStorage = /* @__PURE__ */ __name(() => Player.ExtensionSettings[ModName], "ExtensionStorage");
   function dataTake() {
     if (ExtensionStorage()) {
-      Player[ModName] = JSON.parse(LZString.decompressFromBase64(ExtensionStorage()));
+      Player[ModName] = JSON.parse(LZString.decompressFromBase64(ExtensionStorage()) || "");
     } else if (Player.OnlineSettings["BCResponsive"]) {
       if (typeof Player.OnlineSettings["BCResponsive"] == "object") {
         return Player[ModName] = {};
       }
-      Player[ModName] = JSON.parse(LZString.decompressFromBase64(Player.OnlineSettings["BCResponsive"]));
+      Player[ModName] = JSON.parse(LZString.decompressFromBase64(Player.OnlineSettings["BCResponsive"]) || "");
       delete Player.OnlineSettings["BCResponsive"];
       window.ServerAccountUpdate.QueueData({ OnlineSettings: Player.OnlineSettings });
     } else {
@@ -384,6 +170,7 @@ One of mods you are using is using an old version of SDK. It will work for now b
   __name(dataErase, "dataErase");
   function dataResetForManual() {
     Player[ModName].ResponsesModule = {
+      ResponsiveEnabled: false,
       mainResponses: [],
       extraResponses: {
         low: [],
@@ -413,9 +200,9 @@ One of mods you are using is using an old version of SDK. It will work for now b
   }
   __name(dataFix, "dataFix");
   function clearOldData() {
-    delete Player.OnlineSettings?.["BCResponsive"]?.Profiles;
-    delete Player.OnlineSettings?.["BCResponsive"]?.data;
-    delete Player.OnlineSettings?.["BCResponsive"]?.SavedVersion;
+    delete Player.OnlineSettings["BCResponsive"]?.Profiles;
+    delete Player.OnlineSettings["BCResponsive"]?.data;
+    delete Player.OnlineSettings["BCResponsive"]?.SavedVersion;
     delete Player["BCResponsive"]?.Profiles;
     delete Player["BCResponsive"]?.data;
     delete Player["BCResponsive"]?.SavedVersion;
@@ -423,7 +210,6 @@ One of mods you are using is using an old version of SDK. It will work for now b
   __name(clearOldData, "clearOldData");
 
   // src/Base/SettingDefinitions.ts
-  init_define_LAST_COMMIT_HASH();
   var SETTING_FUNC_PREFIX = "PreferenceSubscreen";
   var SETTING_NAME_PREFIX = "BCR";
   var SETTING_FUNC_NAMES = ["Load", "Run", "Click", "Unload", "Exit"];
@@ -639,7 +425,7 @@ One of mods you are using is using an old version of SDK. It will work for now b
   __publicField(_GuiSubscreen, "X_MOD", 950);
   __publicField(_GuiSubscreen, "Y_MOD", 75);
   __publicField(_GuiSubscreen, "POS_BAK", _GuiSubscreen.START_X);
-  __publicField(_GuiSubscreen, "TEXT_ALIGN_BAK");
+  __publicField(_GuiSubscreen, "TEXT_ALIGN_BAK", "left");
   var GuiSubscreen = _GuiSubscreen;
   function drawTooltip(x, y, width, text, align) {
     const bak = MainCanvas.textAlign;
@@ -652,7 +438,6 @@ One of mods you are using is using an old version of SDK. It will work for now b
   __name(drawTooltip, "drawTooltip");
 
   // src/Screens/Reset.ts
-  init_define_LAST_COMMIT_HASH();
   var _GuiReset = class _GuiReset extends GuiSubscreen {
     constructor() {
       super(...arguments);
@@ -755,103 +540,6 @@ One of mods you are using is using an old version of SDK. It will work for now b
   __name(_GuiReset, "GuiReset");
   var GuiReset = _GuiReset;
 
-  // src/Screens/Support.ts
-  init_define_LAST_COMMIT_HASH();
-  var _GuiSupport = class _GuiSupport extends GuiSubscreen {
-    get name() {
-      return "Support";
-    }
-    get structure() {
-      return [
-        {
-          type: "button",
-          position: [GuiSubscreen.START_X, GuiSubscreen.START_Y],
-          size: [405, 80],
-          label: "support.button.ko-fi",
-          color: "#49225C",
-          image: "https://storage.ko-fi.com/cdn/nav-logo-stroke.png",
-          disabled: false,
-          callback() {
-            window.open("https://ko-fi.com/monikka_bc", "_blank");
-          }
-        },
-        {
-          type: "button",
-          position: [GuiSubscreen.START_X, GuiSubscreen.START_Y + GuiSubscreen.Y_MOD + 20],
-          size: [405, 80],
-          label: "support.button.patreon",
-          color: "#49225C",
-          image: "https://c5.patreon.com/external/favicon/rebrand/favicon-32.png?v=af5597c2ef",
-          disabled: false,
-          callback() {
-            window.open("https://patreon.com/monikka_bc", "_blank");
-          }
-        }
-      ];
-    }
-    static getSupporter() {
-      if (_GuiSupport.thankYouNext < CommonTime()) _GuiSupport.doNextThankYou();
-      return `${getText("support.other.thankyou")}, ${_GuiSupport.thankYou}`;
-    }
-    static doNextThankYou() {
-      if (_GuiSupport.thankYou && _GuiSupport.thankYouList.length < 2) return;
-      _GuiSupport.thankYou = CommonRandomItemFromList(_GuiSupport.thankYou, _GuiSupport.thankYouList);
-      _GuiSupport.thankYouNext = CommonTime() + 4e3;
-    }
-    Load() {
-      _GuiSupport.doNextThankYou();
-      ElementCreateDiv("ResponsiveGratitude");
-      let elm = document.getElementById("ResponsiveGratitude");
-      ElementContent("ResponsiveGratitude", gratitudeHtml);
-      const font = MainCanvas.canvas.clientWidth <= MainCanvas.canvas.clientHeight * 2 ? MainCanvas.canvas.clientWidth / 50 : MainCanvas.canvas.clientHeight / 25;
-      Object.assign(elm.style, {
-        fontFamily: CommonGetFontName(),
-        fontSize: font + "px"
-      });
-      super.Load();
-    }
-    Run() {
-      super.Run();
-      let tmp = GuiSubscreen.START_X;
-      GuiSubscreen.START_X = 550;
-      DrawText(_GuiSupport.getSupporter(), GuiSubscreen.START_X + 300, GuiSubscreen.START_Y - GuiSubscreen.Y_MOD, "Black", "#D7F6E9");
-      GuiSubscreen.START_X = tmp;
-    }
-    Click() {
-      super.Click();
-    }
-    Exit() {
-      ElementRemove("ResponsiveGratitude");
-      super.Exit();
-    }
-  };
-  __name(_GuiSupport, "GuiSupport");
-  __publicField(_GuiSupport, "thankYouList", ["Ellena", "weboos", "Jamie"]);
-  __publicField(_GuiSupport, "thankYouNext", 0);
-  __publicField(_GuiSupport, "thankYou", "");
-  var GuiSupport = _GuiSupport;
-  var gratitudeHtml = (
-    /*html*/
-    `
-<h1 class="ResponsiveH">Dear Supporters!</h1>
-<p class="ResponsiveP">
-  I want to take a moment to express my heartfelt gratitude for considering supporting me. Your willingness to stand by
-  my side in this creative journey means the world to me, and I am truly humbled by your generosity.
-</p>
-<p class="ResponsiveP">
-  Your support goes far beyond the financial contributions; it represents belief in my work and a shared passion for
-  what I do. Your encouragement inspires me to continue developing.
-</p>
-<p class="ResponsiveP">
-  Your support not only helps me sustain and grow as a developer, but also enables me to dedicate more time and
-  resources to producing high-quality mods. It allows me to explore new ideas, enhance my skills, and bring even more
-  meaningful and enjoyable content to you.
-</p>
-<p class="ResponsiveP">Thank you all~</p>
-<p class="ResponsiveP">With love, Monikka\u2665</p>
-`
-  );
-
   // src/Screens/MainMenu.ts
   var _MainMenu = class _MainMenu extends GuiSubscreen {
     constructor(module) {
@@ -876,7 +564,7 @@ One of mods you are using is using an old version of SDK. It will work for now b
       MainCanvas.textAlign = "left";
       DrawCharacter(Player, 50, 50, 0.9, false);
       DrawText(
-        getText("mainmenu.title").replace("$ModVersion", MOD_VERSION_CAPTION) + "  " + GuiSupport.getSupporter(),
+        getText("mainmenu.title").replace("$ModVersion", MOD_VERSION_CAPTION),
         GuiSubscreen.START_X,
         GuiSubscreen.START_Y - GuiSubscreen.Y_MOD,
         "Black",
@@ -897,15 +585,12 @@ One of mods you are using is using an old version of SDK. It will work for now b
         i++;
         MainCanvas.textAlign = "left";
       }
-      DrawButton(1500, 630, 405, 80, "", "IndianRed");
-      DrawImageResize("Icons/ServiceBell.png", 1510, 640, 60, 60);
-      DrawTextFit("Reset", 1580, 670, 320, "Black");
-      DrawButton(1500, 730, 405, 80, "", "#BDA203", "", "Open Responsive Wiki on GitHub.", false);
-      DrawImageResize("Icons/Introduction.png", 1510, 740, 60, 60);
-      DrawTextFit("Wiki", 1580, 770, 320, "Black");
-      DrawButton(1500, 830, 405, 80, "", "#49225C");
-      DrawImageResize("Assets/Female3DCG/Emoticon/Coffee/Icon.png", 1510, 840, 60, 60);
-      DrawTextFit("Support Me\u2764", 1580, 870, 320, "Black");
+      DrawButton(1500, 730, 405, 80, "", "IndianRed");
+      DrawImageResize("Icons/ServiceBell.png", 1510, 740, 60, 60);
+      DrawTextFit("Reset", 1580, 770, 320, "Black");
+      DrawButton(1500, 830, 405, 80, "", "#BDA203", "", "Open Responsive Wiki on GitHub.", false);
+      DrawImageResize("Icons/Introduction.png", 1510, 840, 60, 60);
+      DrawTextFit("Wiki", 1580, 870, 320, "Black");
       GuiSubscreen.START_X = tmp;
       MainCanvas.textAlign = prev;
     }
@@ -925,9 +610,8 @@ One of mods you are using is using an old version of SDK. It will work for now b
         i++;
       }
       GuiSubscreen.START_X = tmp;
-      if (MouseIn(1500, 630, 405, 80)) this.setSubscreen(new GuiReset());
-      if (MouseIn(1500, 730, 400, 80)) window.open("https://github.com/dDeepLb/BC-Responsive/wiki/", "_blank");
-      if (MouseIn(1500, 830, 400, 80)) this.setSubscreen(new GuiSupport());
+      if (MouseIn(1500, 730, 405, 80)) this.setSubscreen(new GuiReset());
+      if (MouseIn(1500, 830, 405, 80)) window.open("https://github.com/dDeepLb/BC-Responsive/wiki/", "_blank");
     }
     Exit() {
       CharacterAppearanceForceUpCharacter = -1;
@@ -940,7 +624,6 @@ One of mods you are using is using an old version of SDK. It will work for now b
   var MainMenu = _MainMenu;
 
   // src/Base/BaseModule.ts
-  init_define_LAST_COMMIT_HASH();
   var _BaseModule = class _BaseModule {
     get settingsScreen() {
       return null;
@@ -1090,14 +773,7 @@ One of mods you are using is using an old version of SDK. It will work for now b
   __publicField(_GUI, "instance", null);
   var GUI = _GUI;
 
-  // src/Modules/CharTalk.ts
-  init_define_LAST_COMMIT_HASH();
-
-  // src/Utilities/ChatMessages.ts
-  init_define_LAST_COMMIT_HASH();
-
   // src/Utilities/Other.ts
-  init_define_LAST_COMMIT_HASH();
   function getCharacter(memberNumber) {
     return ChatRoomCharacter.find((c) => c.MemberNumber == memberNumber) ?? void 0;
   }
@@ -1118,16 +794,19 @@ One of mods you are using is using an old version of SDK. It will work for now b
 
   // src/Utilities/ChatMessages.ts
   function activityDeconstruct(dict) {
-    let SourceCharacter, TargetCharacter, ActivityGroup, ActivityName;
-    for (let v of dict) {
-      if (v.TargetCharacter) TargetCharacter = { MemberNumber: v.TargetCharacter };
-      else if (v.SourceCharacter) SourceCharacter = { MemberNumber: v.SourceCharacter };
-      else if (v.FocusGroupName) ActivityGroup = v.FocusGroupName;
-      else if (v.ActivityName) ActivityName = v.ActivityName;
-    }
-    if (SourceCharacter === void 0 || TargetCharacter === void 0 || ActivityGroup === void 0 || ActivityName === void 0)
+    const activityName = dict.ActivityName;
+    const targetCharacter = dict.TargetCharacter;
+    const groupName = dict.GroupName;
+    const sourceCharacter = dict.SourceCharacter;
+    if (activityName === void 0 || targetCharacter === void 0 || groupName === void 0 || sourceCharacter === void 0) {
       return void 0;
-    return { SourceCharacter, TargetCharacter, ActivityGroup, ActivityName };
+    }
+    return {
+      groupName,
+      activityName,
+      sourceCharacter,
+      targetCharacter
+    };
   }
   __name(activityDeconstruct, "activityDeconstruct");
   function isSimpleChat(msg) {
@@ -1152,35 +831,26 @@ One of mods you are using is using an old version of SDK. It will work for now b
   }
   __name(leaveMessage, "leaveMessage");
   function activityMessage(dict, entry) {
-    const source = getCharacter(dict.SourceCharacter.MemberNumber);
-    const response = typedResponse(entry?.responses);
-    const templatedResponse = replaceTemplate(response, source);
-    if (templatedResponse.trim()[0] == "@") {
-      return sendAction(templatedResponse.slice(1), source);
+    const source = getCharacter(dict.sourceCharacter.MemberNumber);
+    const response = typedResponse(entry?.responses ?? []);
+    const templatedResponse = replaceTemplate(response, source).trim();
+    if (templatedResponse[0] == "@") {
+      if (templatedResponse[1] == "@") {
+        const playerName = CharacterNickname(Player);
+        const messageWithPlayerName = `${playerName} ${templatedResponse.slice(2)}`;
+        return sendAction(messageWithPlayerName);
+      }
+      return sendAction(templatedResponse.slice(1));
     }
-    const finalMessage = templatedResponse;
-    chatRoomAutoInterceptMessage(ElementValue("InputChat"), finalMessage, source);
+    chatRoomAutoInterceptMessage(ElementValue("InputChat"), templatedResponse, source);
   }
   __name(activityMessage, "activityMessage");
-  function sendAction(action, sender = null) {
-    let msg = action;
-    const playerName = CharacterNickname(Player);
-    if (msg.trim()[0] !== "@") {
-      msg = playerName + " " + msg.trim();
-    } else {
-      msg = msg.slice(1);
-    }
+  function sendAction(action) {
     ServerSend("ChatRoomChat", {
-      Content: "Beep",
+      Content: "RESPONSIVE_CUSTOM_ACTION",
       Type: "Action",
       Dictionary: [
-        { Tag: "Beep", Text: "msg" },
-        { Tag: "\u53D1\u9001\u79C1\u804A", Text: "msg" },
-        { Tag: "\u767C\u9001\u79C1\u804A", Text: "msg" },
-        { Tag: "Biep", Text: "msg" },
-        { Tag: "Sonner", Text: "msg" },
-        { Tag: "\u0417\u0432\u0443\u043A\u043E\u0432\u043E\u0439 \u0441\u0438\u0433\u043D\u0430\u043B", Text: "msg" },
-        { Tag: "msg", Text: msg }
+        { Tag: 'MISSING TEXT IN "Interface.csv": RESPONSIVE_CUSTOM_ACTION', Text: action }
       ]
     });
   }
@@ -1203,6 +873,8 @@ One of mods you are using is using an old version of SDK. It will work for now b
   }
   __name(chatRoomNormalMessage, "chatRoomNormalMessage");
   function replaceTemplate(msg, source) {
+    if (!msg) return "";
+    source ?? (source = Player);
     const playerPronouns = CharacterPronounDescription(Player);
     const playerName = CharacterNickname(Player);
     const playerPronoun = playerPronouns === "She/Her" ? "she" : "he";
@@ -1230,12 +902,7 @@ One of mods you are using is using an old version of SDK. It will work for now b
   }
   __name(typedResponse, "typedResponse");
 
-  // src/Utilities/SDK.ts
-  init_define_LAST_COMMIT_HASH();
-  var import_bondage_club_mod_sdk = __toESM(require_bcmodsdk());
-
   // src/Utilities/Console.ts
-  init_define_LAST_COMMIT_HASH();
   var STYLES = {
     INFO: "color: #32CCCC",
     LOG: "color: #CCCC32",
@@ -1265,7 +932,7 @@ One of mods you are using is using an old version of SDK. It will work for now b
   __name(conDebug, "conDebug");
 
   // src/Utilities/SDK.ts
-  var SDK = import_bondage_club_mod_sdk.default.registerMod(
+  var SDK = bcModSdk.registerMod(
     {
       name: ModName,
       fullName: FullModName,
@@ -1306,752 +973,42 @@ One of mods you are using is using an old version of SDK. It will work for now b
     return removeCallback;
   }
   __name(hookFunction, "hookFunction");
-  function onActivity(priority, module, callback) {
-    hookFunction(
-      "ChatRoomMessage",
-      priority,
-      (args, next) => {
-        let data = args[0];
-        let sender = getCharacter(data.Sender);
-        if (data.Type == "Activity") callback(data, sender, data.Content, data.Dictionary);
-        next(args);
-      },
-      module
-    );
-  }
-  __name(onActivity, "onActivity");
-
-  // src/Modules/Responses.ts
-  init_define_LAST_COMMIT_HASH();
-
-  // src/Utilities/Handlers.ts
-  init_define_LAST_COMMIT_HASH();
-  var doesBcxAllowsTalking = /* @__PURE__ */ __name(() => {
-    const isRuleWorking = /* @__PURE__ */ __name((ruleName) => {
-      const rule = window.bcx.getModApi(ModName).getRuleState(ruleName);
-      switch (ruleName) {
-        case "speech_forbid_open_talking":
-          return rule.inEffect && rule.isEnforced;
-        case "speech_limit_open_talking":
-          return rule.inEffect && rule.isEnforced;
-        case "speech_specific_sound":
-          return rule.inEffect && rule.isEnforced && rule.customData.soundWhitelist;
-        case "speech_mandatory_words":
-          return rule.inEffect && rule.isEnforced && rule.customData.mandatoryWords;
-        default:
-          break;
-      }
-    }, "isRuleWorking");
-    if (PlayerStorage().GlobalModule.doPreventMessageIfBcxBlock && (isRuleWorking("speech_forbid_open_talking") || isRuleWorking("speech_limit_open_talking") || isRuleWorking("speech_specific_sound") || isRuleWorking("speech_mandatory_words"))) {
-      return false;
-    }
-    return true;
-  }, "doesBcxAllowsTalking");
-  var orgasmHandle = /* @__PURE__ */ __name((c) => {
-    if (!PlayerStorage().GlobalModule.ResponsiveEnabled) return;
-    if (!PlayerStorage().GlobalModule.responsesEnabled) return;
-    if (CurrentScreen !== "ChatRoom" || !Player) return;
-    if (Player.MemberNumber !== c.MemberNumber) return;
-    if (!PlayerStorage().ResponsesModule.extraResponses.orgasm) return;
-    if (ActivityOrgasmRuined) return;
-    if (window.bcx && !doesBcxAllowsTalking()) return;
-    ResponsesModule.isOrgasm = true;
-    orgasmMessage();
-  }, "orgasmHandle");
-  var activityHandle = /* @__PURE__ */ __name((dict, entry) => {
-    if (!PlayerStorage().GlobalModule.ResponsiveEnabled) return;
-    if (!PlayerStorage().GlobalModule.responsesEnabled) return;
-    if (CurrentScreen !== "ChatRoom" || !Player) return;
-    if (dict.TargetCharacter.MemberNumber !== Player.MemberNumber) return;
-    if (!entry || !entry?.responses) return;
-    if (!entry.selfTrigger && dict.TargetCharacter.MemberNumber === dict.SourceCharacter.MemberNumber) return;
-    if (window.bcx && !doesBcxAllowsTalking()) return;
-    activityMessage(dict, entry);
-  }, "activityHandle");
-  var leaveHandle = /* @__PURE__ */ __name((data) => {
-    if (!PlayerStorage().GlobalModule.ResponsiveEnabled) return;
-    if (!PlayerStorage().GlobalModule.doLeaveMessage) return;
-    if (CurrentScreen !== "ChatRoom" || !Player) return;
-    if (!(CurrentScreen == "ChatRoom" && ChatRoomData.Name != data.ChatRoomName)) return;
-    if (window.bcx && !doesBcxAllowsTalking()) return;
-    leaveMessage();
-  }, "leaveHandle");
-
-  // src/Screens/Responses.ts
-  init_define_LAST_COMMIT_HASH();
-  var _GuiResponses = class _GuiResponses extends GuiSubscreen {
-    constructor() {
-      super(...arguments);
-      __publicField(this, "activityIndex", 0);
-      __publicField(this, "selfAllowed", false);
-      // to not call ActivityCanBeDoneOnSelf() every draw call;
-      __publicField(this, "masterSet", false);
-      __publicField(this, "copiedEntry", {});
-    }
-    get name() {
-      return "responses";
-    }
-    get icon() {
-      return "Icons/Chat.png";
-    }
-    get settings() {
-      return super.settings;
-    }
-    get currentResponsesEntry() {
-      let actName = this.currentAct()?.Name ?? "";
-      let groupName = this.currentGroup()?.Name ?? "";
-      let entry = this.getResponsesEntry(actName, groupName);
-      return entry;
-    }
-    get activities() {
-      if (!Player.FocusGroup) return [];
-      else
-        return AssetActivitiesForGroup("Female3DCG", Player.FocusGroup.Name, "any").filter(
-          (a) => this.activityHasDictionaryText(this.getActivityLabelTag(a, Player.FocusGroup))
-        );
-    }
-    get multipageStructure() {
-      return [
-        [],
-        [
-          {
-            type: "text",
-            id: "extra_low",
-            label: "responses.setting.low_response.name",
-            description: "responses.setting.low_response.desc",
-            setting: /* @__PURE__ */ __name(() => _GuiResponses.stringListShow(this.settings?.extraResponses?.low), "setting"),
-            setSetting: /* @__PURE__ */ __name((val) => {
-              this.settings.extraResponses.low = _GuiResponses.validateInput(val) ?? this.settings.extraResponses.low;
-            }, "setSetting")
-          },
-          {
-            type: "text",
-            id: "extra_light",
-            label: "responses.setting.light_response.name",
-            description: "responses.setting.light_response.desc",
-            setting: /* @__PURE__ */ __name(() => _GuiResponses.stringListShow(this.settings?.extraResponses?.light), "setting"),
-            setSetting: /* @__PURE__ */ __name((val) => {
-              this.settings.extraResponses.light = _GuiResponses.validateInput(val) ?? this.settings.extraResponses.light;
-            }, "setSetting")
-          },
-          {
-            type: "text",
-            id: "extra_medium",
-            label: "responses.setting.medium_response.name",
-            description: "responses.setting.medium_response.desc",
-            setting: /* @__PURE__ */ __name(() => _GuiResponses.stringListShow(this.settings?.extraResponses?.medium), "setting"),
-            setSetting: /* @__PURE__ */ __name((val) => {
-              this.settings.extraResponses.medium = _GuiResponses.validateInput(val) ?? this.settings.extraResponses.medium;
-            }, "setSetting")
-          },
-          {
-            type: "text",
-            id: "extra_hot",
-            label: "responses.setting.hot_response.name",
-            description: "responses.setting.hot_response.desc",
-            setting: /* @__PURE__ */ __name(() => _GuiResponses.stringListShow(this.settings?.extraResponses?.hot), "setting"),
-            setSetting: /* @__PURE__ */ __name((val) => {
-              this.settings.extraResponses.hot = _GuiResponses.validateInput(val) ?? this.settings.extraResponses.hot;
-            }, "setSetting")
-          },
-          {
-            type: "text",
-            id: "extra_orgasm",
-            label: "responses.setting.orgasm_response.name",
-            description: "responses.setting.orgasm_response.desc",
-            setting: /* @__PURE__ */ __name(() => _GuiResponses.stringListShow(this.settings?.extraResponses?.orgasm), "setting"),
-            setSetting: /* @__PURE__ */ __name((val) => {
-              this.settings.extraResponses.orgasm = _GuiResponses.validateInput(val) ?? this.settings.extraResponses.orgasm;
-            }, "setSetting")
-          }
-        ]
-      ];
-    }
-    static activityCanBeDoneOnSelf(activity, group) {
-      const foundActivity = AssetAllActivities(Player.AssetFamily).find((act) => act.Name === activity);
-      return foundActivity?.TargetSelf ? (typeof foundActivity.TargetSelf === "boolean" ? foundActivity.Target : foundActivity.TargetSelf).includes(group) : false;
-    }
-    Load() {
-      if (!this.settings) conDebug(`Loading Responses GUI`);
-      super.Load();
-      ElementCreateTextArea("mainResponses");
-      this.elementHide("mainResponses");
-      CharacterAppearanceForceUpCharacter = Player.MemberNumber ?? -1;
-    }
-    Run() {
-      let prev = MainCanvas.textAlign;
-      MainCanvas.textAlign = "left";
-      super.Run();
-      if (PreferencePageCurrent == 1) {
-        for (let Group of AssetGroup) {
-          if (Group.IsItem() && !Group.MirrorActivitiesFrom && AssetActivitiesForGroup("Female3DCG", Group.Name).length)
-            DrawAssetGroupZone(Player, Group.Zone, 0.9, 50, 50, 1, "#808080FF", 3, this.getZoneColor(Group.Name));
-        }
-        if (Player.FocusGroup != null) {
-          let activity = this.activities[this.activityIndex ?? 0];
-          DrawAssetGroupZone(Player, Player.FocusGroup.Zone, 0.9, 50, 50, 1, "cyan");
-          MainCanvas.textAlign = "center";
-          DrawBackNextButton(
-            550,
-            this.getYPos(0),
-            600,
-            64,
-            this.getActivityLabel(activity, Player.FocusGroup),
-            "White",
-            "",
-            () => "",
-            () => ""
-          );
-          MainCanvas.textAlign = "left";
-          if (!!activity) {
-            let image = "Assets/" + Player.AssetFamily + "/Activity/" + activity.Name + ".png";
-            if (activity.Name.indexOf("Item") > -1) {
-              image = "Icons/Dress.png";
-            }
-            DrawImageResize(image, 1170, this.getYPos(0) - 28, 120, 120);
-            DrawEmptyRect(1170, this.getYPos(0) - 28, 120, 120, "Black", 2);
-            this.drawActivityOptions();
-          }
-        } else {
-          DrawText(getText("responses.text.select_zone"), this.getXPos(0), this.getYPos(0), "Black", "White");
-        }
-      }
-      if (PreferencePageCurrent == 2) this.elementHide("mainResponses");
-      MainCanvas.textAlign = prev;
-    }
-    Click() {
-      let tmp = GuiSubscreen.START_X;
-      GuiSubscreen.START_X = 550;
-      super.Click();
-      if (PreferencePageCurrent == 1) {
-        for (const Group of AssetGroup) {
-          if (Group.IsItem() && !Group.MirrorActivitiesFrom && AssetActivitiesForGroup("Female3DCG", Group.Name).length) {
-            const Zone = Group.Zone.find((z) => DialogClickedInZone(Player, z, 0.9, 50, 50, 1));
-            if (Zone) {
-              if (Player.FocusGroup) this.saveResponseEntry(this.currentResponsesEntry);
-              if (Player.FocusGroup === Group) return this.deselectEntry();
-              Player.FocusGroup = Group;
-              let activities = this.activities;
-              if (this.activityIndex >= activities.length) this.activityIndex = 0;
-              this.loadResponseEntry(this.currentResponsesEntry);
-            }
-          }
-        }
-        if (Player.FocusGroup != null) {
-          let activities = this.activities;
-          if (MouseIn(this.getXPos(0), this.getYPos(0), 600, 64)) {
-            this.saveResponseEntry(this.currentResponsesEntry);
-            if (MouseX <= this.getXPos(0) + 300) this.activityIndex = (activities.length + this.activityIndex - 1) % activities.length;
-            else this.activityIndex = (this.activityIndex + 1) % activities.length;
-            this.loadResponseEntry(this.currentResponsesEntry);
-          }
-        }
-        this.handleActivityEntryClick();
-      }
-      GuiSubscreen.START_X = tmp;
-    }
-    Exit() {
-      this.saveResponseEntry(this.currentResponsesEntry);
-      ElementRemove("mainResponses");
-      CharacterAppearanceForceUpCharacter = -1;
-      CharacterLoadCanvas(Player);
-      Player.FocusGroup = null;
-      super.Exit();
-    }
-    currentAct() {
-      return this.activities[this.activityIndex];
-    }
-    currentGroup() {
-      return Player.FocusGroup;
-    }
-    getZoneColor(groupName) {
-      let hasConfiguration = this.settings?.mainResponses?.some((a) => a.groupName.includes(groupName));
-      return hasConfiguration ? "#00FF0044" : "#80808044";
-    }
-    getResponsesEntry(actName, grpName) {
-      return this.settings?.mainResponses?.find((a) => a.actName == actName && a.groupName.includes(grpName));
-    }
-    activityHasDictionaryText(KeyWord) {
-      if (!ActivityDictionary) ActivityDictionaryLoad();
-      if (!ActivityDictionary) return;
-      for (let D = 0; D < ActivityDictionary.length; D++) if (ActivityDictionary[D][0] == KeyWord) return true;
-      return false;
-    }
-    getActivityLabelTag(activity, group) {
-      let groupName = group.Name;
-      if (Player.HasPenis()) {
-        if (groupName == "ItemVulva") groupName = "ItemPenis";
-        if (groupName == "ItemVulvaPiercings") groupName = "ItemGlans";
-      }
-      return `Label-ChatOther-${groupName}-${activity.Name}`;
-    }
-    getActivityLabel(activity, group) {
-      if (!activity) return "ACTIVITY NOT FOUND";
-      let tag = this.getActivityLabelTag(activity, group);
-      return ActivityDictionaryText(tag);
-    }
-    deselectEntry() {
-      Player.FocusGroup = null;
-      this.elementHide("mainResponses");
-    }
-    loadResponseEntry(entry) {
-      this.elementSetValue("mainResponses", _GuiResponses.stringListShow(entry?.responses) ?? []);
-    }
-    saveResponseEntry(entry) {
-      let responses = ElementValue("mainResponses");
-      let merge;
-      let unmerge;
-      const validResponses = _GuiResponses.validateInput(responses);
-      if (responses != "" && validResponses) {
-        if (!entry) entry = this.createEntryIfNeeded(entry);
-        if (!this.masterSet) {
-          merge = this.mergeEntry(entry, validResponses);
-          unmerge = this.unmergeEntry(entry, validResponses);
-        }
-        if (this.masterSet || !(merge || unmerge)) entry.responses = validResponses ?? entry.responses;
-        this.settings.mainResponses.sort((a, b) => a.actName.localeCompare(b.actName));
-      }
-    }
-    clearEntry(entry) {
-      if (!entry) return;
-      let temp = this.settings?.mainResponses?.find((ent) => ent.actName === entry.actName && ent.groupName === entry.groupName);
-      if (temp?.groupName.length <= 1) {
-        this.settings.mainResponses = this.settings?.mainResponses.filter((a) => {
-          return !(a.actName == entry.actName && a.groupName == entry.groupName);
-        });
-      } else {
-        temp?.groupName?.splice(temp?.groupName?.indexOf(this.currentGroup()?.Name), 1);
-      }
-      this.elementSetValue("mainResponses", []);
-    }
-    /**
-     * Get entry >
-     *
-     * find response that has same `actName`, that doesn't includes current `groupName` and responses are the same with current entry >
-     *
-     * push `groupName` to that response >
-     *
-     * clear current entry
-     */
-    mergeEntry(entry, validResponses) {
-      const stringifiedValidResponses = JSON.stringify(validResponses);
-      let mergingEntry = this.settings?.mainResponses?.find((ent) => {
-        return ent.actName == this.currentAct().Name && // Actions are same
-        !ent.groupName.includes(this.currentGroup().Name) && // Group array don't have selected group
-        (JSON.stringify(ent.responses) === stringifiedValidResponses || // Responses are the same
-        ent.selfTrigger === entry.selfTrigger);
-      });
-      if (!mergingEntry) return false;
-      mergingEntry.groupName.push(this.currentGroup()?.Name);
-      const entr = this.settings?.mainResponses?.find((ent) => ent.actName === entry.actName && ent.groupName === entry.groupName);
-      entr?.groupName?.splice(entr?.groupName?.indexOf(this.currentGroup()?.Name), 1);
-      this.clearEntry(entry);
-      return true;
-    }
-    /**
-     * Get entry >
-     *
-     * find response that has same `actName`, that includes current `groupName` and responses are not the same with current entry >
-     *
-     * remove `groupName` from that response >
-     *
-     * create new entry with this data
-     */
-    unmergeEntry(entry, validResponses) {
-      const stringifiedCurrentResponses = JSON.stringify(validResponses);
-      let unmergingEntry = this.settings?.mainResponses?.find((ent) => {
-        return ent.actName == this.currentAct().Name && // Actions are same
-        Array.isArray(ent.groupName) && // Group name is type of array
-        ent.groupName.length > 1 && // Group array has more than one entry
-        ent.groupName.includes(this.currentGroup().Name) && // Group array has selected group
-        (JSON.stringify(ent.responses) !== stringifiedCurrentResponses || // Responses are not the same
-        ent.selfTrigger !== entry.selfTrigger);
-      });
-      if (!unmergingEntry) return false;
-      unmergingEntry.groupName.splice(unmergingEntry.groupName.indexOf(this.currentGroup()?.Name), 1);
-      const newEntry = this.createNewEntry(this.currentAct().Name, this.currentGroup().Name, validResponses, entry.selfTrigger);
-      this.settings.mainResponses.push(newEntry);
-      return true;
-    }
-    createNewEntry(actName, grpName, responses, selfTrigger) {
-      return {
-        actName,
-        groupName: [grpName],
-        responses: responses ?? [""],
-        selfTrigger: selfTrigger ?? false
-      };
-    }
-    createEntryIfNeeded(existing) {
-      if (!existing) {
-        existing = this.createNewEntry(this.currentAct()?.Name, this.currentGroup()?.Name ?? "");
-        this.settings.mainResponses.push(existing);
-        this.loadResponseEntry(this.currentResponsesEntry);
-      }
-      return existing;
-    }
-    copyEntry(entry) {
-      this.copiedEntry = entry;
-    }
-    pasteEntry(entry) {
-      if (Object.keys(this.copiedEntry).length === 0) return;
-      if (!entry) entry = this.createEntryIfNeeded(entry);
-      entry.responses = this.copiedEntry.responses ?? [""];
-      this.loadResponseEntry(entry);
-      if (_GuiResponses.activityCanBeDoneOnSelf(this.currentAct()?.Name, this.currentGroup()?.Name))
-        entry.selfTrigger = this.copiedEntry.selfTrigger;
-    }
-    handleActivityEntryClick() {
-      let entry = this.currentResponsesEntry;
-      this.selfAllowed = _GuiResponses.activityCanBeDoneOnSelf(this.currentAct()?.Name, this.currentGroup()?.Name);
-      if (!!entry && MouseIn(1310, this.getYPos(0), 64, 64)) {
-        this.clearEntry(entry);
-      }
-      if (MouseIn(1385, this.getYPos(0), 64, 64)) {
-        this.copyEntry(entry);
-      }
-      if (MouseIn(1455, this.getYPos(0), 64, 64)) {
-        this.pasteEntry(entry);
-      }
-      if (MouseIn(this.getXPos(2) + 600, this.getYPos(2) - 32, 64, 64) && this.selfAllowed) {
-        entry = this.createEntryIfNeeded(entry);
-        entry.selfTrigger = !entry.selfTrigger;
-      }
-      if (MouseIn(this.getXPos(8) + 600, this.getYPos(8) - 32, 64, 64)) {
-        this.masterSet = !this.masterSet;
-      }
-    }
-    drawActivityOptions() {
-      let activityEntry = this.currentResponsesEntry;
-      if (!!activityEntry) {
-        MainCanvas.textAlign = "center";
-        DrawButton(1310, this.getYPos(0), 64, 64, "X", "White", void 0, getText("responses.text.clear_entry"));
-        MainCanvas.textAlign = "left";
-      }
-      MainCanvas.textAlign = "center";
-      DrawButton(1385, this.getYPos(0), 64, 64, "", "White", void 0, getText("responses.text.copy_entry"));
-      DrawImageResize("Icons/Export.png", 1385, this.getYPos(0), 64, 64);
-      MainCanvas.textAlign = "left";
-      MainCanvas.textAlign = "center";
-      DrawButton(1455, this.getYPos(0), 64, 64, "", "White", void 0, getText("responses.text.paste_entry"));
-      DrawImageResize("Icons/Import.png", 1455, this.getYPos(0), 64, 64);
-      MainCanvas.textAlign = "left";
-      this.drawCheckbox(
-        "responses.setting.self_trigger.name",
-        "responses.setting.self_trigger.desc",
-        activityEntry?.selfTrigger ?? false,
-        2,
-        !this.selfAllowed
-      );
-      this.drawCheckbox("responses.setting.master_set.name", "responses.setting.master_set.desc", this.masterSet ?? false, 8);
-      this.elementPosition("mainResponses", "responses.setting.responses.name", "responses.setting.responses.desc", 3, false);
-    }
-    elementSetValue(elementId, value) {
-      let element = document.getElementById(elementId);
-      if (!!element && value != null) element.value = value;
-    }
-    elementPosition(elementId, label, description, order, disabled = false) {
-      var isHovering = MouseIn(this.getXPos(order), this.getYPos(order) - 32, 600, 64);
-      const isValid = !!_GuiResponses.validateInput(ElementValue(elementId));
-      DrawTextFit(
-        isValid ? `${getText(label)}` : `${getText(label)} \u2716`,
-        this.getXPos(order),
-        this.getYPos(order),
-        600,
-        isHovering ? "Red" : "Black",
-        "Gray"
-      );
-      ElementPosition(elementId, this.getXPos(order) + 750 + 225, this.getYPos(order), 800, 64);
-      if (disabled) ElementSetAttribute(elementId, "disabled", "true");
-      if (!disabled) document.getElementById(elementId)?.removeAttribute("disabled");
-      if (isHovering) this.tooltip(getText(description));
-    }
-  };
-  __name(_GuiResponses, "GuiResponses");
-  __publicField(_GuiResponses, "validateInput", /* @__PURE__ */ __name((input) => {
-    let raw = `[${input}]`;
-    const validateStringList = /* @__PURE__ */ __name((input2) => {
-      if (!Array.isArray(input2)) return void 0;
-      if (!input2.every((_) => typeof _ === "string")) return void 0;
-      return input2;
-    }, "validateStringList");
-    try {
-      let data = JSON.parse(raw);
-      return validateStringList(data);
-    } catch (e) {
-      return void 0;
-    }
-  }, "validateInput"));
-  __publicField(_GuiResponses, "stringListShow", /* @__PURE__ */ __name((input) => {
-    if (!input || input.length === 0) return "";
-    let result = JSON.stringify(input);
-    return result.substring(1, result.length - 1);
-  }, "stringListShow"));
-  var GuiResponses = _GuiResponses;
-
-  // src/Utilities/DefaultResponsesEntries.ts
-  init_define_LAST_COMMIT_HASH();
-  var DefaultResponses = {
-    pain: ["Aie!", "Aoouch!", "Aaaaie!", "Ouch", "Aow"],
-    tickle: ["Hahaha!", "Mmmmhahaha!", "Muhahah...", "Ha!Ha!"],
-    boop: ["Eek!", "Beep!", "Aww.."],
-    low: ["", "", "mh", "\u2665oh\u2665", "ah", "...\u2665"],
-    light: ["ah\u2665", "Aah!", "mh", "oh!\u2665", "mh\u2665"],
-    medium: ["mm", "aaaah", "Mm.. Ah\u2665"],
-    hot: ["nh... ah\u2665", "Oooh", "mmmmmh!", "HaaA\u2665"],
-    orgasm: ["Mh...Mn...HaaAAaah!", "Mmmmh... MMmh... Hhhmmmm...", "Oooooh... Mmmmh... OooOOOOh!", "Mmmhnn... Nyhmm... aah!"]
-  };
-  var setData = /* @__PURE__ */ __name((key) => {
-    let oldSettings = null;
-    if (Player?.OnlineSettings?.BCResponsive?.data) {
-      oldSettings = JSON.parse(
-        //@ts-ignore
-        LZString.decompressFromBase64(Player?.OnlineSettings?.BCResponsive?.data)
-      );
-    }
-    return oldSettings ? oldSettings?.[key] ? oldSettings?.[key] : DefaultResponses[key] : DefaultResponses[key];
-  }, "setData");
-  function getDefaultResponsesEntries() {
-    return {
-      mainResponses: [
-        {
-          actName: "Pet",
-          groupName: ["ItemNose"],
-          responses: setData("boop"),
-          selfTrigger: false
-        },
-        {
-          actName: "LSCG_SharkBite",
-          groupName: ["ItemNose"],
-          responses: setData("boop"),
-          selfTrigger: false
-        },
-        {
-          actName: "Slap",
-          groupName: ["ItemVulva", "ItemVulvaPiercings", "ItemBreast", "ItemHead"],
-          responses: setData("pain"),
-          selfTrigger: true
-        },
-        {
-          actName: "Bite",
-          groupName: [
-            "ItemFeet",
-            "ItemLegs",
-            "ItemButt",
-            "ItemTorso",
-            "ItemTorso2",
-            "ItemNipples",
-            "ItemBreast",
-            "ItemArms",
-            "ItemHands",
-            "ItemNeck",
-            "ItemMouth",
-            "ItemNose",
-            "ItemEars",
-            "ItemBoots"
-          ],
-          responses: setData("pain"),
-          selfTrigger: true
-        },
-        {
-          actName: "Spank",
-          groupName: ["ItemFeet", "ItemLegs", "ItemButt", "ItemPelvis", "ItemTorso", "ItemTorso2", "ItemArms", "ItemHands", "ItemBoots"],
-          responses: setData("pain"),
-          selfTrigger: true
-        },
-        {
-          actName: "Kick",
-          groupName: ["ItemFeet", "ItemLegs", "ItemVulva", "ItemVulvaPiercings", "ItemButt", "ItemBoots"],
-          responses: setData("pain")
-        },
-        {
-          actName: "Pinch",
-          groupName: ["ItemButt", "ItemPelvis", "ItemNipples", "ItemArms", "ItemMouth", "ItemNose", "ItemEars"],
-          responses: setData("pain"),
-          selfTrigger: true
-        },
-        {
-          actName: "SpankItem",
-          groupName: [
-            "ItemFeet",
-            "ItemLegs",
-            "ItemVulva",
-            "ItemVulvaPiercings",
-            "ItemButt",
-            "ItemPelvis",
-            "ItemTorso",
-            "ItemNipples",
-            "ItemBreast",
-            "ItemArms",
-            "ItemBoots"
-          ],
-          responses: setData("pain"),
-          selfTrigger: true
-        },
-        {
-          actName: "ShockItem",
-          groupName: [
-            "ItemFeet",
-            "ItemLegs",
-            "ItemVulva",
-            "ItemVulvaPiercings",
-            "ItemButt",
-            "ItemPelvis",
-            "ItemTorso",
-            "ItemNipples",
-            "ItemBreast",
-            "ItemArms",
-            "ItemNeck",
-            "ItemNeckAccessories",
-            "ItemBoots"
-          ],
-          responses: setData("pain"),
-          selfTrigger: true
-        },
-        {
-          actName: "LSCG_SharkBite",
-          groupName: [
-            "ItemFeet",
-            "ItemLegs",
-            "ItemButt",
-            "ItemTorso",
-            "ItemNipples",
-            "ItemBreast",
-            "ItemArms",
-            "ItemHands",
-            "ItemNeck",
-            "ItemEars",
-            "ItemBoots"
-          ],
-          responses: setData("pain")
-        },
-        {
-          actName: "Tickle",
-          groupName: ["ItemFeet", "ItemLegs", "ItemPelvis", "ItemTorso", "ItemTorso2", "ItemBreast", "ItemArms", "ItemNeck", "ItemBoots"],
-          responses: setData("tickle")
-        },
-        {
-          actName: "TickleItem",
-          groupName: [
-            "ItemFeet",
-            "ItemLegs",
-            "ItemVulva",
-            "ItemVulvaPiercings",
-            "ItemButt",
-            "ItemPelvis",
-            "ItemTorso",
-            "ItemNipples",
-            "ItemBreast",
-            "ItemArms",
-            "ItemNeck",
-            "ItemMouth",
-            "ItemNose",
-            "ItemHood",
-            "ItemEars",
-            "ItemBoots"
-          ],
-          responses: setData("tickle")
-        }
-      ],
-      extraResponses: {
-        low: setData("low"),
-        light: setData("light"),
-        medium: setData("medium"),
-        hot: setData("hot"),
-        orgasm: setData("orgasm")
-      }
-    };
-  }
-  __name(getDefaultResponsesEntries, "getDefaultResponsesEntries");
-
-  // src/Modules/Responses.ts
-  var _ResponsesModule = class _ResponsesModule extends BaseModule {
-    // Just for Char Talk stuff
-    get settings() {
-      return super.settings;
-    }
-    get settingsScreen() {
-      return GuiResponses;
-    }
-    get defaultSettings() {
-      return getDefaultResponsesEntries();
-    }
-    Load() {
-      onActivity(0 /* Observe */, 1 /* Responses */, (data, sender, msg, metadata) => {
-        const dict = activityDeconstruct(metadata);
-        if (!dict) return;
-        let entry = this.getResponsesEntry(dict?.ActivityName, dict?.ActivityGroup);
-        activityHandle(dict, entry);
-        conDebug(dict);
-      });
-      hookFunction(
-        "ServerAccountBeep",
-        1 /* AddBehavior */,
-        (args, next) => {
-          let data = args[0];
-          if (!data.ChatRoomName || !ChatRoomData || data.BeepType !== "Leash") return next(args);
-          if (!Player.OnlineSharedSettings?.AllowPlayerLeashing) return next(args);
-          leaveHandle(data);
-          next(args);
-        },
-        0 /* Global */
-      );
-      hookFunction(
-        "ActivityOrgasmStart",
-        0 /* Observe */,
-        (args, next) => {
-          orgasmHandle(args[0]);
-          next(args);
-        },
-        0 /* Global */
-      );
-    }
-    Run() {
-    }
-    getResponsesEntry(actName, grpName) {
-      return this.settings.mainResponses.find((ent) => ent.actName === actName && ent.groupName.includes(grpName));
-    }
-  };
-  __name(_ResponsesModule, "ResponsesModule");
-  __publicField(_ResponsesModule, "isOrgasm", false);
-  var ResponsesModule = _ResponsesModule;
 
   // src/Modules/CharTalk.ts
   var letterExpressionMap = [
     { regex: /[.?!…~]/, expr: [null, 600] },
     { regex: /[,;]/, expr: [null, 250] },
     //Latin
-    { regex: /[a]/, expr: ["Open", 400] },
-    { regex: /[oeu]/, expr: ["HalfOpen", 300] },
-    { regex: /[bp]/, expr: [null, 200] },
-    { regex: /[mn]/, expr: [null, 500] },
-    { regex: /[ij]/, expr: ["Smirk", 400] },
-    { regex: /[kqrw]/, expr: ["HalfOpen", 300] },
-    { regex: /[fv]/, expr: ["LipBite", 300] },
-    { regex: /[cdt]/, expr: ["TonguePinch", 200] },
-    { regex: /[slz]/, expr: ["TonguePinch", 400] },
-    { regex: /[ghx]/, expr: ["Angry", 300] },
+    { regex: /[a]/i, expr: ["Open", 400] },
+    { regex: /[oeu]/i, expr: ["HalfOpen", 300] },
+    { regex: /[bp]/i, expr: [null, 200] },
+    { regex: /[mn]/i, expr: [null, 500] },
+    { regex: /[ij]/i, expr: ["Smirk", 400] },
+    { regex: /[kqrw]/i, expr: ["HalfOpen", 300] },
+    { regex: /[fv]/i, expr: ["LipBite", 300] },
+    { regex: /[cdt]/i, expr: ["TonguePinch", 200] },
+    { regex: /[slz]/i, expr: ["TonguePinch", 400] },
+    { regex: /[ghx]/i, expr: ["Angry", 300] },
     //Cyrillic
-    { regex: /[ая]/, expr: ["Open", 400] },
-    { regex: /[оеуєю]/, expr: ["HalfOpen", 300] },
-    { regex: /[бп]/, expr: [null, 200] },
-    { regex: /[мн]/, expr: [null, 500] },
-    { regex: /[иіжїы]/, expr: ["Smirk", 400] },
-    { regex: /[yкр]/, expr: ["HalfOpen", 300] },
-    { regex: /[фв]/, expr: ["LipBite", 300] },
-    { regex: /[цдт]/, expr: ["TonguePinch", 200] },
-    { regex: /[слз]/, expr: ["TonguePinch", 400] },
-    { regex: /[гх]/, expr: ["Angry", 300] }
+    { regex: /[ая]/i, expr: ["Open", 400] },
+    { regex: /[оеуєю]/i, expr: ["HalfOpen", 300] },
+    { regex: /[бп]/i, expr: [null, 200] },
+    { regex: /[мн]/i, expr: [null, 500] },
+    { regex: /[иіжїы]/i, expr: ["Smirk", 400] },
+    { regex: /[yкр]/i, expr: ["HalfOpen", 300] },
+    { regex: /[фв]/i, expr: ["LipBite", 300] },
+    { regex: /[цдт]/i, expr: ["TonguePinch", 200] },
+    { regex: /[слз]/i, expr: ["TonguePinch", 400] },
+    { regex: /[гх]/i, expr: ["Angry", 300] }
   ];
   var _CharTalkModule = class _CharTalkModule extends BaseModule {
     Load() {
       ChatRoomRegisterMessageHandler({
         Description: "Processes mouth moving on the client",
         Priority: 500,
-        Callback: /* @__PURE__ */ __name((data, sender, msg, metadata) => {
-          if (data.Type == "Chat") {
-            _CharTalkModule.charTalkHandle(sender, msg);
-            return false;
-          }
+        Callback: /* @__PURE__ */ __name((data, sender, msg) => {
+          if (data.Type === "Chat") _CharTalkModule.charTalkHandle(sender, msg);
+          return false;
         }, "Callback")
       });
       hookFunction(
@@ -2059,14 +1016,16 @@ One of mods you are using is using an old version of SDK. It will work for now b
         0 /* Observe */,
         (args, next) => {
           const c = args[0];
-          if (!_CharTalkModule.animation?.[c.MemberNumber]) return next(args);
+          if (!c?.MemberNumber) return next(args);
+          const charData = _CharTalkModule.characterData[c.MemberNumber];
+          if (!charData) return next(args);
           const mouth = InventoryGet(c, "Mouth");
           if (!mouth) return next(args);
           if (!mouth.Property) mouth.Property = {};
-          const realExpression = mouth?.Property?.Expression || null;
-          mouth.Property.Expression = _CharTalkModule.currentExpression?.[c.MemberNumber] || null;
+          charData.realExpression = mouth.Property.Expression ?? null;
+          mouth.Property.Expression = charData.currentExpression ?? null;
           const returnValue = next(args);
-          mouth.Property.Expression = realExpression;
+          mouth.Property.Expression = charData.realExpression;
           return returnValue;
         },
         3 /* CharTalk */
@@ -2078,91 +1037,64 @@ One of mods you are using is using an old version of SDK. It will work for now b
      * before pushing them into the animator.
      */
     static animateSpeech(c, msg) {
-      const chunks = _CharTalkModule.chunkSubstr(msg, 3);
+      const maxFrames = 30;
+      const chunks = msg.match(/.{1,3}/g) || [];
       const animation = chunks.map((chunk) => {
         const match = letterExpressionMap.find(({ regex }) => regex.test(chunk)) ?? { expr: [null, 200] };
         return match.expr;
-      });
+      }).slice(0, maxFrames);
       _CharTalkModule.runExpressionAnimation(c, animation);
     }
     /**
      * Runs animation by changing mouth expression every `step[1]`ms
      */
     static runExpressionAnimationStep(c) {
-      if (!_CharTalkModule.animation?.[c.MemberNumber]) return;
-      let step = _CharTalkModule.animation[c.MemberNumber][_CharTalkModule.animationFrame++];
-      _CharTalkModule.setLocalMouthExpression(c, step?.[0]);
-      if (_CharTalkModule.animationFrame < _CharTalkModule.animation?.[c.MemberNumber].length) {
-        setTimeout(() => _CharTalkModule.runExpressionAnimationStep(c), step[1]);
-      } else {
-        delete _CharTalkModule.animation[c.MemberNumber];
+      if (!c?.MemberNumber) return;
+      const charData = _CharTalkModule.characterData[c.MemberNumber];
+      if (!charData) return;
+      if (charData.animationFrame >= charData.animation.length) {
+        return _CharTalkModule.cleanup(c);
       }
+      const [expression, duration] = charData.animation[charData.animationFrame++];
+      _CharTalkModule.setLocalMouthExpression(c, expression);
+      setTimeout(() => _CharTalkModule.runExpressionAnimationStep(c), duration);
     }
     static runExpressionAnimation(c, list) {
-      if (_CharTalkModule.animation?.[c.MemberNumber]) return;
-      _CharTalkModule.animation[c.MemberNumber] = list;
-      _CharTalkModule.animationFrame = 0;
-      const mouth = InventoryGet(c, "Mouth")?.Property;
-      if (mouth?.Expression && _CharTalkModule.animation[c.MemberNumber] !== null) {
-        _CharTalkModule.animation?.[c.MemberNumber].push([mouth?.Expression, 0]);
-      }
+      if (!c?.MemberNumber) return;
+      if (_CharTalkModule.characterData[c.MemberNumber]) return;
+      _CharTalkModule.characterData[c.MemberNumber] = {
+        realExpression: null,
+        currentExpression: null,
+        animation: list,
+        animationFrame: 0
+      };
       _CharTalkModule.runExpressionAnimationStep(c);
     }
-    /**
-     * Splits a string into chunks of "size" length
-     */
-    static chunkSubstr(str, size) {
-      const numChunks = Math.ceil(str.length / size);
-      const chunks = new Array(numChunks);
-      for (let i = 0, o = 0; i < numChunks; ++i, o += size) {
-        chunks[i] = str.substring(o, o + size);
-      }
-      return chunks;
-    }
     static setLocalMouthExpression(c, expressionName) {
+      if (!c?.MemberNumber) return;
       const mouth = InventoryGet(c, "Mouth");
-      if (expressionName != null && !mouth.Asset.Group.AllowExpression.includes(expressionName)) return;
-      _CharTalkModule.currentExpression[c.MemberNumber] = expressionName;
+      if (!mouth || expressionName && !mouth.Asset.Group.AllowExpression?.includes(expressionName)) return;
+      _CharTalkModule.characterData[c.MemberNumber].currentExpression = expressionName;
       CharacterRefresh(c, false);
+    }
+    static charTalkHandle(c, msg) {
+      const storage = PlayerStorage().GlobalModule;
+      if (!storage.ResponsiveEnabled || !storage.CharTalkEnabled || !c?.MemberNumber || _CharTalkModule.characterData[c.MemberNumber]) return;
+      if (isSimpleChat(msg)) {
+        _CharTalkModule.animateSpeech(c, msg);
+      }
+    }
+    static cleanup(c) {
+      if (!c?.MemberNumber || !_CharTalkModule.characterData[c.MemberNumber]) return;
+      _CharTalkModule.setLocalMouthExpression(c, _CharTalkModule.characterData[c.MemberNumber].realExpression);
+      delete _CharTalkModule.characterData[c.MemberNumber];
     }
   };
   __name(_CharTalkModule, "CharTalkModule");
-  __publicField(_CharTalkModule, "doAnimateMouth", true);
-  /**
-   * The list of expressions to animate with their duration.
-   */
-  __publicField(_CharTalkModule, "animation", {});
-  __publicField(_CharTalkModule, "currentExpression", {});
-  __publicField(_CharTalkModule, "animationFrame", 0);
-  __publicField(_CharTalkModule, "charTalkHandle", /* @__PURE__ */ __name((c, msg) => {
-    if (!PlayerStorage().GlobalModule.ResponsiveEnabled) return;
-    if (!PlayerStorage().GlobalModule.CharTalkEnabled) return;
-    if (!c) return;
-    const fIsSimpleChat = !!isSimpleChat(msg);
-    if (fIsSimpleChat && _CharTalkModule.doAnimateMouth && c == Player && !ResponsesModule.isOrgasm) {
-      _CharTalkModule.animateSpeech(c, msg);
-    } else if (fIsSimpleChat && _CharTalkModule.doAnimateMouth && c != Player) {
-      _CharTalkModule.animateSpeech(c, msg);
-    }
-    if (!fIsSimpleChat) {
-      _CharTalkModule.doAnimateMouth = false;
-      return;
-    }
-    if (fIsSimpleChat && !_CharTalkModule.doAnimateMouth) {
-      _CharTalkModule.doAnimateMouth = true;
-      _CharTalkModule.animateSpeech(c, msg);
-    }
-    if (ResponsesModule.isOrgasm) {
-      ResponsesModule.isOrgasm = false;
-    }
-  }, "charTalkHandle"));
+  __publicField(_CharTalkModule, "characterData", {});
   var CharTalkModule = _CharTalkModule;
 
-  // src/Modules/Global.ts
-  init_define_LAST_COMMIT_HASH();
-
   // src/Screens/Global.ts
-  init_define_LAST_COMMIT_HASH();
   var _GuiGlobal = class _GuiGlobal extends GuiSubscreen {
     get name() {
       return "settings";
@@ -2261,11 +1193,7 @@ One of mods you are using is using an old version of SDK. It will work for now b
   __name(_GlobalModule, "GlobalModule");
   var GlobalModule = _GlobalModule;
 
-  // src/Modules/Profiles.ts
-  init_define_LAST_COMMIT_HASH();
-
   // src/Screens/Profiles.ts
-  init_define_LAST_COMMIT_HASH();
   var _GuiProfiles = class _GuiProfiles extends GuiSubscreen {
     constructor() {
       super(...arguments);
@@ -2460,11 +1388,731 @@ One of mods you are using is using an old version of SDK. It will work for now b
   __name(_ProfilesModule, "ProfilesModule");
   var ProfilesModule = _ProfilesModule;
 
-  // src/Modules/Version.ts
-  init_define_LAST_COMMIT_HASH();
+  // src/Utilities/Handlers.ts
+  var doesBcxAllowsTalking = /* @__PURE__ */ __name(() => {
+    const isRuleWorking = /* @__PURE__ */ __name((ruleName) => {
+      const rule = window.bcx?.getModApi(ModName).getRuleState(ruleName);
+      if (!rule) return false;
+      switch (ruleName) {
+        case "speech_forbid_open_talking":
+          return rule.inEffect && rule.isEnforced;
+        case "speech_limit_open_talking":
+          return rule.inEffect && rule.isEnforced;
+        case "speech_specific_sound":
+          return rule.inEffect && rule.isEnforced && rule.customData.soundWhitelist;
+        case "speech_mandatory_words":
+          return rule.inEffect && rule.isEnforced && rule.customData.mandatoryWords;
+        default:
+          break;
+      }
+    }, "isRuleWorking");
+    if (PlayerStorage().GlobalModule.doPreventMessageIfBcxBlock && (isRuleWorking("speech_forbid_open_talking") || isRuleWorking("speech_limit_open_talking") || isRuleWorking("speech_specific_sound") || isRuleWorking("speech_mandatory_words"))) {
+      return false;
+    }
+    return true;
+  }, "doesBcxAllowsTalking");
+  var orgasmHandle = /* @__PURE__ */ __name((c) => {
+    if (!PlayerStorage().GlobalModule.ResponsiveEnabled) return;
+    if (!PlayerStorage().GlobalModule.responsesEnabled) return;
+    if (CurrentScreen !== "ChatRoom" || !Player) return;
+    if (Player.MemberNumber !== c.MemberNumber) return;
+    if (!PlayerStorage().ResponsesModule.extraResponses.orgasm) return;
+    if (ActivityOrgasmRuined) return;
+    if (window.bcx && !doesBcxAllowsTalking()) return;
+    ResponsesModule.isOrgasm = true;
+    orgasmMessage();
+  }, "orgasmHandle");
+  var activityHandle = /* @__PURE__ */ __name((dict, entry) => {
+    if (!PlayerStorage().GlobalModule.ResponsiveEnabled) return;
+    if (!PlayerStorage().GlobalModule.responsesEnabled) return;
+    if (CurrentScreen !== "ChatRoom" || !Player) return;
+    if (dict.targetCharacter.MemberNumber !== Player.MemberNumber) return;
+    if (!entry || !entry?.responses) return;
+    if (!entry.selfTrigger && dict.targetCharacter.MemberNumber === dict.sourceCharacter.MemberNumber) return;
+    if (window.bcx && !doesBcxAllowsTalking()) return;
+    activityMessage(dict, entry);
+  }, "activityHandle");
+  var leaveHandle = /* @__PURE__ */ __name((data) => {
+    if (!PlayerStorage().GlobalModule.ResponsiveEnabled) return;
+    if (!PlayerStorage().GlobalModule.doLeaveMessage) return;
+    if (CurrentScreen !== "ChatRoom" || !Player) return;
+    if (!(CurrentScreen == "ChatRoom" && ChatRoomData?.Name != data.ChatRoomName)) return;
+    if (window.bcx && !doesBcxAllowsTalking()) return;
+    leaveMessage();
+  }, "leaveHandle");
+
+  // src/Screens/Responses.ts
+  var _GuiResponses = class _GuiResponses extends GuiSubscreen {
+    constructor() {
+      super(...arguments);
+      __publicField(this, "activityIndex", 0);
+      __publicField(this, "selfAllowed", false);
+      // to not call ActivityCanBeDoneOnSelf() every draw call;
+      __publicField(this, "masterSet", false);
+      __publicField(this, "copiedEntry", {});
+    }
+    get name() {
+      return "responses";
+    }
+    get icon() {
+      return "Icons/Chat.png";
+    }
+    get settings() {
+      return super.settings;
+    }
+    get currentResponsesEntry() {
+      let actName = this.currentAct()?.Name ?? "";
+      let groupName = this.currentGroup()?.Name ?? "";
+      let entry = this.getResponsesEntry(actName, groupName);
+      return entry;
+    }
+    get activities() {
+      if (!Player.FocusGroup) return [];
+      else
+        return AssetActivitiesForGroup("Female3DCG", Player.FocusGroup.Name, "any").filter(
+          (a) => this.getActivityLabelTag(a, Player.FocusGroup)
+        );
+    }
+    get multipageStructure() {
+      return [
+        [],
+        [
+          {
+            type: "text",
+            id: "extra_low",
+            label: "responses.setting.low_response.name",
+            description: "responses.setting.low_response.desc",
+            setting: /* @__PURE__ */ __name(() => _GuiResponses.stringListShow(this.settings?.extraResponses?.low), "setting"),
+            setSetting: /* @__PURE__ */ __name((val) => {
+              this.settings.extraResponses.low = _GuiResponses.validateInput(val) ?? this.settings.extraResponses.low;
+            }, "setSetting")
+          },
+          {
+            type: "text",
+            id: "extra_light",
+            label: "responses.setting.light_response.name",
+            description: "responses.setting.light_response.desc",
+            setting: /* @__PURE__ */ __name(() => _GuiResponses.stringListShow(this.settings?.extraResponses?.light), "setting"),
+            setSetting: /* @__PURE__ */ __name((val) => {
+              this.settings.extraResponses.light = _GuiResponses.validateInput(val) ?? this.settings.extraResponses.light;
+            }, "setSetting")
+          },
+          {
+            type: "text",
+            id: "extra_medium",
+            label: "responses.setting.medium_response.name",
+            description: "responses.setting.medium_response.desc",
+            setting: /* @__PURE__ */ __name(() => _GuiResponses.stringListShow(this.settings?.extraResponses?.medium), "setting"),
+            setSetting: /* @__PURE__ */ __name((val) => {
+              this.settings.extraResponses.medium = _GuiResponses.validateInput(val) ?? this.settings.extraResponses.medium;
+            }, "setSetting")
+          },
+          {
+            type: "text",
+            id: "extra_hot",
+            label: "responses.setting.hot_response.name",
+            description: "responses.setting.hot_response.desc",
+            setting: /* @__PURE__ */ __name(() => _GuiResponses.stringListShow(this.settings?.extraResponses?.hot), "setting"),
+            setSetting: /* @__PURE__ */ __name((val) => {
+              this.settings.extraResponses.hot = _GuiResponses.validateInput(val) ?? this.settings.extraResponses.hot;
+            }, "setSetting")
+          },
+          {
+            type: "text",
+            id: "extra_orgasm",
+            label: "responses.setting.orgasm_response.name",
+            description: "responses.setting.orgasm_response.desc",
+            setting: /* @__PURE__ */ __name(() => _GuiResponses.stringListShow(this.settings?.extraResponses?.orgasm), "setting"),
+            setSetting: /* @__PURE__ */ __name((val) => {
+              this.settings.extraResponses.orgasm = _GuiResponses.validateInput(val) ?? this.settings.extraResponses.orgasm;
+            }, "setSetting")
+          }
+        ]
+      ];
+    }
+    static activityCanBeDoneOnSelf(activity, group) {
+      return activity?.TargetSelf ? (typeof activity.TargetSelf === "boolean" ? activity.Target : activity.TargetSelf).includes(group) : false;
+    }
+    /**
+     * Whether an activity can be performed on others / only on self / both.
+     * @param {Activity} activity
+     * @returns {{ onOthers: boolean, onSelf: boolean, selfOnly: boolean, othersOnly: boolean }}
+     */
+    static activityTargetMode(activity) {
+      const onOthers = Array.isArray(activity.Target) && activity.Target.length > 0;
+      const onSelf = activity.TargetSelf === true || Array.isArray(activity.TargetSelf) && activity.TargetSelf.length > 0;
+      return {
+        onOthers,
+        onSelf,
+        selfOnly: onSelf && !onOthers,
+        othersOnly: onOthers && !onSelf
+      };
+    }
+    Load() {
+      if (!this.settings) conDebug(`Loading Responses GUI`);
+      super.Load();
+      ElementCreateTextArea("mainResponses");
+      this.elementHide("mainResponses");
+      CharacterAppearanceForceUpCharacter = Player.MemberNumber ?? -1;
+    }
+    Run() {
+      let prev = MainCanvas.textAlign;
+      MainCanvas.textAlign = "left";
+      super.Run();
+      if (PreferencePageCurrent == 1) {
+        for (let Group of AssetGroup) {
+          if (Group.IsItem() && !Group.MirrorActivitiesFrom && AssetActivitiesForGroup("Female3DCG", Group.Name).length)
+            DrawAssetGroupZone(Player, Group.Zone, 0.9, 50, 50, 1, "#808080FF", 3, this.getZoneColor(Group.Name));
+        }
+        if (Player.FocusGroup != null) {
+          let activity = this.activities[this.activityIndex ?? 0];
+          DrawAssetGroupZone(Player, Player.FocusGroup.Zone, 0.9, 50, 50, 1, "cyan");
+          MainCanvas.textAlign = "center";
+          DrawBackNextButton(
+            550,
+            this.getYPos(0),
+            600,
+            64,
+            this.getActivityLabel(activity, Player.FocusGroup),
+            "White",
+            "",
+            () => "",
+            () => ""
+          );
+          MainCanvas.textAlign = "left";
+          if (!!activity) {
+            let image = "Assets/" + Player.AssetFamily + "/Activity/" + activity.Name + ".png";
+            if (activity.Name.indexOf("Item") > -1) {
+              image = "Icons/Dress.png";
+            }
+            DrawImageResize(image, 1170, this.getYPos(0) - 28, 120, 120);
+            DrawEmptyRect(1170, this.getYPos(0) - 28, 120, 120, "Black", 2);
+            this.drawActivityOptions();
+          }
+        } else {
+          DrawText(getText("responses.text.select_zone"), this.getXPos(0), this.getYPos(0), "Black", "White");
+        }
+      }
+      if (PreferencePageCurrent == 2) this.elementHide("mainResponses");
+      MainCanvas.textAlign = prev;
+    }
+    Click() {
+      let tmp = GuiSubscreen.START_X;
+      GuiSubscreen.START_X = 550;
+      super.Click();
+      if (PreferencePageCurrent == 1) {
+        for (const Group of AssetGroup) {
+          if (Group.IsItem() && !Group.MirrorActivitiesFrom && AssetActivitiesForGroup("Female3DCG", Group.Name).length) {
+            const Zone = Group.Zone.find((z) => DialogClickedInZone(Player, z, 0.9, 50, 50, 1));
+            if (Zone) {
+              if (Player.FocusGroup) this.saveResponseEntry(this.currentResponsesEntry);
+              if (Player.FocusGroup === Group) return this.deselectEntry();
+              Player.FocusGroup = Group;
+              let activities = this.activities;
+              if (this.activityIndex >= activities.length) this.activityIndex = 0;
+              this.loadResponseEntry(this.currentResponsesEntry);
+            }
+          }
+        }
+        if (Player.FocusGroup != null) {
+          let activities = this.activities;
+          if (MouseIn(this.getXPos(0), this.getYPos(0), 600, 64)) {
+            this.saveResponseEntry(this.currentResponsesEntry);
+            if (MouseX <= this.getXPos(0) + 300) this.activityIndex = (activities.length + this.activityIndex - 1) % activities.length;
+            else this.activityIndex = (this.activityIndex + 1) % activities.length;
+            this.loadResponseEntry(this.currentResponsesEntry);
+          }
+        }
+        this.handleActivityEntryClick();
+      }
+      GuiSubscreen.START_X = tmp;
+    }
+    Exit() {
+      this.saveResponseEntry(this.currentResponsesEntry);
+      ElementRemove("mainResponses");
+      CharacterAppearanceForceUpCharacter = -1;
+      CharacterLoadCanvas(Player);
+      Player.FocusGroup = null;
+      super.Exit();
+    }
+    currentAct() {
+      return this.activities[this.activityIndex];
+    }
+    currentGroup() {
+      return Player.FocusGroup;
+    }
+    getZoneColor(groupName) {
+      let hasConfiguration = this.settings?.mainResponses?.some((a) => a.groupName.includes(groupName));
+      return hasConfiguration ? "#00FF0044" : "#80808044";
+    }
+    getResponsesEntry(actName, grpName) {
+      return this.settings?.mainResponses?.find((a) => a.actName == actName && a.groupName.includes(grpName));
+    }
+    getActivityLabelTag(activity, group) {
+      let groupName = group.Name;
+      if (Player.HasPenis()) {
+        if (groupName == "ItemVulva") groupName = "ItemPenis";
+        if (groupName == "ItemVulvaPiercings") groupName = "ItemGlans";
+      }
+      const targetMode = _GuiResponses.activityTargetMode(activity);
+      if (targetMode.selfOnly) {
+        return `Label-ChatSelf-${groupName}-${activity.Name}`;
+      } else {
+        return `Label-ChatOther-${groupName}-${activity.Name}`;
+      }
+    }
+    getActivityLabel(activity, group) {
+      if (!activity) return "ACTIVITY NOT FOUND";
+      let tag = this.getActivityLabelTag(activity, group);
+      return ActivityDictionaryText(tag);
+    }
+    deselectEntry() {
+      Player.FocusGroup = null;
+      this.elementHide("mainResponses");
+    }
+    loadResponseEntry(entry) {
+      this.elementSetValue("mainResponses", _GuiResponses.stringListShow(entry?.responses) ?? []);
+    }
+    saveResponseEntry(entry) {
+      let responses = ElementValue("mainResponses");
+      let merge = false;
+      let unmerge = false;
+      const validResponses = _GuiResponses.validateInput(responses);
+      if (responses != "" && validResponses) {
+        if (!entry) entry = this.createEntryIfNeeded(entry);
+        if (!this.masterSet) {
+          merge = this.mergeEntry(entry, validResponses);
+          unmerge = this.unmergeEntry(entry, validResponses);
+        }
+        if (this.masterSet || !(merge || unmerge)) entry.responses = validResponses ?? entry.responses;
+        this.settings.mainResponses.sort((a, b) => a.actName.localeCompare(b.actName));
+      }
+    }
+    clearEntry(entry) {
+      if (!entry) return;
+      let temp = this.settings?.mainResponses?.find((ent) => ent.actName === entry.actName && ent.groupName === entry.groupName);
+      if (temp?.groupName?.length && temp.groupName.length <= 1) {
+        this.settings.mainResponses = this.settings?.mainResponses.filter((a) => {
+          return !(a.actName == entry.actName && a.groupName == entry.groupName);
+        });
+      } else {
+        const currentGroupName = this.currentGroup()?.Name;
+        if (currentGroupName) {
+          temp?.groupName?.splice(temp?.groupName?.indexOf(currentGroupName), 1);
+        }
+      }
+      this.elementSetValue("mainResponses", []);
+    }
+    /**
+     * Get entry >
+     *
+     * find response that has same `actName`, that doesn't includes current `groupName` and responses are the same with current entry >
+     *
+     * push `groupName` to that response >
+     *
+     * clear current entry
+     */
+    mergeEntry(entry, validResponses) {
+      const stringifiedValidResponses = JSON.stringify(validResponses);
+      let mergingEntry = this.settings?.mainResponses?.find((ent) => {
+        const currentGroupName2 = this.currentGroup()?.Name;
+        if (!currentGroupName2) return false;
+        return ent.actName == this.currentAct().Name && // Actions are same
+        !ent.groupName.includes(currentGroupName2) && // Group array don't have selected group
+        (JSON.stringify(ent.responses) === stringifiedValidResponses || // Responses are the same
+        ent.selfTrigger === entry.selfTrigger);
+      });
+      if (!mergingEntry) return false;
+      const currentGroupName = this.currentGroup()?.Name;
+      if (!currentGroupName) return false;
+      mergingEntry.groupName.push(currentGroupName);
+      const entr = this.settings?.mainResponses?.find((ent) => ent.actName === entry.actName && ent.groupName === entry.groupName);
+      entr?.groupName?.splice(entr?.groupName?.indexOf(currentGroupName), 1);
+      this.clearEntry(entry);
+      return true;
+    }
+    /**
+     * Get entry >
+     *
+     * find response that has same `actName`, that includes current `groupName` and responses are not the same with current entry >
+     *
+     * remove `groupName` from that response >
+     *
+     * create new entry with this data
+     */
+    unmergeEntry(entry, validResponses) {
+      const stringifiedCurrentResponses = JSON.stringify(validResponses);
+      let unmergingEntry = this.settings?.mainResponses?.find((ent) => {
+        const currentGroupName2 = this.currentGroup()?.Name;
+        if (!currentGroupName2) return false;
+        return ent.actName == this.currentAct().Name && // Actions are same
+        Array.isArray(ent.groupName) && // Group name is type of array
+        ent.groupName.length > 1 && // Group array has more than one entry
+        ent.groupName.includes(currentGroupName2) && // Group array has selected group
+        (JSON.stringify(ent.responses) !== stringifiedCurrentResponses || // Responses are not the same
+        ent.selfTrigger !== entry.selfTrigger);
+      });
+      if (!unmergingEntry) return false;
+      const currentGroupName = this.currentGroup()?.Name;
+      if (!currentGroupName) return false;
+      unmergingEntry.groupName.splice(unmergingEntry.groupName.indexOf(currentGroupName), 1);
+      const newEntry = this.createNewEntry(this.currentAct().Name, currentGroupName, validResponses, entry.selfTrigger);
+      this.settings.mainResponses.push(newEntry);
+      return true;
+    }
+    createNewEntry(actName, grpName, responses, selfTrigger) {
+      return {
+        actName,
+        groupName: [grpName],
+        responses: responses ?? [""],
+        selfTrigger: selfTrigger ?? false
+      };
+    }
+    createEntryIfNeeded(existing) {
+      if (!existing) {
+        existing = this.createNewEntry(this.currentAct()?.Name, this.currentGroup()?.Name ?? "");
+        this.settings.mainResponses.push(existing);
+        this.loadResponseEntry(this.currentResponsesEntry);
+      }
+      return existing;
+    }
+    copyEntry(entry) {
+      this.copiedEntry = entry;
+    }
+    pasteEntry(entry) {
+      if (Object.keys(this.copiedEntry).length === 0) return;
+      if (!entry) entry = this.createEntryIfNeeded(entry);
+      entry.responses = this.copiedEntry.responses ?? [""];
+      this.loadResponseEntry(entry);
+      const currentGroupName = this.currentGroup()?.Name;
+      if (!currentGroupName) return;
+      if (_GuiResponses.activityCanBeDoneOnSelf(this.currentAct(), currentGroupName))
+        entry.selfTrigger = this.copiedEntry.selfTrigger;
+    }
+    handleActivityEntryClick() {
+      let entry = this.currentResponsesEntry;
+      const currentGroupName = this.currentGroup()?.Name;
+      if (!currentGroupName) return;
+      this.selfAllowed = _GuiResponses.activityCanBeDoneOnSelf(this.currentAct(), currentGroupName);
+      if (!!entry && MouseIn(1310, this.getYPos(0), 64, 64)) {
+        this.clearEntry(entry);
+      }
+      if (MouseIn(1385, this.getYPos(0), 64, 64)) {
+        this.copyEntry(entry);
+      }
+      if (MouseIn(1455, this.getYPos(0), 64, 64)) {
+        this.pasteEntry(entry);
+      }
+      if (MouseIn(this.getXPos(2) + 600, this.getYPos(2) - 32, 64, 64) && this.selfAllowed) {
+        entry = this.createEntryIfNeeded(entry);
+        entry.selfTrigger = !entry.selfTrigger;
+      }
+      if (MouseIn(this.getXPos(8) + 600, this.getYPos(8) - 32, 64, 64)) {
+        this.masterSet = !this.masterSet;
+      }
+    }
+    drawActivityOptions() {
+      let activityEntry = this.currentResponsesEntry;
+      if (!!activityEntry) {
+        MainCanvas.textAlign = "center";
+        DrawButton(1310, this.getYPos(0), 64, 64, "X", "White", void 0, getText("responses.text.clear_entry"));
+        MainCanvas.textAlign = "left";
+      }
+      MainCanvas.textAlign = "center";
+      DrawButton(1385, this.getYPos(0), 64, 64, "", "White", void 0, getText("responses.text.copy_entry"));
+      DrawImageResize("Icons/Export.png", 1385, this.getYPos(0), 64, 64);
+      MainCanvas.textAlign = "left";
+      MainCanvas.textAlign = "center";
+      DrawButton(1455, this.getYPos(0), 64, 64, "", "White", void 0, getText("responses.text.paste_entry"));
+      DrawImageResize("Icons/Import.png", 1455, this.getYPos(0), 64, 64);
+      MainCanvas.textAlign = "left";
+      this.drawCheckbox(
+        "responses.setting.self_trigger.name",
+        "responses.setting.self_trigger.desc",
+        activityEntry?.selfTrigger ?? false,
+        2,
+        !this.selfAllowed
+      );
+      this.drawCheckbox("responses.setting.master_set.name", "responses.setting.master_set.desc", this.masterSet ?? false, 8);
+      this.elementPosition("mainResponses", "responses.setting.responses.name", "responses.setting.responses.desc", 3, false);
+    }
+    elementSetValue(elementId, value) {
+      let element = document.getElementById(elementId);
+      if (!!element && value != null) element.value = value;
+    }
+    elementPosition(elementId, label, description, order, disabled = false) {
+      var isHovering = MouseIn(this.getXPos(order), this.getYPos(order) - 32, 600, 64);
+      const isValid = !!_GuiResponses.validateInput(ElementValue(elementId));
+      DrawTextFit(
+        isValid ? `${getText(label)}` : `${getText(label)} \u2716`,
+        this.getXPos(order),
+        this.getYPos(order),
+        600,
+        isHovering ? "Red" : "Black",
+        "Gray"
+      );
+      ElementPosition(elementId, this.getXPos(order) + 750 + 225, this.getYPos(order), 800, 64);
+      if (disabled) ElementSetAttribute(elementId, "disabled", "true");
+      if (!disabled) document.getElementById(elementId)?.removeAttribute("disabled");
+      if (isHovering) this.tooltip(getText(description));
+    }
+  };
+  __name(_GuiResponses, "GuiResponses");
+  __publicField(_GuiResponses, "validateInput", /* @__PURE__ */ __name((input) => {
+    let raw = `[${input}]`;
+    const validateStringList = /* @__PURE__ */ __name((input2) => {
+      if (!Array.isArray(input2)) return void 0;
+      if (!input2.every((_) => typeof _ === "string")) return void 0;
+      return input2;
+    }, "validateStringList");
+    try {
+      let data = JSON.parse(raw);
+      return validateStringList(data);
+    } catch (e) {
+      return void 0;
+    }
+  }, "validateInput"));
+  __publicField(_GuiResponses, "stringListShow", /* @__PURE__ */ __name((input) => {
+    if (!input || input.length === 0) return "";
+    let result = JSON.stringify(input);
+    return result.substring(1, result.length - 1);
+  }, "stringListShow"));
+  var GuiResponses = _GuiResponses;
+
+  // src/Utilities/DefaultResponsesEntries.ts
+  var DefaultResponses = {
+    pain: ["Aie!", "Aoouch!", "Aaaaie!", "Ouch", "Aow"],
+    tickle: ["Hahaha!", "Mmmmhahaha!", "Muhahah...", "Ha!Ha!"],
+    boop: ["Eek!", "Beep!", "Aww.."],
+    low: ["", "", "mh", "\u2665oh\u2665", "ah", "...\u2665"],
+    light: ["ah\u2665", "Aah!", "mh", "oh!\u2665", "mh\u2665"],
+    medium: ["mm", "aaaah", "Mm.. Ah\u2665"],
+    hot: ["nh... ah\u2665", "Oooh", "mmmmmh!", "HaaA\u2665"],
+    orgasm: ["Mh...Mn...HaaAAaah!", "Mmmmh... MMmh... Hhhmmmm...", "Oooooh... Mmmmh... OooOOOOh!", "Mmmhnn... Nyhmm... aah!"]
+  };
+  var setData = /* @__PURE__ */ __name((key) => {
+    let oldSettings = null;
+    if (Player?.OnlineSettings?.BCResponsive?.data) {
+      oldSettings = JSON.parse(
+        //@ts-ignore
+        LZString.decompressFromBase64(Player?.OnlineSettings?.BCResponsive?.data)
+      );
+    }
+    return oldSettings ? oldSettings?.[key] ? oldSettings?.[key] : DefaultResponses[key] : DefaultResponses[key];
+  }, "setData");
+  function getDefaultResponsesEntries() {
+    return {
+      mainResponses: [
+        {
+          actName: "Pet",
+          groupName: ["ItemNose"],
+          responses: setData("boop"),
+          selfTrigger: false
+        },
+        {
+          actName: "LSCG_SharkBite",
+          groupName: ["ItemNose"],
+          responses: setData("boop"),
+          selfTrigger: false
+        },
+        {
+          actName: "Slap",
+          groupName: ["ItemVulva", "ItemVulvaPiercings", "ItemBreast", "ItemHead"],
+          responses: setData("pain"),
+          selfTrigger: true
+        },
+        {
+          actName: "Bite",
+          groupName: [
+            "ItemFeet",
+            "ItemLegs",
+            "ItemButt",
+            "ItemTorso",
+            "ItemTorso2",
+            "ItemNipples",
+            "ItemBreast",
+            "ItemArms",
+            "ItemHands",
+            "ItemNeck",
+            "ItemMouth",
+            "ItemNose",
+            "ItemEars",
+            "ItemBoots"
+          ],
+          responses: setData("pain"),
+          selfTrigger: true
+        },
+        {
+          actName: "Spank",
+          groupName: ["ItemFeet", "ItemLegs", "ItemButt", "ItemPelvis", "ItemTorso", "ItemTorso2", "ItemArms", "ItemHands", "ItemBoots"],
+          responses: setData("pain"),
+          selfTrigger: true
+        },
+        {
+          actName: "Kick",
+          groupName: ["ItemFeet", "ItemLegs", "ItemVulva", "ItemVulvaPiercings", "ItemButt", "ItemBoots"],
+          responses: setData("pain")
+        },
+        {
+          actName: "Pinch",
+          groupName: ["ItemButt", "ItemPelvis", "ItemNipples", "ItemArms", "ItemMouth", "ItemNose", "ItemEars"],
+          responses: setData("pain"),
+          selfTrigger: true
+        },
+        {
+          actName: "SpankItem",
+          groupName: [
+            "ItemFeet",
+            "ItemLegs",
+            "ItemVulva",
+            "ItemVulvaPiercings",
+            "ItemButt",
+            "ItemPelvis",
+            "ItemTorso",
+            "ItemNipples",
+            "ItemBreast",
+            "ItemArms",
+            "ItemBoots"
+          ],
+          responses: setData("pain"),
+          selfTrigger: true
+        },
+        {
+          actName: "ShockItem",
+          groupName: [
+            "ItemFeet",
+            "ItemLegs",
+            "ItemVulva",
+            "ItemVulvaPiercings",
+            "ItemButt",
+            "ItemPelvis",
+            "ItemTorso",
+            "ItemNipples",
+            "ItemBreast",
+            "ItemArms",
+            "ItemNeck",
+            "ItemNeckAccessories",
+            "ItemBoots"
+          ],
+          responses: setData("pain"),
+          selfTrigger: true
+        },
+        {
+          actName: "LSCG_SharkBite",
+          groupName: [
+            "ItemFeet",
+            "ItemLegs",
+            "ItemButt",
+            "ItemTorso",
+            "ItemNipples",
+            "ItemBreast",
+            "ItemArms",
+            "ItemHands",
+            "ItemNeck",
+            "ItemEars",
+            "ItemBoots"
+          ],
+          responses: setData("pain")
+        },
+        {
+          actName: "Tickle",
+          groupName: ["ItemFeet", "ItemLegs", "ItemPelvis", "ItemTorso", "ItemTorso2", "ItemBreast", "ItemArms", "ItemNeck", "ItemBoots"],
+          responses: setData("tickle")
+        },
+        {
+          actName: "TickleItem",
+          groupName: [
+            "ItemFeet",
+            "ItemLegs",
+            "ItemVulva",
+            "ItemVulvaPiercings",
+            "ItemButt",
+            "ItemPelvis",
+            "ItemTorso",
+            "ItemNipples",
+            "ItemBreast",
+            "ItemArms",
+            "ItemNeck",
+            "ItemMouth",
+            "ItemNose",
+            "ItemHood",
+            "ItemEars",
+            "ItemBoots"
+          ],
+          responses: setData("tickle")
+        }
+      ],
+      extraResponses: {
+        low: setData("low"),
+        light: setData("light"),
+        medium: setData("medium"),
+        hot: setData("hot"),
+        orgasm: setData("orgasm")
+      }
+    };
+  }
+  __name(getDefaultResponsesEntries, "getDefaultResponsesEntries");
+
+  // src/Modules/Responses.ts
+  var _ResponsesModule = class _ResponsesModule extends BaseModule {
+    // Just for Char Talk stuff
+    get settings() {
+      return super.settings;
+    }
+    get settingsScreen() {
+      return GuiResponses;
+    }
+    get defaultSettings() {
+      return getDefaultResponsesEntries();
+    }
+    Load() {
+      ChatRoomRegisterMessageHandler({
+        Description: "Processes activity responses",
+        Priority: 320,
+        Callback: /* @__PURE__ */ __name((data, sender, msg, metadata) => {
+          if (data.Type !== "Activity") return false;
+          const dict = activityDeconstruct(metadata ?? {});
+          if (!dict) return false;
+          let entry = this.getResponsesEntry(dict?.activityName, dict?.groupName);
+          if (!entry) return false;
+          activityHandle(dict, entry);
+          return false;
+        }, "Callback")
+      });
+      hookFunction(
+        "ServerAccountBeep",
+        1 /* AddBehavior */,
+        (args, next) => {
+          let data = args[0];
+          if (!data.ChatRoomName || !ChatRoomData || data.BeepType !== "Leash") return next(args);
+          if (!Player.OnlineSharedSettings?.AllowPlayerLeashing) return next(args);
+          leaveHandle(data);
+          next(args);
+        },
+        0 /* Global */
+      );
+      hookFunction(
+        "ActivityOrgasmStart",
+        0 /* Observe */,
+        (args, next) => {
+          orgasmHandle(args[0]);
+          next(args);
+        },
+        0 /* Global */
+      );
+    }
+    Run() {
+    }
+    getResponsesEntry(actName, grpName) {
+      if (!actName || !grpName) return void 0;
+      return this.settings.mainResponses.find((ent) => ent.actName === actName && ent.groupName.includes(grpName));
+    }
+  };
+  __name(_ResponsesModule, "ResponsesModule");
+  __publicField(_ResponsesModule, "isOrgasm", false);
+  var ResponsesModule = _ResponsesModule;
 
   // src/Utilities/Messages.ts
-  init_define_LAST_COMMIT_HASH();
   var BCR_CMDS = (
     /*html*/
     `
@@ -2511,16 +2159,18 @@ One of mods you are using is using an old version of SDK. It will work for now b
     /*html*/
     `
   <div class="ResponsiveMessageContent">
+    <b class="ResponsiveVersion">0.6.6</b>
+    <br>\u2022 Fixed CharTalk making expression stuck.
+    <br>\u2022 Fixed custom actions to be displayed correctly throughout all translations.<br> 
+    <br>\u2022 Fixed CharTalk to match letters in case-insensitive way.
+    <br>\u2022 Limit amount of animation frames in CharTalk to 30. Long sentences or RP essays won't be animated for 10 straight minutes~<br>
+
     <b class="ResponsiveVersion">0.6.5</b>
     <br>\u2022 Move mod button to Extensions Settings. Preferences > Extensions > Responsive Settings.
     <br>\u2022 Fixed crash in some cases by automating data repairing.<br>
 
     <b class="ResponsiveVersion">0.6.4</b>
     <br>\u2022 Fixed Character Talk wasn't working.<br>
-
-    <b class="ResponsiveVersion">0.6.3</b>
-    <br>\u2022 Fixed bug introduced in R104.
-    <br>\u2022 Removed feature to add moans on high arousal.<br>
   </div>
 
   <br><a href='https://github.com/dDeepLb/BC-Responsive/wiki/Full-Changelog' target='_blank'><b>Full Changelog (Click)</b></a>
@@ -2577,7 +2227,7 @@ One of mods you are using is using an old version of SDK. It will work for now b
     }
     static saveVersion() {
       if (PlayerStorage()) {
-        PlayerStorage().Version = "0.6.5";
+        PlayerStorage().Version = "0.6.6";
       }
     }
     static loadVersion() {
@@ -2588,7 +2238,7 @@ One of mods you are using is using an old version of SDK. It will work for now b
     }
     static checkIfNewVersion() {
       let LoadedVersion = _VersionModule.loadVersion();
-      if (_VersionModule.isNewVersion(LoadedVersion, "0.6.5")) {
+      if (_VersionModule.isNewVersion(LoadedVersion, "0.6.6")) {
         _VersionModule.isItNewVersion = true;
       }
       _VersionModule.saveVersion();
@@ -2599,7 +2249,6 @@ One of mods you are using is using an old version of SDK. It will work for now b
   var VersionModule = _VersionModule;
 
   // src/Utilities/Commands.ts
-  init_define_LAST_COMMIT_HASH();
   function loadCommands() {
     CommandCombine({
       Tag: CMD_BCR,
