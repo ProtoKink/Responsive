@@ -1,0 +1,111 @@
+@charset "UTF-8";
+.rsp-field {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--gap);
+  width: 100%;
+}
+.rsp-field > label {
+  font-weight: bold;
+  font-size: 0.9em;
+  min-width: min(min(15vh, 15dvh), min(7.5vw, 7.5dvw));
+  flex-shrink: 0;
+  padding-top: min(min(1vh, 1dvh), min(0.5vw, 0.5dvw));
+}
+.rsp-field label {
+  font-weight: bold;
+  font-size: 0.9em;
+}
+.rsp-field > *:not(label):not(input[type=checkbox]) {
+  flex: 1;
+  min-width: 0;
+}
+.rsp-field input[type=text],
+.rsp-field input[type=number],
+.rsp-field select {
+  padding: min(min(1vh, 1dvh), min(0.5vw, 0.5dvw));
+  font-size: 0.9em;
+}
+.rsp-field .rsp-field-elements {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  flex: 1;
+}
+
+.rsp-section {
+  display: flex;
+  flex-direction: column;
+  padding: min(min(1.5vh, 1.5dvh), min(0.75vw, 0.75dvw));
+  background-color: var(--tmd-element-hover, white);
+  border-radius: var(--deeplib-border-radius);
+  gap: var(--gap);
+}
+.rsp-section .rsp-content-list-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: min(min(1vh, 1dvh), min(0.5vw, 0.5dvw));
+}
+.rsp-section .rsp-content-list-header label {
+  font-weight: bold;
+  font-size: 0.9em;
+  flex: 1 1 auto;
+}
+.rsp-section .rsp-content-list-header .rsp-content-add {
+  flex: 1 1 auto;
+  width: min-content;
+  padding: 0 min(min(1vh, 1dvh), min(0.5vw, 0.5dvw));
+}
+
+.rsp-collapsible {
+  display: flex;
+  flex-direction: column;
+  border: var(--deeplib-border-width) solid var(--deeplib-border-color, #ccc);
+  border-radius: var(--deeplib-border-radius);
+}
+.rsp-collapsible .rsp-collapsible-header {
+  padding: min(min(1.5vh, 1.5dvh), min(0.75vw, 0.75dvw));
+  background-color: var(--tmd-element-hover, white);
+  color: var(--tmd-text, black);
+  cursor: pointer;
+  font-weight: bold;
+  user-select: none;
+  position: relative;
+  border-top-right-radius: var(--deeplib-border-radius);
+  border-top-left-radius: var(--deeplib-border-radius);
+}
+.rsp-collapsible .rsp-collapsible-header * {
+  user-select: none;
+}
+.rsp-collapsible .rsp-collapsible-header[data-expanded=false] {
+  border-bottom-right-radius: var(--deeplib-border-radius);
+  border-bottom-left-radius: var(--deeplib-border-radius);
+}
+.rsp-collapsible .rsp-collapsible-header:hover {
+  background-color: var(--tmd-accent-hover, #e0e0e0);
+}
+.rsp-collapsible .rsp-collapsible-header::after {
+  content: "▼";
+  position: absolute;
+  right: min(min(1.5vh, 1.5dvh), min(0.75vw, 0.75dvw));
+  transition: transform 0.2s;
+}
+.rsp-collapsible .rsp-collapsible-header[data-expanded=true]::after {
+  transform: rotate(180deg);
+}
+.rsp-collapsible .rsp-collapsible-content {
+  padding: min(min(1.5vh, 1.5dvh), min(0.75vw, 0.75dvw));
+  background-color: var(--tmd-accent, #ffff00);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  border-bottom-right-radius: var(--deeplib-border-radius);
+  border-bottom-left-radius: var(--deeplib-border-radius);
+}
+.rsp-collapsible:has(> [data-expanded=false]) .rsp-collapsible-content {
+  display: none;
+}
+/*# sourceMappingURL=fields.css.map */

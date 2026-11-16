@@ -1,0 +1,503 @@
+.rsp-behaviors-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: min(min(1vh, 1dvh), min(0.5vw, 0.5dvw));
+}
+
+.rsp-behaviors-tab-content {
+  display: flex;
+  flex-direction: row;
+  gap: min(min(1vh, 1dvh), min(0.5vw, 0.5dvw));
+  flex: 1;
+  min-height: 0;
+}
+
+.rsp-behaviors-tabs {
+  display: flex;
+  gap: min(min(1vh, 1dvh), min(0.5vw, 0.5dvw));
+  padding: min(min(1vh, 1dvh), min(0.5vw, 0.5dvw));
+  background-color: var(--tmd-element, #ffffff);
+  border-radius: var(--deeplib-border-radius);
+  box-shadow: min(min(0.2vh, 0.2dvh), min(0.1vw, 0.1dvw)) min(min(0.2vh, 0.2dvh), min(0.1vw, 0.1dvw)) min(min(0.4vh, 0.4dvh), min(0.2vw, 0.2dvw)) black;
+}
+.rsp-behaviors-tabs .rsp-behaviors-tab-button {
+  flex: 1;
+  padding: min(min(0.8vh, 0.8dvh), min(0.4vw, 0.4dvw)) min(min(1.5vh, 1.5dvh), min(0.75vw, 0.75dvw));
+}
+.rsp-behaviors-tabs .rsp-behaviors-tab-button[data-selected] {
+  background-color: var(--tmd-accent, #ffff00);
+  color: white;
+}
+.rsp-behaviors-tabs .rsp-behaviors-tab-button[data-selected]:hover {
+  background-color: var(--tmd-accent-hover, #e0e0e0);
+}
+
+.rsp-behaviors-list-panel {
+  display: flex;
+  flex-direction: column;
+  gap: min(min(1vh, 1dvh), min(0.5vw, 0.5dvw));
+  width: 25%;
+  min-width: 250px;
+  background-color: var(--tmd-element, #ffffff);
+  border-radius: var(--deeplib-border-radius);
+  padding: min(min(1.8vh, 1.8dvh), min(0.6vw, 0.6dvw));
+  box-shadow: min(min(0.2vh, 0.2dvh), min(0.1vw, 0.1dvw)) min(min(0.2vh, 0.2dvh), min(0.1vw, 0.1dvw)) min(min(0.4vh, 0.4dvh), min(0.2vw, 0.2dvw)) black;
+}
+.rsp-behaviors-list-panel .rsp-behaviors-list-header {
+  display: flex;
+  flex-direction: row;
+  gap: min(1dvh, 0.5dvw);
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+.rsp-behaviors-list-panel .rsp-behaviors-add-button {
+  width: min(6dvh, 3dvw);
+  height: min(6dvh, 3dvw);
+  flex: 0 0 auto;
+  padding: 0;
+}
+.rsp-behaviors-list-panel .rsp-behaviors-search {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+}
+.rsp-behaviors-list-panel .rsp-behaviors-search input {
+  width: 100%;
+  padding: min(min(1vh, 1dvh), min(0.5vw, 0.5dvw));
+  font-size: 0.8em;
+}
+.rsp-behaviors-list-panel .rsp-behaviors-list-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  width: 100%;
+  flex: 1;
+}
+.rsp-behaviors-list-panel .rsp-behaviors-list-items .rsp-behaviors-list-item {
+  padding: min(min(1vh, 1dvh), min(0.5vw, 0.5dvw));
+  transition: background-color 0.2s;
+  height: unset;
+  position: relative !important;
+}
+.rsp-behaviors-list-panel .rsp-behaviors-list-items .rsp-behaviors-list-item:hover {
+  background-color: var(--tmd-accent-hover, #e0e0e0);
+}
+.rsp-behaviors-list-panel .rsp-behaviors-list-items .rsp-behaviors-list-item[data-selected] {
+  background-color: var(--tmd-accent, #ffff00);
+  color: white;
+}
+.rsp-behaviors-list-panel .rsp-behaviors-list-items .rsp-behaviors-list-item[data-selected] .rsp-behaviors-item-info {
+  color: var(--tmd-text, white);
+}
+.rsp-behaviors-list-panel .rsp-behaviors-list-items .rsp-behaviors-list-item[data-deletable][data-delete-mode] {
+  background-color: #B22222;
+  color: white;
+}
+.rsp-behaviors-list-panel .rsp-behaviors-list-items .rsp-behaviors-list-item[data-deletable][data-delete-mode]:hover {
+  background-color: #8B0000;
+}
+.rsp-behaviors-list-panel .rsp-behaviors-list-items .rsp-behaviors-list-item[data-deletable][data-delete-mode] .rsp-behaviors-item-name {
+  color: white;
+}
+.rsp-behaviors-list-panel .rsp-behaviors-list-items .rsp-behaviors-list-item .rsp-behaviors-item-timeout-icon {
+  position: absolute !important;
+  inset: min(min(0.5vh, 0.5dvh), min(0.25vw, 0.25dvw)) min(min(0.5vh, 0.5dvh), min(0.25vw, 0.25dvw)) auto auto !important;
+  width: min(min(4vh, 4dvh), min(2vw, 2dvw)) !important;
+  height: min(min(4vh, 4dvh), min(2vw, 2dvw)) !important;
+  z-index: 1 !important;
+}
+.rsp-behaviors-list-panel .rsp-behaviors-list-items .rsp-behaviors-list-item .rsp-behaviors-item-name {
+  font-weight: bold;
+  color: var(--tmd-text, black);
+  text-align: start;
+}
+.rsp-behaviors-list-panel .rsp-behaviors-list-items .rsp-behaviors-list-item .rsp-behaviors-item-info {
+  font-size: 0.9em;
+  opacity: 0.8;
+  color: var(--tmd-text-disabled, #666);
+  text-align: start;
+}
+.rsp-behaviors-list-panel .rsp-behaviors-list-items .rsp-behaviors-list-item .rsp-behaviors-item-main {
+  display: flex;
+  flex-direction: column;
+  gap: min(0.5dvh, 0.25dvw);
+}
+.rsp-behaviors-list-panel .rsp-behaviors-list-items .rsp-behaviors-list-item .rsp-behaviors-item-main * {
+  pointer-events: none;
+}
+.rsp-behaviors-list-panel .rsp-behaviors-list-items .rsp-behaviors-list-item .rsp-behaviors-item-main .rsp-behaviors-item-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: min(min(1vh, 1dvh), min(2vw, 2dvw));
+  width: 100%;
+}
+.rsp-behaviors-list-panel .rsp-behaviors-list-items .rsp-behaviors-list-item .rsp-behaviors-item-main .rsp-behaviors-item-badges .rsp-behaviors-item-badge {
+  display: inline-block;
+  padding: min(min(0.3vh, 0.3dvh), min(0.15vw, 0.15dvw)) min(min(1vh, 1dvh), min(0.5vw, 0.5dvw));
+  border-radius: var(--deeplib-border-radius);
+  font-size: 0.85em;
+  text-align: start;
+}
+.rsp-behaviors-list-panel .rsp-behaviors-list-items .rsp-behaviors-list-item .rsp-behaviors-item-main .rsp-behaviors-item-badges .rsp-behaviors-item-badge.type-speech {
+  background-color: #4a90e2;
+  color: white;
+}
+.rsp-behaviors-list-panel .rsp-behaviors-list-items .rsp-behaviors-list-item .rsp-behaviors-item-main .rsp-behaviors-item-badges .rsp-behaviors-item-badge.type-emote {
+  background-color: #9b59b6;
+  color: white;
+}
+.rsp-behaviors-list-panel .rsp-behaviors-list-items .rsp-behaviors-list-item .rsp-behaviors-item-main .rsp-behaviors-item-badges .rsp-behaviors-item-badge.type-action {
+  background-color: #e67e22;
+  color: white;
+}
+.rsp-behaviors-list-panel .rsp-behaviors-list-items .rsp-behaviors-list-item .rsp-behaviors-item-main .rsp-behaviors-item-badges .rsp-behaviors-item-badge.type-activity {
+  background-color: #27ae60;
+  color: white;
+}
+.rsp-behaviors-list-panel .rsp-behaviors-list-items .rsp-behaviors-list-item .rsp-behaviors-item-main .rsp-behaviors-item-badges .rsp-behaviors-item-badge.type-animation {
+  background-color: #2a5b69;
+  color: white;
+}
+.rsp-behaviors-list-panel .rsp-behaviors-list-items .rsp-behaviors-list-item .rsp-behaviors-item-main .rsp-behaviors-item-badges .rsp-behaviors-item-badge.type-orgasm {
+  background-color: #e74c3c;
+  color: white;
+}
+.rsp-behaviors-list-panel .rsp-behaviors-list-items .rsp-behaviors-list-item .rsp-behaviors-item-main .rsp-behaviors-item-badges .rsp-behaviors-item-badge.type-arousal {
+  background-color: #d436c7;
+  color: white;
+}
+.rsp-behaviors-list-panel .rsp-behaviors-list-items .rsp-behaviors-list-item .rsp-behaviors-item-main .rsp-behaviors-item-badges .rsp-behaviors-item-badge.type-roomPresence {
+  background-color: #3498db;
+  color: white;
+}
+.rsp-behaviors-list-panel .rsp-behaviors-list-items .rsp-behaviors-list-item .rsp-behaviors-item-main .rsp-behaviors-item-badges .rsp-behaviors-item-badge.type-button {
+  background-color: #5c6bc0;
+  color: white;
+}
+.rsp-behaviors-list-panel .rsp-behaviors-list-items .rsp-behaviors-list-item .rsp-behaviors-item-main .rsp-behaviors-item-badges .rsp-behaviors-item-badge.has-constraints {
+  background-color: #f39c12;
+  color: white;
+}
+
+.rsp-collapsible-content .rsp-no-constraints-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap);
+}
+.rsp-collapsible-content .rsp-no-constraints-container button {
+  width: 50%;
+}
+
+.rsp-constraint-remove {
+  flex: 0 1 auto;
+  width: min(5dvh, 2.5dvw);
+  height: min(5dvh, 2.5dvw);
+}
+
+.rsp-behaviors-editor-panel {
+  display: flex;
+  flex-direction: column;
+  gap: min(min(1.5vh, 1.5dvh), min(0.75vw, 0.75dvw));
+  flex: 1;
+  background-color: var(--tmd-element, #ffffff);
+  border-radius: var(--deeplib-border-radius);
+  padding: min(min(1.8vh, 1.8dvh), min(0.6vw, 0.6dvw));
+  box-shadow: min(min(0.2vh, 0.2dvh), min(0.1vw, 0.1dvw)) min(min(0.2vh, 0.2dvh), min(0.1vw, 0.1dvw)) min(min(0.4vh, 0.4dvh), min(0.2vw, 0.2dvw)) black;
+}
+.rsp-behaviors-editor-panel .rsp-behaviors-editor-empty {
+  text-align: center;
+  padding: min(min(5vh, 5dvh), min(2.5vw, 2.5dvw));
+  opacity: 0.6;
+}
+.rsp-behaviors-editor-panel .rsp-behaviors-field-hint {
+  opacity: 0.75;
+  font-size: 0.9em;
+}
+.rsp-behaviors-editor-panel .rsp-behaviors-content-list {
+  display: flex;
+  flex-direction: column;
+  gap: min(min(1vh, 1dvh), min(0.5vw, 0.5dvw));
+  max-height: min(min(30vh, 30dvh), min(15vw, 15dvw));
+}
+.rsp-behaviors-editor-panel .rsp-behaviors-content-list:not(:empty) {
+  padding: 0 min(min(1vh, 1dvh), min(0.5vw, 0.5dvw));
+}
+.rsp-behaviors-editor-panel .rsp-behaviors-content-list:empty {
+  display: none;
+}
+.rsp-behaviors-editor-panel .rsp-behaviors-content-list .rsp-content-item {
+  width: 100%;
+  text-align: left;
+  padding: min(min(1vh, 1dvh), min(0.5vw, 0.5dvw));
+}
+.rsp-behaviors-editor-panel .rsp-behaviors-content-list .rsp-content-item[data-deletable][data-delete-mode] {
+  background-color: #B22222;
+  color: white;
+}
+.rsp-behaviors-editor-panel .rsp-behaviors-content-list .rsp-content-item[data-empty-content=true] .button-label {
+  color: var(--tmd-text-disabled, gray);
+}
+.rsp-behaviors-editor-panel .rsp-behaviors-content-list .rsp-include-exclude-entry {
+  display: flex;
+  flex-direction: row;
+  gap: min(min(1vh, 1dvh), min(0.5vw, 0.5dvw));
+  align-items: center;
+  background-color: var(--tmd-element-hover, white);
+  border-radius: var(--deeplib-border-radius);
+}
+.rsp-behaviors-editor-panel .rsp-behaviors-content-list .rsp-include-exclude-entry .rsp-dropdown-field {
+  flex: 0 1;
+}
+.rsp-behaviors-editor-panel .rsp-behaviors-content-list .rsp-include-exclude-entry .rsp-content-item {
+  flex: 1;
+}
+.rsp-behaviors-editor-panel .rsp-behaviors-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: min(min(0.5vh, 0.5dvh), min(0.25vw, 0.25dvw));
+}
+.rsp-behaviors-editor-panel .rsp-behaviors-chips .rsp-behaviors-chip {
+  display: flex;
+  align-items: center;
+  gap: min(min(0.5vh, 0.5dvh), min(0.25vw, 0.25dvw));
+  padding: min(min(0.5vh, 0.5dvh), min(0.25vw, 0.25dvw)) min(min(1vh, 1dvh), min(0.5vw, 0.5dvw));
+  background-color: var(--tmd-element, var(--tmd-accent, #ffff00));
+  color: white;
+  border-radius: var(--deeplib-border-radius);
+  font-size: 0.9em;
+  user-select: none;
+}
+.rsp-behaviors-editor-panel .rsp-behaviors-chips .rsp-behaviors-chip.type-speech {
+  background-color: #4a90e2;
+  color: white;
+}
+.rsp-behaviors-editor-panel .rsp-behaviors-chips .rsp-behaviors-chip.type-emote {
+  background-color: #9b59b6;
+  color: white;
+}
+.rsp-behaviors-editor-panel .rsp-behaviors-chips .rsp-behaviors-chip.type-action {
+  background-color: #e67e22;
+  color: white;
+}
+.rsp-behaviors-editor-panel .rsp-behaviors-chips .rsp-behaviors-chip.type-activity {
+  background-color: #27ae60;
+  color: white;
+}
+.rsp-behaviors-editor-panel .rsp-behaviors-chips .rsp-behaviors-chip.type-orgasm {
+  background-color: #e74c3c;
+  color: white;
+}
+.rsp-behaviors-editor-panel .rsp-behaviors-chips .rsp-behaviors-chip.type-arousal {
+  background-color: #d436c7;
+  color: white;
+}
+.rsp-behaviors-editor-panel .rsp-behaviors-chips .rsp-behaviors-chip.type-roomPresence {
+  background-color: #3498db;
+  color: white;
+}
+.rsp-behaviors-editor-panel .rsp-behaviors-chips .rsp-behaviors-chip.type-button {
+  background-color: #5c6bc0;
+  color: white;
+}
+.rsp-behaviors-editor-panel .rsp-behaviors-chips .rsp-behaviors-chip .rsp-behaviors-chip-remove {
+  padding: 0;
+  width: min(min(3vh, 3dvh), min(1.5vw, 1.5dvw));
+  height: min(min(3vh, 3dvh), min(1.5vw, 1.5dvw));
+  border-radius: 50%;
+}
+.rsp-behaviors-editor-panel .rsp-behaviors-chips .rsp-behaviors-chip .rsp-behaviors-chip-remove:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.rsp-behaviors-editor-panel .rsp-collapsible .rsp-collapsible-content button.deeplib-button.rsp-constraint-remove {
+  flex: 0 1 auto;
+  width: min(5dvh, 2.5dvw);
+  height: min(5dvh, 2.5dvw);
+}
+
+#rsp-delete-mode-toggle[data-delete-mode] {
+  background-color: #B22222;
+}
+#rsp-delete-mode-toggle[data-delete-mode]:hover {
+  background-color: #8B0000;
+}
+
+.rsp-debugger-panel {
+  display: flex;
+  flex-direction: column;
+  gap: min(min(1vh, 1dvh), min(0.5vw, 0.5dvw));
+  width: 100%;
+}
+.rsp-debugger-panel * {
+  user-select: none;
+}
+
+.rsp-debugger-header {
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+  padding: min(min(1vh, 1dvh), min(0.5vw, 0.5dvw));
+  background-color: var(--tmd-accent, #ffff00);
+  border-radius: var(--deeplib-border-radius);
+  box-shadow: min(min(0.2vh, 0.2dvh), min(0.1vw, 0.1dvw)) min(min(0.2vh, 0.2dvh), min(0.1vw, 0.1dvw)) min(min(0.4vh, 0.4dvh), min(0.2vw, 0.2dvw)) black;
+}
+.rsp-debugger-header .rsp-debugger-title {
+  font-weight: 700;
+}
+.rsp-debugger-header .rsp-debugger-count {
+  opacity: 0.8;
+}
+.rsp-debugger-header .rsp-debugger-note {
+  opacity: 0.7;
+  font-size: 0.9em;
+}
+.rsp-debugger-header .rsp-debugger-clear {
+  margin-left: auto;
+  flex: 0 1 fit-content;
+  padding: 0 min(min(1vh, 1dvh), min(0.5vw, 0.5dvw));
+}
+
+.rsp-debugger-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  flex: 1;
+  min-height: 0;
+  padding: min(min(1vh, 1dvh), min(0.5vw, 0.5dvw));
+  background-color: var(--tmd-element, #ffffff);
+  border-radius: var(--deeplib-border-radius);
+}
+
+.rsp-debugger-entry {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  padding: min(min(1vh, 1dvh), min(0.5vw, 0.5dvw));
+  border-radius: var(--deeplib-border-radius);
+  background-color: var(--tmd-element-hover, #eee);
+}
+
+.rsp-debugger-entry-header {
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+}
+
+.rsp-debugger-entry-title {
+  font-weight: 600;
+}
+
+.rsp-debugger-entry-time {
+  margin-left: auto;
+  opacity: 0.8;
+  font-size: 0.9em;
+}
+
+.rsp-debugger-badge {
+  padding: min(min(0.4vh, 0.4dvh), min(0.2vw, 0.2dvw)) min(min(0.8vh, 0.8dvh), min(0.4vw, 0.4dvw));
+  border-radius: var(--deeplib-border-radius);
+  background-color: var(--tmd-accent, #ffff00);
+  color: white;
+  font-size: 0.85em;
+}
+
+.rsp-debugger-entry-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--half-gap);
+}
+
+.rsp-debugger-field {
+  display: grid;
+  grid-template-columns: min(min(40vh, 40dvh), min(20vw, 20dvw)) 1fr;
+  gap: var(--gap);
+  align-items: start;
+}
+
+.rsp-debugger-field-label {
+  font-weight: 600;
+}
+
+.rsp-debugger-field-value {
+  word-break: break-word;
+  user-select: text;
+}
+
+.rsp-debugger-unknown {
+  opacity: 0.65;
+  font-style: italic;
+}
+
+.rsp-debugger-empty {
+  opacity: 0.7;
+  text-align: center;
+  padding: min(min(2vh, 2dvh), min(1vw, 1dvw));
+}
+
+.rsp-chatroom-buttons {
+  position: fixed;
+  z-index: 50;
+  overflow: visible;
+  box-sizing: border-box;
+}
+.rsp-chatroom-buttons .rsp-chatroom-button-main {
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+  touch-action: none;
+}
+.rsp-chatroom-buttons[data-dragging] .rsp-chatroom-button-main {
+  cursor: grabbing;
+}
+
+.rsp-chatroom-button-grid {
+  display: grid;
+  position: absolute;
+  top: calc(100% + var(--half-gap));
+  right: 0;
+  box-sizing: border-box;
+  width: min(70dvw, var(--rsp-button-columns, 1) * 10rem, var(--rsp-grid-max-width, 70dvw));
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  grid-template-columns: repeat(var(--rsp-button-columns, 1), minmax(0, 1fr));
+  gap: var(--half-gap);
+  padding: 0 var(--half-gap);
+  background-color: rgba(28, 28, 28, 0.7);
+  border: var(--border-width) solid rgba(255, 255, 255, 0.2);
+  transition: max-height 0.15s ease, opacity 0.15s ease, padding 0.15s ease;
+}
+.rsp-chatroom-button-grid[data-open] {
+  max-height: min(60dvh, var(--rsp-grid-max-height, 60dvh));
+  padding: var(--half-gap);
+  opacity: 1;
+  overflow: auto;
+  pointer-events: auto;
+  box-shadow: 0 var(--half-gap) var(--gap) rgba(0, 0, 0, 0.35);
+}
+.rsp-chatroom-button-grid.align-start {
+  right: auto;
+  left: 0;
+}
+.rsp-chatroom-button-grid.open-up {
+  top: auto;
+  bottom: calc(100% + var(--half-gap));
+}
+
+.rsp-chatroom-button {
+  width: 100%;
+  padding-block: var(--half-gap);
+  display: initial;
+}
+.rsp-chatroom-button .button-label {
+  background-color: unset !important;
+  max-width: 100%;
+}
+/*# sourceMappingURL=behaviors.css.map */

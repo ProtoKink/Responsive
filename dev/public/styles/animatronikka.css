@@ -1,0 +1,261 @@
+.rsp-animatronikka-container {
+  display: flex;
+  flex-direction: row;
+  gap: min(2vh, 1vw);
+  width: min(95vh, 60vw);
+  height: min(60vh, 35vw);
+}
+.rsp-animatronikka-container .rsp-animatronikka-list-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  width: 25%;
+  background-color: var(--tmd-element, #ffffff);
+  border-radius: var(--deeplib-border-radius);
+  padding: min(min(1.8vh, 1.8dvh), min(0.6vw, 0.6dvw));
+  box-shadow: min(min(0.2vh, 0.2dvh), min(0.1vw, 0.1dvw)) min(min(0.2vh, 0.2dvh), min(0.1vw, 0.1dvw)) min(min(0.4vh, 0.4dvh), min(0.2vw, 0.2dvw)) black;
+}
+.rsp-animatronikka-container .rsp-animatronikka-preview-canvas {
+  margin: 0;
+  user-select: none;
+  pointer-events: none;
+  position: relative;
+  height: 100%;
+  flex: 0 fit-content;
+  width: unset;
+}
+.rsp-animatronikka-container .rsp-animatronikka-list-panel .rsp-animatronikka-list-header {
+  display: flex;
+  flex-direction: row;
+  gap: var(--gap);
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+.rsp-animatronikka-container .rsp-animatronikka-list-panel .rsp-animatronikka-list-header .rsp-animatronikka-add {
+  width: min(min(6vh, 6dvh), min(3vw, 3dvw));
+  height: min(min(6vh, 6dvh), min(3vw, 3dvw));
+  flex: 0 0 auto;
+  padding: 0;
+}
+.rsp-animatronikka-container .rsp-animatronikka-list-panel .rsp-animatronikka-list-header .rsp-animatronikka-search {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+}
+.rsp-animatronikka-container .rsp-animatronikka-list-panel .rsp-animatronikka-list-header .rsp-animatronikka-search input {
+  width: 100%;
+  padding: min(min(1vh, 1dvh), min(0.5vw, 0.5dvw));
+  font-size: 0.8em;
+}
+.rsp-animatronikka-container .rsp-animatronikka-list-panel .rsp-animatronikka-list-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  width: 100%;
+  flex: 1;
+}
+.rsp-animatronikka-container .rsp-animatronikka-list-panel .rsp-animatronikka-list-items .rsp-animatronikka-list-item {
+  width: 100%;
+  padding: min(min(1vh, 1dvh), min(0.5vw, 0.5dvw));
+  transition: background-color 0.2s;
+  height: unset;
+  position: relative !important;
+}
+.rsp-animatronikka-container .rsp-animatronikka-list-panel .rsp-animatronikka-list-items .rsp-animatronikka-list-item:hover {
+  background-color: var(--tmd-accent-hover, #e0e0e0);
+}
+.rsp-animatronikka-container .rsp-animatronikka-list-panel .rsp-animatronikka-list-items .rsp-animatronikka-list-item[data-selected] {
+  background-color: var(--tmd-accent, #ffff00);
+  color: white;
+}
+.rsp-animatronikka-container .rsp-animatronikka-list-panel .rsp-animatronikka-list-items .rsp-animatronikka-list-item[data-selected] .rsp-behaviors-item-info {
+  color: var(--tmd-text, white);
+}
+.rsp-animatronikka-container .rsp-animatronikka-list-panel .rsp-animatronikka-list-items .rsp-animatronikka-list-item[data-deletable][data-delete-mode] {
+  background-color: #B22222;
+  color: white;
+}
+.rsp-animatronikka-container .rsp-animatronikka-list-panel .rsp-animatronikka-list-items .rsp-animatronikka-list-item[data-deletable][data-delete-mode]:hover {
+  background-color: #8B0000;
+}
+.rsp-animatronikka-container .rsp-animatronikka-list-panel .rsp-animatronikka-list-items .rsp-animatronikka-list-item[data-deletable][data-delete-mode] .rsp-behaviors-item-name {
+  color: white;
+}
+
+.rsp-animatronikka-library-controls {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+.rsp-animatronikka-library-controls .rsp-animatronikka-library-controls-button {
+  width: min(min(6vh, 6dvh), min(3vw, 3dvw));
+  height: min(min(6vh, 6dvh), min(3vw, 3dvw));
+  flex: 0 0 auto;
+  padding: 0;
+}
+
+.rsp-animatronikka-editor-panel {
+  display: flex;
+  flex-direction: column;
+  gap: min(min(1.5vh, 1.5dvh), min(0.75vw, 0.75dvw));
+  flex: 1;
+  background-color: var(--tmd-element, #ffffff);
+  border-radius: var(--deeplib-border-radius);
+  padding: min(min(1.8vh, 1.8dvh), min(0.6vw, 0.6dvw));
+  box-shadow: min(min(0.2vh, 0.2dvh), min(0.1vw, 0.1dvw)) min(min(0.2vh, 0.2dvh), min(0.1vw, 0.1dvw)) min(min(0.4vh, 0.4dvh), min(0.2vw, 0.2dvw)) black;
+}
+
+.rsp-animatronikka-editor-empty {
+  text-align: center;
+  padding: min(min(5vh, 5dvh), min(2.5vw, 2.5dvw));
+  opacity: 0.6;
+}
+
+.rsp-animatronikka-preview-controls {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: min(1vh, 0.5vw);
+}
+.rsp-animatronikka-preview-controls .rsp-animatronikka-back-to-list-button,
+.rsp-animatronikka-preview-controls .rsp-animatronikka-playback-controls-button,
+.rsp-animatronikka-preview-controls .rsp-animatronikka-export-button {
+  width: min(min(6vh, 6dvh), min(3vw, 3dvw));
+  height: min(min(6vh, 6dvh), min(3vw, 3dvw));
+  flex: 0 0 auto;
+  padding: 0;
+}
+.rsp-animatronikka-preview-controls .rsp-animatronikka-space {
+  flex: 0 0 min(1vh, 0.5vw);
+  min-width: 0;
+}
+.rsp-animatronikka-preview-controls .rsp-animatronikka-preview-modes {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--gap);
+  margin-left: auto;
+}
+.rsp-animatronikka-preview-controls .rsp-animatronikka-preview-button {
+  flex: 0 0 fit-content;
+  padding: 0 var(--half-gap);
+}
+.rsp-animatronikka-preview-controls .rsp-animatronikka-preview-button[data-selected=true] {
+  background-color: var(--tmd-accent, #ffff00);
+}
+.rsp-animatronikka-preview-controls .rsp-animatronikka-preview-label {
+  opacity: 0.75;
+  flex: 0 0 auto;
+}
+
+.rsp-animatronikka-keyframes {
+  display: flex;
+  flex-direction: column;
+  gap: min(1vh, 0.5vw);
+}
+
+.rsp-animatronikka-keyframe-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--gap);
+}
+
+.rsp-animatronikka-keyframe-row--drag-over-top {
+  position: relative;
+}
+
+.rsp-animatronikka-keyframe-row--drag-over-bottom {
+  position: relative;
+}
+
+.rsp-animatronikka-keyframe-row--drag-over-top::before,
+.rsp-animatronikka-keyframe-row--drag-over-bottom::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: min(min(0.4vh, 0.4dvh), min(0.2vw, 0.2dvw));
+  background-color: var(--tmd-accent, #ffff00);
+}
+
+.rsp-animatronikka-keyframe-row--drag-over-top::before {
+  top: -0.25em;
+}
+
+.rsp-animatronikka-keyframe-row--drag-over-bottom::after {
+  bottom: -0.25em;
+}
+
+.rsp-animatronikka-keyframe-drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  opacity: 0.7;
+  padding: 0 var(--half-gap);
+}
+
+.rsp-animatronikka-keyframe-drag-handle:active {
+  cursor: grabbing;
+}
+
+.rsp-animatronikka-keyframe-drag-icon {
+  width: min(min(2.2vh, 2.2dvh), min(1.1vw, 1.1dvw));
+  height: min(min(3.2vh, 3.2dvh), min(1.6vw, 1.6dvw));
+  display: inline-block;
+  background-color: currentColor;
+  mask: url("../images/drag_handle.svg") no-repeat center/contain;
+  -webkit-mask: url("../images/drag_handle.svg") no-repeat center/contain;
+  color: var(--tmd-accent, black);
+}
+
+.rsp-animatronikka-keyframe-label {
+  flex: 1;
+}
+
+.rsp-animatronikka-keyframe-type {
+  width: min(min(4vh, 4dvh), min(2vw, 2dvw));
+  height: min(min(4vh, 4dvh), min(2vw, 2dvw));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  opacity: 0.9;
+}
+
+.rsp-animatronikka-keyframe-type img {
+  width: 100%;
+  height: 100%;
+}
+
+.rsp-animatronikka-keyframe-actions {
+  display: flex;
+  flex-direction: row;
+  gap: var(--half-gap);
+}
+
+.rsp-animatronikka-keyframe-button {
+  min-width: 2.2em;
+  padding: 0 var(--half-gap);
+  flex-basis: fit-content;
+}
+
+.rsp-animatronikka-keyframe-square-button {
+  width: min(min(5vh, 5dvh), min(2.5vw, 2.5dvw));
+  height: min(min(5vh, 5dvh), min(2.5vw, 2.5dvw));
+  flex: 1;
+  padding: 0;
+  min-width: 0;
+}
+
+.rsp-animatronikka-json-textarea {
+  width: min(60vh, 30vw);
+  min-height: min(25vh, 15vw);
+  resize: vertical;
+}
+/*# sourceMappingURL=animatronikka.css.map */
