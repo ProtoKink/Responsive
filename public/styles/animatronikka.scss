@@ -1,0 +1,288 @@
+@use 'helpers' as *;
+@use 'variables' as *;
+
+.rsp-animatronikka-container {
+  display: flex;
+  flex-direction: row;
+  gap: min(2vh, 1vw);
+  width: min(95vh, 60vw);
+  height: min(60vh, 35vw);
+
+
+  .rsp-animatronikka-list-panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+    width: 25%;
+    background-color: $background-color;
+    border-radius: var(--deeplib-border-radius);
+    padding: minv(1.8, 0.6);
+    box-shadow: minv(0.2, 0.1) minv(0.2, 0.1) minv(0.4, 0.2) black;
+  }
+
+  .rsp-animatronikka-preview-canvas {
+    margin: 0;
+    user-select: none;
+    pointer-events: none;
+    position: relative;
+    height: 100%;
+    flex: 0 fit-content;
+    width: unset;
+  }
+
+  .rsp-animatronikka-list-panel {
+
+    .rsp-animatronikka-list-header {
+      display: flex;
+      flex-direction: row;
+      gap: var(--gap);
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+
+      .rsp-animatronikka-add {
+        width: minv(6, 3);
+        height: minv(6, 3);
+        flex: 0 0 auto;
+        padding: 0;
+      }
+
+      .rsp-animatronikka-search {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        align-items: center;
+        justify-content: center;
+
+        input {
+          width: 100%;
+          padding: minv(1, 0.5);
+          font-size: 0.8em;
+        }
+      }
+    }
+
+    .rsp-animatronikka-list-items {
+      display: flex;
+      flex-direction: column;
+      gap: var(--gap);
+      width: 100%;
+      flex: 1;
+
+      .rsp-animatronikka-list-item {
+        width: 100%;
+        padding: minv(1, 0.5);
+        transition: background-color 0.2s;
+        height: unset;
+        position: relative !important;
+
+        &:hover {
+          background-color: var(--tmd-accent-hover, #e0e0e0);
+        }
+
+        &[data-selected] {
+          background-color: $active-color;
+          color: white;
+
+          .rsp-behaviors-item-info {
+            color: var(--tmd-text, white);
+          }
+        }
+
+        &[data-deletable][data-delete-mode] {
+          background-color: $delete-color;
+          color: white;
+
+          &:hover {
+            background-color: $delete-hover-color;
+          }
+
+          .rsp-behaviors-item-name {
+            color: white;
+          }
+        }
+      }
+    }
+  }
+}
+
+.rsp-animatronikka-library-controls {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+
+  .rsp-animatronikka-library-controls-button {
+    width: minv(6, 3);
+    height: minv(6, 3);
+    flex: 0 0 auto;
+    padding: 0;
+  }
+}
+
+.rsp-animatronikka-editor-panel {
+  display: flex;
+  flex-direction: column;
+  gap: minv(1.5, 0.75);
+  flex: 1;
+  background-color: $background-color;
+  border-radius: var(--deeplib-border-radius);
+  padding: minv(1.8, 0.6);
+  box-shadow: minv(0.2, 0.1) minv(0.2, 0.1) minv(0.4, 0.2) black;
+}
+
+.rsp-animatronikka-editor-empty {
+  text-align: center;
+  padding: minv(5, 2.5);
+  opacity: 0.6;
+}
+
+.rsp-animatronikka-preview-controls {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: min(1vh, 0.5vw);
+
+  .rsp-animatronikka-back-to-list-button,
+  .rsp-animatronikka-playback-controls-button,
+  .rsp-animatronikka-export-button {
+    width: minv(6, 3);
+    height: minv(6, 3);
+    flex: 0 0 auto;
+    padding: 0;
+  }
+
+  .rsp-animatronikka-space {
+    flex: 0 0 min(1vh, 0.5vw);
+    min-width: 0;
+  }
+
+  .rsp-animatronikka-preview-modes {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--gap);
+    margin-left: auto;
+  }
+
+  .rsp-animatronikka-preview-button {
+    flex: 0 0 fit-content;
+    padding: 0 var(--half-gap);
+  }
+
+  .rsp-animatronikka-preview-button[data-selected='true'] {
+    background-color: $active-color;
+  }
+  
+  .rsp-animatronikka-preview-label {
+    opacity: 0.75;
+    flex: 0 0 auto;
+  }
+}
+
+.rsp-animatronikka-keyframes {
+  display: flex;
+  flex-direction: column;
+  gap: min(1vh, 0.5vw);
+}
+
+.rsp-animatronikka-keyframe-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--gap);
+}
+
+.rsp-animatronikka-keyframe-row--drag-over-top {
+  position: relative;
+}
+
+.rsp-animatronikka-keyframe-row--drag-over-bottom {
+  position: relative;
+}
+
+.rsp-animatronikka-keyframe-row--drag-over-top::before,
+.rsp-animatronikka-keyframe-row--drag-over-bottom::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: minv(0.4, 0.2);
+  background-color: $active-color;
+}
+
+.rsp-animatronikka-keyframe-row--drag-over-top::before {
+  top: -0.25em;
+}
+
+.rsp-animatronikka-keyframe-row--drag-over-bottom::after {
+  bottom: -0.25em;
+}
+
+.rsp-animatronikka-keyframe-drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  opacity: 0.7;
+  padding: 0 var(--half-gap);
+}
+
+.rsp-animatronikka-keyframe-drag-handle:active {
+  cursor: grabbing;
+}
+
+.rsp-animatronikka-keyframe-drag-icon {
+  width: minv(2.2, 1.1);
+  height: minv(3.2, 1.6);
+  display: inline-block;
+  background-color: currentColor;
+  mask: url('../images/drag_handle.svg') no-repeat center / contain;
+  -webkit-mask: url('../images/drag_handle.svg') no-repeat center / contain;
+  color: var(--tmd-accent, black);
+}
+
+.rsp-animatronikka-keyframe-label {
+  flex: 1;
+}
+
+.rsp-animatronikka-keyframe-type {
+  width: minv(4, 2);
+  height: minv(4, 2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  opacity: 0.9;
+}
+
+.rsp-animatronikka-keyframe-type img {
+  width: 100%;
+  height: 100%;
+}
+
+.rsp-animatronikka-keyframe-actions {
+  display: flex;
+  flex-direction: row;
+  gap: var(--half-gap);
+}
+
+.rsp-animatronikka-keyframe-button {
+  min-width: 2.2em;
+  padding: 0 var(--half-gap);
+  flex-basis: fit-content;
+}
+
+.rsp-animatronikka-keyframe-square-button {
+  width: minv(5, 2.5);
+  height: minv(5, 2.5);
+  flex: 1;
+  padding: 0;
+  min-width: 0;
+}
+
+.rsp-animatronikka-json-textarea {
+  width: min(60vh, 30vw);
+  min-height: min(25vh, 15vw);
+  resize: vertical;
+}

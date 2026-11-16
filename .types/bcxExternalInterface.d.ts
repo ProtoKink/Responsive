@@ -1,3 +1,5 @@
+/* eslint-disable */
+/* @ts-nocheck */
 interface BCXVersion {
   major: number;
   minor: number;

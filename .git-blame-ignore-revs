@@ -1,0 +1,3 @@
+# Run `git config blame.ignoreRevsFile .git-blame-ignore-revs`
+# to get `git blame/praise` to automatically skip those commits.
+d90c61d224f88177684b069854a3c3f59777e967

@@ -1,0 +1,1036 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { processTrigger, processTriggerConstraint } from '@/utilities/triggers';
+import type { Behavior, Trigger, MessageData, TriggerConstraint, Reaction } from '@/models/behaviors';
+import { BehaviorsModule } from '@/modules/behaviors';
+import { AnimatronikkaModule } from '@/modules/animatronikka';
+import { chatRoomAutoInterceptMessage } from '@/utilities/chat_messages';
+import * as gg from '../mocks/game-globals';
+import { setMockTime, advanceMockTime } from '../mocks/game-globals';
+
+vi.mock('@/modules/behaviors', async () => {
+	const actual = await vi.importActual<typeof import('@/modules/behaviors')>('@/modules/behaviors');
+	const MockedBehaviorsModule = actual.BehaviorsModule;
+  
+	const mockInstance = {
+		settings: {
+			behaviors: {},
+			triggers: {},
+			reactions: {},
+		},
+		behaviorExecutionMap: new Map(),
+		getTrigger: vi.fn(),
+		getReaction: vi.fn(),
+	};
+  
+	// Override the instance property
+	Object.defineProperty(MockedBehaviorsModule, 'instance', {
+		get: () => mockInstance,
+		configurable: true,
+	});
+  
+	return {
+		...actual,
+		BehaviorsModule: MockedBehaviorsModule,
+	};
+});
+
+vi.mock('bc-deeplib/deeplib', async () => {
+	const actual = await vi.importActual('bc-deeplib/deeplib');
+	return {
+		...actual,
+		modLogger: {
+			error: vi.fn(),
+		},
+		sendActionMessage: vi.fn(),
+		ModStorage: class {
+			playerStorage = {
+				GlobalModule: {
+					modEnabled: true,
+					responsesEnabled: true,
+					doPreventMessageIfBcxBlock: false,
+					doMessageInterruption: false,
+				},
+				BehaviorsModule: {},
+				ProfilesModule: [],
+			};
+			save = vi.fn();
+			getLocalStorage = vi.fn(() => []);
+			setLocalStorage = vi.fn();
+			constructor(_name: string) {}
+		},
+	};
+});
+
+vi.mock('@/utilities/chat_messages', () => ({
+	chatRoomAutoInterceptMessage: vi.fn(),
+	randomResponse: vi.fn((arr: string[]) => arr[0] || ''),
+	replaceTemplate: vi.fn((msg: string) => msg),
+}));
+
+vi.mock('@/utilities/handlers', () => ({
+	doesBcxAllowsTalking: vi.fn(() => true),
+	areBehaviorsEnabled: vi.fn(() => true),
+}));
+
+vi.mock('@/modules/animatronikka', () => ({
+	AnimatronikkaModule: {
+		instance: {
+			playAnimation: vi.fn(() => true),
+		},
+	},
+}));
+
+global.AssetGetActivity = vi.fn(() => ({ Name: 'TestActivity', Group: 'TestGroup' } as any));
+global.AssetGroupGet = vi.fn(() => ({ Name: 'TestGroup' } as any));
+
+describe('processTrigger', () => {
+	let mockBehaviors: Record<string, Behavior>;
+	let mockTriggers: Record<string, Trigger>;
+	let mockReactions: Record<string, Reaction>;
+
+	beforeEach(() => {
+		mockBehaviors = {};
+		mockTriggers = {};
+		mockReactions = {};
+		(BehaviorsModule.instance.getTrigger as any).mockImplementation((id: string) => mockTriggers[id]);
+		(BehaviorsModule.instance.getReaction as any).mockImplementation((id: string) => mockReactions[id]);
+		BehaviorsModule.instance.settings.behaviors = mockBehaviors;
+		BehaviorsModule.instance.settings.triggers = mockTriggers;
+		BehaviorsModule.instance.settings.reactions = mockReactions;
+		BehaviorsModule.instance.behaviorExecutionMap.clear();
+		BehaviorsModule.instance.activeRankedKeys = {};
+		setMockTime(1000000);
+	});
+
+	describe('speech triggers', () => {
+		it('should match speech with contains mode', () => {
+			const trigger: Trigger = {
+				id: 'trigger1',
+				name: 'Test Trigger',
+				type: 'speech',
+				speechType: 'any',
+				content: [{ value: 'hello', matchMode: 'contains' }],
+			};
+
+			const behavior: Behavior = {
+				id: 'behavior1',
+				name: 'Test Behavior',
+				enabled: true,
+				triggers: ['trigger1'],
+				reactions: [],
+				reactionMode: 'random',
+			};
+
+			mockTriggers['trigger1'] = trigger;
+			mockBehaviors['behavior1'] = behavior;
+
+			const messageData: MessageData = {
+				message: 'hello world',
+				messageContent: 'hello world',
+			};
+
+			const result = processTrigger('speech', messageData);
+			expect(result?.behavior).toEqual(behavior);
+		});
+
+		it('should match speech with startsWith mode', () => {
+			const trigger: Trigger = {
+				id: 'trigger1',
+				name: 'Test Trigger',
+				type: 'speech',
+				speechType: 'any',
+				content: [{ value: 'hello', matchMode: 'startsWith' }],
+			};
+
+			const behavior: Behavior = {
+				id: 'behavior1',
+				name: 'Test Behavior',
+				enabled: true,
+				triggers: ['trigger1'],
+				reactions: [],
+				reactionMode: 'random',
+			};
+
+			mockTriggers['trigger1'] = trigger;
+			mockBehaviors['behavior1'] = behavior;
+
+			const messageData: MessageData = {
+				message: 'hello world',
+				messageContent: 'hello world',
+			};
+
+			const result = processTrigger('speech', messageData);
+			expect(result?.behavior).toEqual(behavior);
+		});
+
+		it('should match speech with endsWith mode', () => {
+			const trigger: Trigger = {
+				id: 'trigger1',
+				name: 'Test Trigger',
+				type: 'speech',
+				speechType: 'any',
+				content: [{ value: 'world', matchMode: 'endsWith' }],
+			};
+
+			const behavior: Behavior = {
+				id: 'behavior1',
+				name: 'Test Behavior',
+				enabled: true,
+				triggers: ['trigger1'],
+				reactions: [],
+				reactionMode: 'random',
+			};
+
+			mockTriggers['trigger1'] = trigger;
+			mockBehaviors['behavior1'] = behavior;
+
+			const messageData: MessageData = {
+				message: 'hello world',
+				messageContent: 'hello world',
+			};
+
+			const result = processTrigger('speech', messageData);
+			expect(result?.behavior).toEqual(behavior);
+		});
+
+		it('should match speech with exact mode', () => {
+			const trigger: Trigger = {
+				id: 'trigger1',
+				name: 'Test Trigger',
+				type: 'speech',
+				speechType: 'any',
+				content: [{ value: 'hello world', matchMode: 'exact' }],
+			};
+
+			const behavior: Behavior = {
+				id: 'behavior1',
+				name: 'Test Behavior',
+				enabled: true,
+				triggers: ['trigger1'],
+				reactions: [],
+				reactionMode: 'random',
+			};
+
+			mockTriggers['trigger1'] = trigger;
+			mockBehaviors['behavior1'] = behavior;
+
+			const messageData: MessageData = {
+				message: 'hello world',
+				messageContent: 'hello world',
+			};
+
+			const result = processTrigger('speech', messageData);
+			expect(result?.behavior).toEqual(behavior);
+		});
+
+		it('should match speech with regex mode', () => {
+			const trigger: Trigger = {
+				id: 'trigger1',
+				name: 'Test Trigger',
+				type: 'speech',
+				speechType: 'any',
+				content: [{ value: 'he.*o', matchMode: 'regex' }],
+			};
+
+			const behavior: Behavior = {
+				id: 'behavior1',
+				name: 'Test Behavior',
+				enabled: true,
+				triggers: ['trigger1'],
+				reactions: [],
+				reactionMode: 'random',
+			};
+
+			mockTriggers['trigger1'] = trigger;
+			mockBehaviors['behavior1'] = behavior;
+
+			const messageData: MessageData = {
+				message: 'hello world',
+				messageContent: 'hello world',
+			};
+
+			const result = processTrigger('speech', messageData);
+			expect(result?.behavior).toEqual(behavior);
+		});
+
+		it('should not match when content does not match', () => {
+			const trigger: Trigger = {
+				id: 'trigger1',
+				name: 'Test Trigger',
+				type: 'speech',
+				speechType: 'any',
+				content: [{ value: 'goodbye', matchMode: 'contains' }],
+			};
+
+			const behavior: Behavior = {
+				id: 'behavior1',
+				name: 'Test Behavior',
+				enabled: true,
+				triggers: ['trigger1'],
+				reactions: [],
+				reactionMode: 'random',
+			};
+
+			mockTriggers['trigger1'] = trigger;
+			mockBehaviors['behavior1'] = behavior;
+
+			const messageData: MessageData = {
+				message: 'hello world',
+				messageContent: 'hello world',
+			};
+
+			const result = processTrigger('speech', messageData);
+			expect(result).toBeUndefined();
+		});
+	});
+
+	describe('emote triggers', () => {
+		it('should match emote with contains mode', () => {
+			const trigger: Trigger = {
+				id: 'trigger1',
+				name: 'Test Trigger',
+				type: 'emote',
+				content: [{ value: 'smiles', matchMode: 'contains' }],
+			};
+
+			const behavior: Behavior = {
+				id: 'behavior1',
+				name: 'Test Behavior',
+				enabled: true,
+				triggers: ['trigger1'],
+				reactions: [],
+				reactionMode: 'random',
+			};
+
+			mockTriggers['trigger1'] = trigger;
+			mockBehaviors['behavior1'] = behavior;
+
+			const messageData: MessageData = {
+				message: 'smiles at you',
+				messageContent: 'smiles at you',
+			};
+
+			const result = processTrigger('emote', messageData);
+			expect(result?.behavior).toEqual(behavior);
+		});
+	});
+
+	describe('action triggers', () => {
+		it('should match action with contains mode', () => {
+			const trigger: Trigger = {
+				id: 'trigger1',
+				name: 'Test Trigger',
+				type: 'action',
+				content: [{ value: 'hugs', matchMode: 'contains' }],
+			};
+
+			const behavior: Behavior = {
+				id: 'behavior1',
+				name: 'Test Behavior',
+				enabled: true,
+				triggers: ['trigger1'],
+				reactions: [],
+				reactionMode: 'random',
+			};
+
+			mockTriggers['trigger1'] = trigger;
+			mockBehaviors['behavior1'] = behavior;
+
+			const messageData: MessageData = {
+				message: 'hugs you tightly',
+				messageContent: 'hugs you tightly',
+			};
+
+			const result = processTrigger('action', messageData);
+			expect(result?.behavior).toEqual(behavior);
+		});
+	});
+
+	describe('activity triggers', () => {
+		it('should match activity when activityName and groupName match', () => {
+			const trigger: Trigger = {
+				id: 'trigger1',
+				name: 'Test Trigger',
+				type: 'activity',
+				activityName: ['Kiss'],
+				groupName: ['ItemMouth'],
+			};
+
+			const behavior: Behavior = {
+				id: 'behavior1',
+				name: 'Test Behavior',
+				enabled: true,
+				triggers: ['trigger1'],
+				reactions: [],
+				reactionMode: 'random',
+			};
+
+			mockTriggers['trigger1'] = trigger;
+			mockBehaviors['behavior1'] = behavior;
+
+			const messageData: MessageData = {
+				activityName: 'Kiss',
+				groupName: 'ItemMouth',
+			};
+
+			const result = processTrigger('activity', messageData);
+			expect(result?.behavior).toEqual(behavior);
+		});
+
+		it('should not match activity when activityName does not match', () => {
+			const trigger: Trigger = {
+				id: 'trigger1',
+				name: 'Test Trigger',
+				type: 'activity',
+				activityName: ['Activity1'],
+				groupName: ['Group1'],
+			};
+
+			const behavior: Behavior = {
+				id: 'behavior1',
+				name: 'Test Behavior',
+				enabled: true,
+				triggers: ['trigger1'],
+				reactions: [],
+				reactionMode: 'random',
+			};
+
+			mockTriggers['trigger1'] = trigger;
+			mockBehaviors['behavior1'] = behavior;
+
+			const messageData: MessageData = {
+				activityName: 'Kiss',
+				groupName: 'ItemMouth',
+			};
+
+			const result = processTrigger('activity', messageData);
+			expect(result).toBeUndefined();
+		});
+	});
+
+	describe('orgasm triggers', () => {
+		it('should match orgasm when type is any', () => {
+			const trigger: Trigger = {
+				id: 'trigger1',
+				name: 'Test Trigger',
+				type: 'orgasm',
+				orgasmType: 'any',
+			};
+
+			const behavior: Behavior = {
+				id: 'behavior1',
+				name: 'Test Behavior',
+				enabled: true,
+				triggers: ['trigger1'],
+				reactions: [],
+				reactionMode: 'random',
+			};
+
+			mockTriggers['trigger1'] = trigger;
+			mockBehaviors['behavior1'] = behavior;
+
+			const messageData: MessageData = {
+				orgasmType: 'normal',
+			};
+
+			const result = processTrigger('orgasm', messageData);
+			expect(result?.behavior).toEqual(behavior);
+		});
+
+		it('should match orgasm when type matches', () => {
+			const trigger: Trigger = {
+				id: 'trigger1',
+				name: 'Test Trigger',
+				type: 'orgasm',
+				orgasmType: 'normal',
+			};
+
+			const behavior: Behavior = {
+				id: 'behavior1',
+				name: 'Test Behavior',
+				enabled: true,
+				triggers: ['trigger1'],
+				reactions: [],
+				reactionMode: 'random',
+			};
+
+			mockTriggers['trigger1'] = trigger;
+			mockBehaviors['behavior1'] = behavior;
+
+			const messageData: MessageData = {
+				orgasmType: 'normal',
+			};
+
+			const result = processTrigger('orgasm', messageData);
+			expect(result?.behavior).toEqual(behavior);
+		});
+
+		it('should not match orgasm when type does not match', () => {
+			const trigger: Trigger = {
+				id: 'trigger1',
+				name: 'Test Trigger',
+				type: 'orgasm',
+				orgasmType: 'normal',
+			};
+
+			const behavior: Behavior = {
+				id: 'behavior1',
+				name: 'Test Behavior',
+				enabled: true,
+				triggers: ['trigger1'],
+				reactions: [],
+				reactionMode: 'random',
+			};
+
+			mockTriggers['trigger1'] = trigger;
+			mockBehaviors['behavior1'] = behavior;
+
+			const messageData: MessageData = {
+				orgasmType: 'resisted',
+			};
+
+			const result = processTrigger('orgasm', messageData);
+			expect(result).toBeUndefined();
+		});
+	});
+
+	describe('roomPresence triggers', () => {
+		it('should match roomPresence when event matches', () => {
+			const trigger: Trigger = {
+				id: 'trigger1',
+				name: 'Test Trigger',
+				type: 'roomPresence',
+				event: 'join',
+			};
+
+			const behavior: Behavior = {
+				id: 'behavior1',
+				name: 'Test Behavior',
+				enabled: true,
+				triggers: ['trigger1'],
+				reactions: [],
+				reactionMode: 'random',
+			};
+
+			mockTriggers['trigger1'] = trigger;
+			mockBehaviors['behavior1'] = behavior;
+
+			const messageData: MessageData = {
+				roomPrecenseEvent: 'join',
+			};
+
+			const result = processTrigger('roomPresence', messageData);
+			expect(result?.behavior).toEqual(behavior);
+		});
+
+		it('should not match roomPresence when event does not match', () => {
+			const trigger: Trigger = {
+				id: 'trigger1',
+				name: 'Test Trigger',
+				type: 'roomPresence',
+				event: 'join',
+			};
+
+			const behavior: Behavior = {
+				id: 'behavior1',
+				name: 'Test Behavior',
+				enabled: true,
+				triggers: ['trigger1'],
+				reactions: [],
+				reactionMode: 'random',
+			};
+
+			mockTriggers['trigger1'] = trigger;
+			mockBehaviors['behavior1'] = behavior;
+
+			const messageData: MessageData = {
+				roomPrecenseEvent: 'leave',
+			};
+
+			const result = processTrigger('roomPresence', messageData);
+			expect(result).toBeUndefined();
+		});
+	});
+
+	describe('button triggers', () => {
+		it('should match the button that was clicked', () => {
+			const trigger: Trigger = {
+				id: 'trigger1',
+				name: 'Wave',
+				type: 'button',
+			};
+
+			const behavior: Behavior = {
+				id: 'behavior1',
+				name: 'Test Behavior',
+				enabled: true,
+				triggers: ['trigger1'],
+				reactions: [],
+				reactionMode: 'random',
+			};
+
+			mockTriggers['trigger1'] = trigger;
+			mockBehaviors['behavior1'] = behavior;
+
+			const result = processTrigger('button', { buttonId: 'trigger1' });
+			expect(result?.behavior).toEqual(behavior);
+			expect(result?.trigger).toEqual(trigger);
+		});
+
+		it('should not match a different button', () => {
+			const trigger: Trigger = {
+				id: 'trigger1',
+				name: 'Wave',
+				type: 'button',
+			};
+
+			const behavior: Behavior = {
+				id: 'behavior1',
+				name: 'Test Behavior',
+				enabled: true,
+				triggers: ['trigger1'],
+				reactions: [],
+				reactionMode: 'random',
+			};
+
+			mockTriggers['trigger1'] = trigger;
+			mockBehaviors['behavior1'] = behavior;
+
+			const result = processTrigger('button', { buttonId: 'other-button' });
+			expect(result).toBeUndefined();
+		});
+	});
+
+	describe('arousal triggers', () => {
+		const playAnimation = AnimatronikkaModule.instance.playAnimation as ReturnType<typeof vi.fn>;
+
+		function addArousalBehavior(id: string, limit: number, reaction: Reaction): void {
+			mockTriggers[`${id}-trigger`] = {
+				id: `${id}-trigger`,
+				name: id,
+				type: 'arousal',
+				limit,
+			};
+			mockReactions[reaction.id] = reaction;
+			mockBehaviors[id] = {
+				id,
+				name: id,
+				enabled: true,
+				triggers: [`${id}-trigger`],
+				reactions: [reaction.id],
+				reactionMode: 'all',
+			};
+		}
+
+		beforeEach(() => {
+			vi.mocked(chatRoomAutoInterceptMessage).mockClear();
+			playAnimation.mockClear();
+		});
+
+		it('matches only at or above the limit and prefers the higher limit', () => {
+			addArousalBehavior('low', 80, {
+				id: 'speech-low',
+				name: 'Low',
+				type: 'speech',
+				content: ['low'],
+			});
+			addArousalBehavior('high', 90, {
+				id: 'speech-high',
+				name: 'High',
+				type: 'speech',
+				content: ['high'],
+			});
+
+			gg.Player.ArousalSettings.Progress = 79;
+			expect(processTrigger('arousal', {})).toBeUndefined();
+
+			gg.Player.ArousalSettings.Progress = 80;
+			expect(processTrigger('arousal', {})?.behavior.id).toBe('low');
+
+			gg.Player.ArousalSettings.Progress = 95;
+			expect(processTrigger('arousal', {})?.behavior.id).toBe('high');
+		});
+
+		it('fires the winning band once, then the lower band when arousal drops', () => {
+			addArousalBehavior('low', 80, {
+				id: 'speech-low',
+				name: 'Low',
+				type: 'speech',
+				content: ['low'],
+			});
+			addArousalBehavior('high', 90, {
+				id: 'anim-high',
+				name: 'High',
+				type: 'animation',
+				animationId: 'anim-90',
+				priority: 0,
+			});
+			addArousalBehavior('low-anim', 80, {
+				id: 'anim-low',
+				name: 'Low anim',
+				type: 'animation',
+				animationId: 'anim-80',
+			});
+
+			gg.Player.ArousalSettings.Progress = 85;
+			BehaviorsModule.processBehavior('arousal', {});
+			expect(chatRoomAutoInterceptMessage).toHaveBeenCalledTimes(1);
+			expect(chatRoomAutoInterceptMessage).toHaveBeenCalledWith('low');
+			expect(playAnimation).toHaveBeenCalledTimes(1);
+			expect(playAnimation).toHaveBeenCalledWith('anim-80', expect.objectContaining({ interrupt: true }));
+
+			BehaviorsModule.processBehavior('arousal', {});
+			expect(chatRoomAutoInterceptMessage).toHaveBeenCalledTimes(1);
+			expect(playAnimation).toHaveBeenCalledTimes(1);
+
+			gg.Player.ArousalSettings.Progress = 95;
+			BehaviorsModule.processBehavior('arousal', {});
+			expect(chatRoomAutoInterceptMessage).toHaveBeenCalledTimes(1);
+			expect(playAnimation).toHaveBeenCalledTimes(2);
+			expect(playAnimation).toHaveBeenLastCalledWith('anim-90', expect.objectContaining({ interrupt: true }));
+
+			gg.Player.ArousalSettings.Progress = 89;
+			BehaviorsModule.processBehavior('arousal', {});
+			expect(chatRoomAutoInterceptMessage).toHaveBeenCalledTimes(2);
+			expect(chatRoomAutoInterceptMessage).toHaveBeenLastCalledWith('low');
+			expect(playAnimation).toHaveBeenLastCalledWith('anim-80', expect.objectContaining({ interrupt: true }));
+		});
+
+		it('re-fires a lower reaction of the same type when a higher one drops out', () => {
+			addArousalBehavior('low', 80, {
+				id: 'speech-low',
+				name: 'Low',
+				type: 'speech',
+				content: ['low'],
+			});
+			addArousalBehavior('high', 90, {
+				id: 'speech-high',
+				name: 'High',
+				type: 'speech',
+				content: ['high'],
+			});
+
+			gg.Player.ArousalSettings.Progress = 95;
+			BehaviorsModule.processBehavior('arousal', {});
+			BehaviorsModule.processBehavior('arousal', {});
+			expect(chatRoomAutoInterceptMessage).toHaveBeenCalledTimes(1);
+			expect(chatRoomAutoInterceptMessage).toHaveBeenCalledWith('high');
+
+			gg.Player.ArousalSettings.Progress = 85;
+			BehaviorsModule.processBehavior('arousal', {});
+			expect(chatRoomAutoInterceptMessage).toHaveBeenCalledTimes(2);
+			expect(chatRoomAutoInterceptMessage).toHaveBeenLastCalledWith('low');
+		});
+	});
+
+	describe('cooldown functionality', () => {
+		it('should respect cooldown period', () => {
+			const trigger: Trigger = {
+				id: 'trigger1',
+				name: 'Test Trigger',
+				type: 'speech',
+				speechType: 'any',
+				content: [{ value: 'hello', matchMode: 'contains' }],
+			};
+
+			const reaction: Reaction = {
+				id: 'reaction1',
+				name: 'Test Reaction',
+				type: 'speech',
+				content: ['Hello!'],
+			};
+
+			const behavior: Behavior = {
+				id: 'behavior1',
+				name: 'Test Behavior',
+				enabled: true,
+				triggers: ['trigger1'],
+				reactions: ['reaction1'],
+				reactionMode: 'random',
+				cooldownSec: 5,
+			};
+
+			mockTriggers['trigger1'] = trigger;
+			mockReactions['reaction1'] = reaction;
+			mockBehaviors['behavior1'] = behavior;
+
+			const messageData: MessageData = {
+				message: 'hello world',
+				messageContent: 'hello world',
+			};
+
+			const result1 = BehaviorsModule.processBehavior('speech', messageData);
+			expect(result1).toEqual(behavior);
+
+			advanceMockTime(3000);
+
+			const result2 = processTrigger('speech', messageData);
+			expect(result2).toBeUndefined();
+
+			advanceMockTime(3000);
+
+			const result3 = processTrigger('speech', messageData);
+			expect(result3?.behavior).toEqual(behavior);
+		});
+	});
+
+	describe('disabled behaviors', () => {
+		it('should not match when behavior is disabled', () => {
+			const trigger: Trigger = {
+				id: 'trigger1',
+				name: 'Test Trigger',
+				type: 'speech',
+				speechType: 'any',
+				content: [{ value: 'hello', matchMode: 'contains' }],
+			};
+
+			const behavior: Behavior = {
+				id: 'behavior1',
+				name: 'Test Behavior',
+				enabled: false,
+				triggers: ['trigger1'],
+				reactions: [],
+				reactionMode: 'random',
+			};
+
+			mockTriggers['trigger1'] = trigger;
+			mockBehaviors['behavior1'] = behavior;
+
+			const messageData: MessageData = {
+				message: 'hello world',
+				messageContent: 'hello world',
+			};
+
+			const result = processTrigger('speech', messageData);
+			expect(result).toBeUndefined();
+		});
+	});
+});
+
+describe('processTriggerConstraint', () => {
+	beforeEach(() => {
+		gg.Player.ArousalSettings.Progress = 50;
+		gg.ChatRoomData.Name = 'Test Room';
+		gg.ChatRoomData.Character = [
+			{ MemberNumber: 1 },
+			{ MemberNumber: 2 },
+		];
+	});
+
+	describe('constraint mode: all', () => {
+		it('should pass when all constraints are met', () => {
+			// Note: The constraint logic checks:
+			// arousalMax: progress >= value (progress is at/above the max threshold)
+			// arousalMin: progress <= value (progress is at/below the min threshold)
+			// For progress = 50, we need: arousalMin >= 50 and arousalMax <= 50
+			const constraint: TriggerConstraint = {
+				player: {
+					arousalMin: 50, // Progress (50) <= 50 = true
+					arousalMax: 50, // Progress (50) >= 50 = true
+				},
+			};
+
+			gg.Player.ArousalSettings.Progress = 50;
+
+			const messageData: MessageData = {};
+
+			const result = processTriggerConstraint(constraint, 'all', messageData);
+			expect(result).toBe(true);
+		});
+
+		it('should fail when any constraint is not met', () => {
+			const constraint: TriggerConstraint = {
+				player: {
+					arousalMin: 40, // Progress (50) <= 40 = false
+					arousalMax: 60, // Progress (50) >= 60 = false
+				},
+			};
+
+			gg.Player.ArousalSettings.Progress = 50;
+
+			const messageData: MessageData = {};
+
+			const result = processTriggerConstraint(constraint, 'all', messageData);
+			expect(result).toBe(false);
+		});
+	});
+
+	describe('constraint mode: any', () => {
+		it('should pass when any constraint is met', () => {
+			const constraint: TriggerConstraint = {
+				player: {
+					arousalMin: 60, // Progress (50) <= 60 = true
+					arousalMax: 40, // Progress (50) >= 40 = true
+				},
+			};
+
+			gg.Player.ArousalSettings.Progress = 50;
+
+			const messageData: MessageData = {};
+
+			const result = processTriggerConstraint(constraint, 'any', messageData);
+			expect(result).toBe(true);
+		});
+
+		it('should fail when no constraints are met', () => {
+			const constraint: TriggerConstraint = {
+				player: {
+					arousalMin: 30, // Progress (50) <= 30 = false
+					arousalMax: 70, // Progress (50) >= 70 = false
+				},
+			};
+
+			gg.Player.ArousalSettings.Progress = 50;
+
+			const messageData: MessageData = {};
+
+			const result = processTriggerConstraint(constraint, 'any', messageData);
+			expect(result).toBe(false);
+		});
+	});
+
+	describe('source constraint', () => {
+		it('should pass when source matches include rule', () => {
+			const constraint: TriggerConstraint = {
+				source: {
+					memberNumber: {
+						entries: [
+							{ value: '1', mode: 'include' },
+						],
+					},
+				},
+			};
+
+			const messageData: MessageData = {
+				source: { MemberNumber: 1 } as any,
+			};
+
+			const result = processTriggerConstraint(constraint, 'all', messageData);
+			expect(result).toBe(true);
+		});
+
+		it('should fail when source matches exclude rule', () => {
+			const constraint: TriggerConstraint = {
+				source: {
+					memberNumber: {
+						entries: [
+							{ value: '1', mode: 'exclude' },
+						],
+					},
+				},
+			};
+
+			const messageData: MessageData = {
+				source: { MemberNumber: 1 } as any,
+			};
+
+			const result = processTriggerConstraint(constraint, 'all', messageData);
+			expect(result).toBe(false);
+		});
+	});
+
+	describe('target constraint', () => {
+		it('should pass when target matches include rule', () => {
+			const constraint: TriggerConstraint = {
+				target: {
+					memberNumber: {
+						entries: [
+							{ value: '2', mode: 'include' },
+						],
+					},
+				},
+			};
+
+			const messageData: MessageData = {
+				target: { MemberNumber: 2 } as any,
+			};
+
+			const result = processTriggerConstraint(constraint, 'all', messageData);
+			expect(result).toBe(true);
+		});
+	});
+
+	describe('inRoomNamed constraint', () => {
+		it('should pass when room name matches include rule', () => {
+			const constraint: TriggerConstraint = {
+				room: {
+					inRoomNamed: {
+						entries: [
+							{ value: 'Test Room', mode: 'include' },
+						],
+					},
+				},
+			};
+
+			const messageData: MessageData = {};
+
+			const result = processTriggerConstraint(constraint, 'all', messageData);
+			expect(result).toBe(true);
+		});
+
+		it('should fail when room name matches exclude rule', () => {
+			const constraint: TriggerConstraint = {
+				room: {
+					inRoomNamed: {
+						entries: [
+							{ value: 'Test Room', mode: 'exclude' },
+						],
+					},
+				},
+			};
+
+			const messageData: MessageData = {};
+
+			const result = processTriggerConstraint(constraint, 'all', messageData);
+			expect(result).toBe(false);
+		});
+	});
+
+	describe('inRoomWithMembers constraint', () => {
+		it('should pass when member is in room (include rule)', () => {
+			const constraint: TriggerConstraint = {
+				room: {
+					inRoomWithMembers: {
+						entries: [
+							{ value: '1', mode: 'include' },
+						],
+					},
+				},
+			};
+
+			const messageData: MessageData = {};
+
+			const result = processTriggerConstraint(constraint, 'all', messageData);
+			expect(result).toBe(true);
+		});
+
+		it('should fail when member is not in room (include rule)', () => {
+			const constraint: TriggerConstraint = {
+				room: {
+					inRoomWithMembers: {
+						entries: [
+							{ value: '999', mode: 'include' },
+						],
+					},
+				},
+			};
+
+			const messageData: MessageData = {};
+
+			const result = processTriggerConstraint(constraint, 'all', messageData);
+			expect(result).toBe(false);
+		});
+	});
+
+	describe('empty constraints', () => {
+		it('should pass when no constraints are defined', () => {
+			const constraint: TriggerConstraint = {};
+
+			const messageData: MessageData = {};
+
+			const result = processTriggerConstraint(constraint, 'all', messageData);
+			expect(result).toBe(true);
+		});
+	});
+});
+
