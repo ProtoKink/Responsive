@@ -152,7 +152,7 @@ export class CharTalkModule extends BaseModule {
 		if (!c?.MemberNumber) return;
     
 		const storage = modStorage.playerStorage.GlobalModule;
-		if (!storage.modEnabled || !storage.CharTalkEnabled || !c?.MemberNumber || CharTalkModule.characterData[c.MemberNumber]) return;
+		if (!storage.modEnabled || !storage.charTalkEnabled || !c?.MemberNumber || CharTalkModule.characterData[c.MemberNumber]) return;
 
 		if (isSimpleChat(msg)) {
 			CharTalkModule.animateSpeech(c, msg);

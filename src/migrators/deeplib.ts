@@ -19,7 +19,7 @@ type ResponsesEntryModel = {
 
 type ExtraResponsesModel = Record<ExtraType, string[]>;
 
-type OldGlobal = GlobalSettingsModel & { responsiveEnabled?: boolean };
+type OldGlobal = GlobalSettingsModel & { responsiveEnabled?: boolean, CharTalkEnabled?: boolean };
 
 type SettingsBag = {
 	GlobalModule?: OldGlobal;
@@ -77,6 +77,9 @@ function migrateGlobal(global: OldGlobal | undefined): void {
 		global.modEnabled = global.responsiveEnabled;
 	delete global.responsiveEnabled;
 	delete global.ResponsiveEnabled;
+	if (global?.CharTalkEnabled !== undefined) 
+		global.charTalkEnabled = global.CharTalkEnabled;
+	delete global.CharTalkEnabled;
 }
 
 function migrateResponses(holder: SettingsBag, global: OldGlobal | undefined): void {

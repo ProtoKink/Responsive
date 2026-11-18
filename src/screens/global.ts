@@ -35,8 +35,8 @@ export class GuiGlobal extends BaseSubscreen {
 				type: 'checkbox',
 				label: getText('settings.setting.chartalk_enabled.name'),
 				description: getText('settings.setting.chartalk_enabled.desc'),
-				setElementValue: () => this.settings?.CharTalkEnabled ?? true,
-				setSettingValue: (val) => (this.settings.CharTalkEnabled = val)
+				setElementValue: () => this.settings?.charTalkEnabled ?? true,
+				setSettingValue: (val) => (this.settings.charTalkEnabled = val)
 			},
 			{
 				id: 'doMessageInterruption',

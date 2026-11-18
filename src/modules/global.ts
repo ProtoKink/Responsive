@@ -19,7 +19,7 @@ export class GlobalModule extends BaseModule {
 		return <GlobalSettingsModel>{
 			modEnabled: true,
 			responsesEnabled: true,
-			CharTalkEnabled: true,
+			charTalkEnabled: true,
 			doShowNewVersionMessage: true,
 			doLeaveMessage: true,
 			doAddMoansOnHighArousal: true,

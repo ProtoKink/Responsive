@@ -3,7 +3,7 @@ import { BaseSettingsModel } from 'bc-deeplib/deeplib';
 export type GlobalSettingsModel = BaseSettingsModel & {
 	modEnabled: boolean;
 	responsesEnabled: boolean;
-	CharTalkEnabled: boolean;
+	charTalkEnabled: boolean;
 	doShowNewVersionMessage: boolean;
 	doLeaveMessage: boolean;
 	doAddMoansOnHighArousal: boolean;
