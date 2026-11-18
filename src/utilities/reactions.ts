@@ -42,14 +42,14 @@ function processReaction(reaction: Reaction, messageData: MessageData): boolean 
 		case 'speech': {
 			if (!doesBcxAllowsTalking()) return false;
 			const response = randomResponse(reaction.content);
-			const templatedResponse = replaceTemplate(response, messageData.source).trim();
+			const templatedResponse = replaceTemplate(response, messageData.target, messageData.source).trim();
 			chatRoomAutoInterceptMessage(templatedResponse);
 
 			return true;
 		}
 		case 'emote': {
 			const response = randomResponse(reaction.content);
-			const templatedResponse = replaceTemplate(response, messageData.source).trim();
+			const templatedResponse = replaceTemplate(response, messageData.target, messageData.source).trim();
 			// add ** to make emote not send player's name
 			ChatRoomSendEmote('**' + templatedResponse);
 
@@ -57,7 +57,7 @@ function processReaction(reaction: Reaction, messageData: MessageData): boolean 
 		}
 		case 'action': {
 			const response = randomResponse(reaction.content);
-			const templatedResponse = replaceTemplate(response, messageData.source).trim();
+			const templatedResponse = replaceTemplate(response, messageData.target, messageData.source).trim();
 			sendActionMessage(templatedResponse);
 
 			return true;
