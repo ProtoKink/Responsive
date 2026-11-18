@@ -1813,7 +1813,8 @@ export class GuiBehaviors extends BaseSubscreen {
 							onClick: function () { onRemove.call(chip, item); },
 							options: {
 								image: `${PUBLIC_URL}/images/cross.svg`,
-								noStyling: true
+								noStyling: true,
+								imageColor: 'white'
 							},
 							htmlOptions: {
 								button: {
