@@ -1,5 +1,5 @@
 // #region SECTION Imports & Types
-import { advElement, BaseSubscreen, exportToGlobal, getText, layout, Modal, SettingElement, SubscreenOptions } from 'bc-deeplib/deeplib';
+import { advElement, BaseSubscreen, exportToGlobal, getText, Modal, SettingElement, SubscreenOptions } from 'bc-deeplib/deeplib';
 import { BehaviorsSettingsModel, Behavior, Trigger, Reaction, ConstraintMode, MatchMode, SpeechType, OrgasmType, RoomPresenceEvent, ReactionMode, triggerTypes, reactionTypes, ReactionType, TriggerType, IncludeExcludeEntry, MatchContentEntry, speechTypes, matchModes, orgasmTypes, roomPresenceEvents, reactionModes, constraintModes, includeExcludeModes, ConstraintEntity, ConstraintFieldKey } from '../models/behaviors';
 import { BehaviorsModule } from '../modules/behaviors';
 import { assertNever } from '../utilities/other';
@@ -73,7 +73,7 @@ export class GuiBehaviors extends BaseSubscreen {
 					htmlOptions: {
 						tag: 'div',
 						classList: ['rsp-behaviors-container'],
-						parent: layout.getSubscreen()
+						parent: ElementWrap(BaseSubscreen.ids.subscreen)
 					},
 					position: [100, 180],
 					size: () => [1800, 720],
@@ -95,7 +95,7 @@ export class GuiBehaviors extends BaseSubscreen {
 			},
 			size: [90, 90],
 		});
-		BaseSubscreen.menu?.prepend(deleteModeButton);
+		ElementWrap(BaseSubscreen.ids.menu)?.append(deleteModeButton);
 
 		this.render();
 	}
@@ -369,9 +369,6 @@ export class GuiBehaviors extends BaseSubscreen {
 					id: `rsp-behavior-enabled-${CommonGenerateUniqueID()}`,
 					label: behavior.name,
 					setElementValue: () => behavior.enabled,
-					options: {
-						direction: 'rowReverse'
-					},
 					htmlOptions: {
 						label: {
 							classList: ['rsp-behaviors-item-name', 'truncated-text']

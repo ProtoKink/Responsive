@@ -1,4 +1,4 @@
-import { advElement, BaseSubscreen, getText, layout, Modal, modLogger, SubscreenOptions } from 'bc-deeplib/deeplib';
+import { advElement, BaseSubscreen, getText, Modal, modLogger, SubscreenOptions } from 'bc-deeplib/deeplib';
 import { ProfileEntryModel, ProfileId, ProfilesSettingsModel } from '../models/profiles';
 import { BehaviorsSettingsModel } from '../models/behaviors';
 import { GlobalSettingsModel } from '../models/base';
@@ -26,7 +26,7 @@ export class GuiProfiles extends BaseSubscreen {
 			attributes: {
 				id: 'rsp-profiles-container'
 			},
-			parent: layout.getSubscreen()
+			parent: ElementWrap(BaseSubscreen.ids.subscreen)
 		});
 
 		for (const profileId of ['1', '2', '3'] as ProfileId[]) {

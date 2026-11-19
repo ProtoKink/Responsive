@@ -1,4 +1,4 @@
-import { BaseSubscreen, getText, layout, modules, advElement, SubscreenOptions } from 'bc-deeplib/deeplib';
+import { BaseSubscreen, getText, modules, advElement, SubscreenOptions } from 'bc-deeplib/deeplib';
 import { dataErase, dataResetForManual, modStorage } from '../utilities/data';
 
 export class GuiReset extends BaseSubscreen {
@@ -92,7 +92,7 @@ export class GuiReset extends BaseSubscreen {
 					]
 				}
 			],
-			parent: layout.getSubscreen(),
+			parent: ElementWrap(BaseSubscreen.ids.subscreen),
 		});
 
 		const timer = TimerCreate(() => {

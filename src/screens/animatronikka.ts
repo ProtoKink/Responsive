@@ -1,4 +1,4 @@
-import { advElement, BaseSubscreen, exportToGlobal, getText, layout, Modal, SettingElement, SubscreenOptions } from 'bc-deeplib/deeplib';
+import { advElement, BaseSubscreen, exportToGlobal, getText, Modal, SettingElement, SubscreenOptions } from 'bc-deeplib/deeplib';
 import { v4 as uuidv4 } from 'uuid';
 import { AnimatronikkaModule } from '../modules/animatronikka';
 import { Animation, AnimatronikkaSettingsModel, Keyframe, KeyframeType, keyframeTypes } from '../models/animations';
@@ -72,7 +72,7 @@ export class GuiAnimatronikka extends BaseSubscreen {
 				htmlOptions: {
 					tag: 'div',
 					classList: ['rsp-animatronikka-container'],
-					parent: layout.getSubscreen(),
+					parent: ElementWrap(BaseSubscreen.ids.subscreen),
 				},
 				position: [100, 180, 'top-left'],
 				size: () => [1800, 720],
@@ -93,7 +93,7 @@ export class GuiAnimatronikka extends BaseSubscreen {
 			},
 			size: [90, 90],
 		});
-		BaseSubscreen.menu?.prepend(deleteModeButton);
+		ElementWrap(BaseSubscreen.ids.menu)?.append(deleteModeButton);
 
 		this.render();
 	}
@@ -153,7 +153,7 @@ export class GuiAnimatronikka extends BaseSubscreen {
 			htmlOptions: {
 				tag: 'canvas',
 				classList: [selector.previewCanvas],
-				parent: layout.getSubscreen(),
+				parent: ElementWrap(BaseSubscreen.ids.subscreen),
 				attributes: {
 					width: '500',
 					height: '1000',
