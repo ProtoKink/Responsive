@@ -89,7 +89,8 @@ export class GuiAnimatronikka extends BaseSubscreen {
 			onClick: () => this.toggleDeleteMode(),
 			options: {
 				image: `${PUBLIC_URL}/images/trash_bin.svg`,
-				tooltip: getText('animatronikka.text.toggle_delete_mode')
+				tooltip: getText('animatronikka.text.toggle_delete_mode'),
+				role: 'switch'
 			},
 			size: [90, 90],
 		});
@@ -603,10 +604,25 @@ export class GuiAnimatronikka extends BaseSubscreen {
 				if (this.deleteMode) {
 					animation.keyframes.splice(index, 1);
 					this.buildKeyframesSection(animation);
+				} else {
+					Modal.confirm([
+						getText('animatronikka.prompt.delete_confirm', { $name: label })
+					], { modalClassList: ['rsp-modal'] }).then(confirmed => {
+						if (confirmed) {
+							animation.keyframes.splice(index, 1);
+							this.buildKeyframesSection(animation);
+						}
+					});
 				}
 			},
 			options: { image: `${PUBLIC_URL}/images/trash_bin.svg`, tooltip: getText('animatronikka.button.delete') },
-			htmlOptions: { button: { classList: ['rsp-animatronikka-keyframe-button', 'rsp-animatronikka-keyframe-square-button'] } }
+			htmlOptions: { button: { 
+				classList: ['rsp-animatronikka-keyframe-button', 'rsp-animatronikka-keyframe-square-button'],
+				dataAttributes: {
+					deletable: 'true',
+					deleteMode: this.deleteMode
+				}
+			} }
 		});
 
 		const row = ElementCreate({
