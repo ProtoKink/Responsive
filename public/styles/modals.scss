@@ -43,11 +43,11 @@
       height: fit-content;
 
       &[data-selected] {
-        background-color: $active-color;
-        color: var(--tmd-text, white);
+        background-color: $active-fill;
+        color: $text-color;
 
         &:hover {
-          background-color: var(--tmd-accent-hover, #e0e0e0);
+          background-color: $active-fill-hover;
         }
       }
     }
@@ -92,12 +92,12 @@
       }
 
       &[data-selected] {
-        background-color: color-mix(in srgb, $active-color 50%, transparent);
+        background-color: $active-fill;
         border-color: $active-color;
-        color: var(--tmd-text, white);
+        color: $text-color;
 
         &:hover {
-          background-color: color-mix(in srgb, $active-color 70%, transparent);
+          background-color: $active-fill-hover;
         }
       }
     }
@@ -156,12 +156,12 @@
       }
 
       &[data-selected] {
-        background-color: color-mix(in srgb, $active-color 50%, transparent);
+        background-color: $active-fill;
         border-color: $active-color;
-        color: var(--tmd-text, white);
+        color: $text-color;
 
         &:hover {
-          background-color: color-mix(in srgb, $active-color 70%, transparent);
+          background-color: $active-fill-hover;
         }
       }
     }
@@ -275,7 +275,7 @@
         }
 
         &.rsp-member-row-selected {
-          background-color: color-mix(in srgb, $active-color 30%, transparent);
+          background-color: $active-fill;
         }
       }
     }
@@ -398,13 +398,17 @@
       white-space: nowrap;
       box-sizing: border-box;
 
-      &[data-selected] {
-        background-color: $active-color;
-        color: var(--tmd-text, white);
+      &:hover {
+        background-color: $hover-fill;
       }
 
-      &:hover {
-        background-color: color-mix(in srgb, $active-color 20%, transparent);
+      &[data-selected] {
+        background-color: $active-fill;
+        color: $text-color;
+
+        &:hover {
+          background-color: $active-fill-hover;
+        }
       }
 
       img {

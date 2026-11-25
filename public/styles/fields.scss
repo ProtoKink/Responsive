@@ -45,7 +45,7 @@
   display: flex;
   flex-direction: column;
   padding: minv(1.5, 0.75);
-  background-color: var(--tmd-element-hover, white);
+  background-color: $surface-color;
   border-radius: var(--deeplib-border-radius);
   gap: var(--gap);
 
@@ -78,8 +78,8 @@
 
   .rsp-collapsible-header {
     padding: minv(1.5, 0.75);
-    background-color: var(--tmd-element-hover, white);
-    color: var(--tmd-text, black);
+    background-color: $surface-color;
+    color: $text-color;
     cursor: pointer;
     font-weight: bold;
     user-select: none;
@@ -97,7 +97,7 @@
     }
 
     &:hover {
-      background-color: var(--tmd-accent-hover, #e0e0e0);
+      background-color: $hover-fill;
     }
 
     &::after {
@@ -114,7 +114,6 @@
 
   .rsp-collapsible-content {
     padding: minv(1.5, 0.75);
-    background-color: $active-color;
     display: flex;
     flex-direction: column;
     gap: var(--gap);

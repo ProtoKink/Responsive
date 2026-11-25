@@ -980,7 +980,7 @@ export class GuiBehaviors extends BaseSubscreen {
 				addLabel: 'behaviors.button.select_activity',
 				content: this.buildChipList(
 					`${reaction.id}-activity-names`,
-					reaction.activityName ? [{ id: reaction.activityName, name: ActivityDictionaryText(`Activity${reaction.activityName}`) }] : [],
+					reaction.activityName ? [{ id: reaction.activityName, name: ActivityDictionaryText(`Activity${reaction.activityName}`), type: 'activity' }] : [],
 					function () {
 						reaction.activityName = '';
 						this.remove();
@@ -1011,7 +1011,7 @@ export class GuiBehaviors extends BaseSubscreen {
 				addLabel:'behaviors.button.select_body_part',
 				content: this.buildChipList(
 					`${reaction.id}-group-names`,
-					reaction.groupName ? [{ id: reaction.groupName, name: TextGetInScope('Screens/Character/Preference/Text_Preference.csv', `ArousalZone${reaction.groupName}`) }] : [],
+					reaction.groupName ? [{ id: reaction.groupName, name: TextGetInScope('Screens/Character/Preference/Text_Preference.csv', `ArousalZone${reaction.groupName}`), type: 'group' }] : [],
 					function () {
 						reaction.groupName = '';
 						this.remove();
@@ -1153,7 +1153,7 @@ export class GuiBehaviors extends BaseSubscreen {
 					addLabel: 'behaviors.button.select_activities',
 					content: this.buildChipList(
 						`${trigger.id}-activity-names`,
-						trigger.activityName.map(activity => ({ id: activity, name: ActivityDictionaryText(`Activity${activity}`) })),
+						trigger.activityName.map(activity => ({ id: activity, name: ActivityDictionaryText(`Activity${activity}`), type: 'activity' })),
 						function (item) {
 							trigger.activityName.splice(trigger.activityName.indexOf(item.id), 1);
 							this.remove();
@@ -1176,7 +1176,7 @@ export class GuiBehaviors extends BaseSubscreen {
 					addLabel: 'behaviors.button.select_body_parts',
 					content: this.buildChipList(
 						`${trigger.id}-group-names`,
-						trigger.groupName.map(name => ({ id: name, name: TextGetInScope('Screens/Character/Preference/Text_Preference.csv', `ArousalZone${name}`) })),
+						trigger.groupName.map(name => ({ id: name, name: TextGetInScope('Screens/Character/Preference/Text_Preference.csv', `ArousalZone${name}`), type: 'group' })),
 						function (item) {
 							trigger.groupName.splice(trigger.groupName.indexOf(item.id), 1);
 							this.remove();

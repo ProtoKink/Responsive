@@ -17,7 +17,7 @@
     background-color: $background-color;
     border-radius: var(--deeplib-border-radius);
     padding: minv(1.8, 0.6);
-    box-shadow: minv(0.2, 0.1) minv(0.2, 0.1) minv(0.4, 0.2) black;
+    box-shadow: $panel-shadow;
   }
 
   .rsp-animatronikka-preview-canvas {
@@ -78,15 +78,15 @@
         position: relative !important;
 
         &:hover {
-          background-color: var(--tmd-accent-hover, #e0e0e0);
+          background-color: $hover-fill;
         }
 
         &[data-selected] {
-          background-color: $active-color;
-          color: white;
+          background-color: $active-fill;
+          color: $text-color;
 
-          .rsp-behaviors-item-info {
-            color: var(--tmd-text, white);
+          &:hover {
+            background-color: $active-fill-hover;
           }
         }
 
@@ -128,7 +128,7 @@
   background-color: $background-color;
   border-radius: var(--deeplib-border-radius);
   padding: minv(1.8, 0.6);
-  box-shadow: minv(0.2, 0.1) minv(0.2, 0.1) minv(0.4, 0.2) black;
+  box-shadow: $panel-shadow;
 }
 
 .rsp-animatronikka-editor-empty {
@@ -171,7 +171,8 @@
   }
 
   .rsp-animatronikka-preview-button[data-selected='true'] {
-    background-color: $active-color;
+    background-color: $active-fill;
+    color: $text-color;
   }
   
   .rsp-animatronikka-preview-label {

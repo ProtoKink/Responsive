@@ -28,18 +28,18 @@
   padding: minv(1, 0.5);
   background-color: $background-color;
   border-radius: var(--deeplib-border-radius);
-  box-shadow: minv(0.2, 0.1) minv(0.2, 0.1) minv(0.4, 0.2) black;
+  box-shadow: $panel-shadow;
 
   .rsp-behaviors-tab-button {
     flex: 1;
     padding: minv(0.8, 0.4) minv(1.5, 0.75);
 
     &[data-selected] {
-      background-color: $active-color;
-      color: white;
+      background-color: $active-fill;
+      color: $text-color;
 
       &:hover {
-        background-color: var(--tmd-accent-hover, #e0e0e0);
+        background-color: $active-fill-hover;
       }
     }
   }
@@ -58,7 +58,7 @@
   background-color: $background-color;
   border-radius: var(--deeplib-border-radius);
   padding: minv(1.8, 0.6);
-  box-shadow: minv(0.2, 0.1) minv(0.2, 0.1) minv(0.4, 0.2) black;
+  box-shadow: $panel-shadow;
 
   // List Header
   .rsp-behaviors-list-header {
@@ -108,15 +108,15 @@
       position: relative !important;
 
       &:hover {
-        background-color: var(--tmd-accent-hover, #e0e0e0);
+        background-color: $hover-fill;
       }
 
       &[data-selected] {
-        background-color: $active-color;
-        color: white;
+        background-color: $active-fill;
+        color: $text-color;
 
-        .rsp-behaviors-item-info {
-          color: var(--tmd-text, white);
+        &:hover {
+          background-color: $active-fill-hover;
         }
       }
 
@@ -264,7 +264,7 @@
   background-color: $background-color;
   border-radius: var(--deeplib-border-radius);
   padding: minv(1.8, 0.6);
-  box-shadow: minv(0.2, 0.1) minv(0.2, 0.1) minv(0.4, 0.2) black;
+  box-shadow: $panel-shadow;
 
   .rsp-behaviors-editor-empty {
     text-align: center;
@@ -311,7 +311,7 @@
       flex-direction: row;
       gap: minv(1, 0.5);
       align-items: center;
-      background-color: var(--tmd-element-hover, white);
+      background-color: $surface-color;
       border-radius: var(--deeplib-border-radius);
 
       .rsp-dropdown-field {
@@ -334,7 +334,7 @@
       align-items: center;
       gap: minv(0.5, 0.25);
       padding: minv(0.5, 0.25) minv(1, 0.5);
-      background-color: var(--tmd-element, $active-color);
+      background-color: $chip-color;
       color: white;
       border-radius: var(--deeplib-border-radius);
       font-size: 0.9em;
@@ -342,42 +342,42 @@
 
       &.type-speech {
         background-color: $speech-color;
-        color: white;
       }
 
       &.type-emote {
         background-color: $emote-color;
-        color: white;
       }
 
       &.type-action {
         background-color: $action-color;
-        color: white;
       }
 
       &.type-activity {
         background-color: $activity-color;
-        color: white;
+      }
+
+      &.type-group {
+        background-color: $group-color;
       }
 
       &.type-orgasm {
         background-color: $orgasm-color;
-        color: white;
       }
 
       &.type-arousal {
         background-color: $arousal-color;
-        color: white;
       }
 
       &.type-roomPresence {
         background-color: $roomPresence-color;
-        color: white;
       }
 
       &.type-button {
         background-color: $button-color;
-        color: white;
+      }
+
+      &.type-animation {
+        background-color: $animation-color;
       }
 
       .rsp-behaviors-chip-remove {
@@ -432,9 +432,10 @@
   align-items: center;
   gap: var(--gap);
   padding: minv(1, 0.5);
-  background-color: $active-color;
+  background-color: $surface-color;
+  color: $text-color;
   border-radius: var(--deeplib-border-radius);
-  box-shadow: minv(0.2, 0.1) minv(0.2, 0.1) minv(0.4, 0.2) black;
+  box-shadow: $panel-shadow;
 
   .rsp-debugger-title {
     font-weight: 700;
@@ -473,7 +474,7 @@
   gap: var(--gap);
   padding: minv(1, 0.5);
   border-radius: var(--deeplib-border-radius);
-  background-color: var(--tmd-element-hover, #eee);
+  background-color: $surface-color;
 }
 
 .rsp-debugger-entry-header {
@@ -495,8 +496,8 @@
 .rsp-debugger-badge {
   padding: minv(0.4, 0.2) minv(0.8, 0.4);
   border-radius: var(--deeplib-border-radius);
-  background-color: $active-color;
-  color: white;
+  background-color: $active-fill;
+  color: $text-color;
   font-size: 0.85em;
 }
 
@@ -568,8 +569,9 @@
   grid-template-columns: repeat(var(--rsp-button-columns, 1), minmax(0, 1fr));
   gap: var(--half-gap);
   padding: 0 var(--half-gap);
-  background-color: rgb(28 28 28 / 70%);
-  border: var(--border-width) solid rgb(255 255 255 / 20%);
+  background-color: color-mix(in srgb, var(--tmd-element, #1c1c1c) 88%, transparent);
+  border: var(--border-width) solid color-mix(in srgb, var(--tmd-accent, #fff) 35%, transparent);
+  color: $text-color;
   transition: max-height 0.15s ease, opacity 0.15s ease, padding 0.15s ease;
 
   &[data-open] {
