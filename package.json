@@ -1,7 +1,8 @@
 {
-  "name": "bc-responsive",
+  "name": "BC Responsive",
   "version": "1.0.0",
-  "description": "An auto response script for bondage-club",
+  "description": "Automate replies, emotes, actions, animations and more from custom Bondage Club triggers.",
+	"author": "ProtoKink",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,7 +20,6 @@
     "url": "git+https://github.com/ProtoKink/Responsive.git"
   },
   "keywords": [],
-  "author": "",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/ProtoKink/Responsive/issues"

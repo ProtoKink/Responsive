@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name BC Responsive
 // @namespace https://www.bondageprojects.com/
-// @version 0.6.6
-// @description An auto response script for Bondage Club
-// @author Saki Saotome, dDeepLb
+// @version 1.0.0
+// @description Automate replies, emotes, actions, animations and more from custom Bondage Club triggers.
+// @author ProtoKink
 // @match https://bondageprojects.elementfx.com/*
 // @match https://www.bondageprojects.elementfx.com/*
 // @match https://bondage-europe.com/*
