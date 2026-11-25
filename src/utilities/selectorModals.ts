@@ -110,7 +110,7 @@ export async function animationSelectorModal(options?: { selectedIds?: string[];
 		selected: options?.selectedIds?.includes(animation.id) ?? false,
 	}));
 
-	return await itemSelectorModal({ buttons, limit: options.limit });
+	return await itemSelectorModal({ buttons, limit: options.limit, showSearch: true });
 }
 
 export async function bodyPartSelectorModal(options?: { selectedParts?: AssetGroupItemName[], limit?: number }): Promise<AssetGroupItemName[] | null> {

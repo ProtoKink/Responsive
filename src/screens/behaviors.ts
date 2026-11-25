@@ -2046,7 +2046,7 @@ export class GuiBehaviors extends BaseSubscreen {
 										entries.splice(originalIndex, 1);
 										onChange(entries);
 									} else {
-										Modal.prompt(getText('behaviors.prompt.edit_content'), { defaultValue: entry.value, modalClassList: ['rsp-modal'] }).then((newValue) => {
+										textReactionSelectorModal({ initialValue: entry.value, prompt: getText('behaviors.prompt.edit_content') }).then((newValue) => {
 											if (newValue === entry.value) return;
 											else if (newValue === null) return;
 											else {
@@ -2343,7 +2343,7 @@ export class GuiBehaviors extends BaseSubscreen {
 			value: t.id
 		}));
 
-		const selectedIds = await itemSelectorModal({ buttons: options });
+		const selectedIds = await itemSelectorModal({ buttons: options, showSearch: true });
 		if (selectedIds === null || selectedIds.length === 0) return;
 
 		selectedIds.forEach((id: string) => {
@@ -2366,7 +2366,7 @@ export class GuiBehaviors extends BaseSubscreen {
 			value: r.id
 		}));
 
-		const selectedIds = await itemSelectorModal({ buttons: options });
+		const selectedIds = await itemSelectorModal({ buttons: options, showSearch: true });
 		if (selectedIds === null || selectedIds.length === 0) return;
 
 		selectedIds.forEach((id) => behavior.reactions.push(id));
